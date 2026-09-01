@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Archivo } from 'next/font/google';
-import { SITE, needsVerification } from '@/lib/content';
+import { LOCATIONS, SITE, needsVerification } from '@/lib/content';
 import './globals.css';
 
 /**
@@ -30,7 +30,7 @@ const archivo = Archivo({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — ${SITE.locality}, ${SITE.city}`,
+    default: `${SITE.name} — ${SITE.tagline}`,
     template: `%s — ${SITE.name}`,
   },
   description: SITE.description,
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: SITE.name,
-    title: `${SITE.name} — ${SITE.locality}, ${SITE.city}`,
+    title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
     locale: 'en_IN',
     images: [{ url: '/media/img/facade-dusk-1600.webp', width: 1600, height: 1067, alt: SITE.tagline }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE.name} — ${SITE.locality}, ${SITE.city}`,
+    title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
     images: ['/media/img/facade-dusk-1600.webp'],
   },
@@ -60,41 +60,47 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * Brand-level schema only. Each property carries its own `Hotel` entity on its
+ * own page, which is where an address belongs.
+ */
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Hotel',
+  '@type': 'Organization',
   name: SITE.legalName,
+  alternateName: SITE.name,
   description: SITE.description,
   url: SITE.url,
   telephone: needsVerification.phone,
   email: needsVerification.email,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: SITE.street,
-    addressLocality: `${SITE.locality}, ${SITE.city}`,
-    addressRegion: SITE.region,
-    postalCode: SITE.postalCode,
-    addressCountry: SITE.country,
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: needsVerification.coordinates.lat,
-    longitude: needsVerification.coordinates.lng,
-  },
-  amenityFeature: [
-    'Air conditioning',
-    'Covered parking',
-    'Breakfast service',
-    'Conference room',
-    '24-hour reception',
-    'Lift access',
-  ].map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
+  areaServed: SITE.city,
+  subOrganization: LOCATIONS.map((l) => ({
+    '@type': 'Hotel',
+    name: l.name,
+    url: `${SITE.url}/${l.slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: l.street,
+      addressLocality: `${l.area}, ${SITE.city}`,
+      addressRegion: SITE.region,
+      postalCode: l.postalCode,
+      addressCountry: SITE.country,
+    },
+  })),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN" className={`${bodoni.variable} ${archivo.variable}`}>
       <body>
+        <script
+          // Runs before the overlay paints. Repeat visits within a session
+          // never see the entry sequence flash up and disappear.
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(sessionStorage.getItem('vapr:intro')==='1')document.documentElement.dataset.introSeen='1'}catch(e){}",
+          }}
+        />
         <script
           type="application/ld+json"
           // Static object under our control; nothing user-supplied reaches it.

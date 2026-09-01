@@ -1,6 +1,10 @@
 # VAPR
 
-Marketing site for VAPR, a small hotel in Ashok Nagar, Chennai.
+Booking-enquiry site for VAPR, two small hotels in Chennai: **Ashok Nagar** and
+**Guindy** (Ekkatuthangal).
+
+Three routes — `/` introduces both and sends the enquiry, `/ashok-nagar` and
+`/guindy` are the properties. All three are statically prerendered.
 
 ```bash
 npm install
@@ -12,19 +16,43 @@ npm run dev
 
 ## Before this goes live
 
-Two things are deliberately unfinished, and both are marked in the code.
+Three things are outstanding, and all three are marked in the code.
 
-**1. Placeholder facts.** `lib/content.ts` exports `needsVerification`. Every
-value in it — the phone number, the inbox, the WhatsApp number, the nightly
-rate, the road distances and the map coordinates — is either a placeholder or
-a best-effort guess. Replace them with the property's real details. Nothing
-else on the site invents a fact; all the copy about the building was written
-from the photography.
+**1. Placeholder facts.** `lib/content.ts` exports `needsVerification`: the
+phone number, the inbox, the WhatsApp number and the nightly rate. Those four
+are the only invented values on the site.
+
+Everything else about the properties — room categories and their inclusions,
+facilities, what is *not* available, guest ratings, room counts, check-in
+times, addresses and landmark distances — is taken from each hotel's own Treebo
+listing and is cited at the top of `lib/content.ts`. If a fact is not on the
+listing, it is not asserted anywhere.
+
+**Guindy has no photography.** Every image and clip supplied was shot at Ashok
+Nagar — the facade signage confirms it, and nothing in the source folders
+refers to Ekkatuthangal. Rather than show one hotel's rooms on the other's
+page, `/guindy` renders a designed placeholder wherever its pictures belong,
+and its `images` array in `lib/content.ts` is empty. Fill that array once the
+shoot happens and the placeholders disappear on their own.
 
 **2. The source media is not in the repository.** The web-ready renditions in
 `public/media` are committed. The originals live in
 `media-source/`, which is gitignored — roughly 800 MB of camera files. Restore
 that folder from the client's Drive before re-running `npm run media`.
+
+---
+
+## The two properties
+
+`LOCATIONS` in `lib/content.ts` is the single source. A property page is
+generated per entry via `generateStaticParams`, so adding a third hotel is one
+object — route, metadata, schema, the enquiry selector and both footer columns
+all follow from it.
+
+Guest ratings are shown with their source named and are deliberately **not**
+marked up as `aggregateRating`: those reviews were collected by a booking
+platform, not by this site, and claiming them as first-party structured data
+would be misrepresentation.
 
 ---
 
@@ -77,6 +105,13 @@ Every animated surface has a still counterpart:
 | Spaces | Image follows the cursor | Images inline under each row |
 | Cursor | Hairline ring with captions | Not mounted |
 
+The entry sequence is rendered unconditionally on server and client, and
+decides for itself whether to play. Choosing in the parent instead meant the
+server emitted the overlay while the client declined to render it, and the
+orphaned node stayed on screen covering the whole page on every navigation
+after the first. An inline script in the document head hides it before first
+paint on a repeat visit, so skipping costs no flash.
+
 Reveals animate *from* a state set by script, never *to* one — so if a timeline
 never runs, the content is already visible. The entry sequence is an overlay,
 not a gate: the page is fully rendered underneath it the whole time, and it is
@@ -126,17 +161,18 @@ source footage is ever re-exported, re-check those cuts.
 ## Structure
 
 ```
-app/                    layout, tokens, the single route
+app/                    layout, tokens, home, and /[location]
 components/
   brand/Emblem          the seal, as animatable vector
   chrome/               nav, entry sequence, cursor, grain
   media/Frame           responsive picture with a blur placeholder
   providers/            Lenis + ScrollTrigger, entry-sequence state
-  sections/             the page, in order
+  property/             the per-hotel page: hero, room, getting there
+  sections/             the home page, in order
   ui/Glass              liquid glass; used on the nav and the reserve panel only
   webgl/HeroCanvas      the hero dissolve
 lib/
-  content.ts            every string on the site
+  content.ts            every string, and LOCATIONS — the source of truth
   media.generated.ts    written by the pipeline
   useCapability.ts      decides who gets the shader
 scripts/
@@ -154,6 +190,7 @@ ScrollTrigger and IntersectionObserver has fired, and writes one PNG per stop.
 ## Notes on the enquiry form
 
 There is no booking engine, so the reserve panel does not pretend to be one. It
-composes the enquiry the guest would otherwise type and hands it to WhatsApp or
-their mail client with the message already written. If a real booking system is
-added later, this is the component to replace.
+asks which hotel, when, and how many, composes the enquiry the guest would
+otherwise have to type, and hands it to WhatsApp or their mail client with the
+message already written. A property page preselects itself. If a real booking
+system is added later, this is the component to replace.

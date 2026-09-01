@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { ArrowUpRight, MessageCircle, Phone } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import Glass from '@/components/ui/Glass';
-import { RESERVE, ROOMS, SITE, needsVerification } from '@/lib/content';
+import { LOCATIONS, RESERVE, SITE, STAY, needsVerification } from '@/lib/content';
+import { cn } from '@/lib/utils';
 
 const { phone, phoneHref, whatsapp, email, currency, ratesFrom } = needsVerification;
 
@@ -12,43 +13,43 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 /**
  * There is no booking engine behind this site, so this does not pretend to be
- * one. It composes the enquiry the guest would otherwise have to type, and
- * hands it to whichever channel they prefer — the message is already written
- * when WhatsApp or the mail client opens.
+ * one. It composes the enquiry the guest would otherwise have to type — which
+ * hotel, when, how many — and hands it to whichever channel they prefer, with
+ * the message already written.
  *
  * A form that looks like it books a room and does not is worse than no form.
  */
-export default function Reserve() {
+export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
+  const [slug, setSlug] = useState(defaultSlug ?? LOCATIONS[0].slug);
   const [arrival, setArrival] = useState('');
   const [nights, setNights] = useState(2);
   const [guests, setGuests] = useState(2);
-  const [room, setRoom] = useState<string>(ROOMS[0].name);
+
+  const location = LOCATIONS.find((l) => l.slug === slug) ?? LOCATIONS[0];
 
   const message = useMemo(() => {
     const when = arrival ? `arriving ${arrival}` : 'dates still flexible';
-    return `Hello ${SITE.name} — I would like to enquire about a stay. ${
-      room
-    }, ${when}, ${nights} night${nights === 1 ? '' : 's'}, ${guests} guest${
-      guests === 1 ? '' : 's'
-    }. Could you confirm availability?`;
-  }, [arrival, nights, guests, room]);
+    return `Hello ${SITE.name} — I would like to enquire about a stay at ${location.name} (${location.area}). ${when}, ${nights} night${
+      nights === 1 ? '' : 's'
+    }, ${guests} guest${guests === 1 ? '' : 's'}. Could you confirm availability and the rate?`;
+  }, [arrival, nights, guests, location]);
 
   const whatsappHref = `${whatsapp}?text=${encodeURIComponent(message)}`;
   const mailHref = `mailto:${email}?subject=${encodeURIComponent(
-    `Enquiry — ${room}`
+    `Enquiry — ${location.name}`
   )}&body=${encodeURIComponent(message)}`;
 
   const field =
     'w-full border-b border-hairline-strong bg-transparent py-2.5 text-bone outline-none transition-colors duration-300 focus-visible:border-chalk [color-scheme:dark]';
 
   return (
-    <section id="reserve" className="relative overflow-hidden bg-void py-20 md:py-32">
+    <section id="reserve" className="relative overflow-hidden bg-void py-20 md:py-28">
       <Frame
         slug="room-b-light"
         className="absolute inset-0 h-full w-full"
         ratio="fill"
         sizes="100vw"
-        imgClassName="opacity-45"
+        imgClassName="opacity-30"
         position="50% 60%"
       />
       <div
@@ -56,7 +57,7 @@ export default function Reserve() {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, var(--color-void) 0%, color-mix(in oklab, var(--color-void) 55%, transparent) 38%, var(--color-void) 100%)',
+            'linear-gradient(to bottom, var(--color-void) 0%, color-mix(in oklab, var(--color-void) 62%, transparent) 38%, var(--color-void) 100%)',
         }}
       />
 
@@ -74,8 +75,10 @@ export default function Reserve() {
               </dd>
             </div>
             <div>
-              <dt className="type-label">Reception</dt>
-              <dd className="mt-1 text-xl text-chalk">24 hours</dd>
+              <dt className="type-label">Check in / out</dt>
+              <dd className="tabular mt-1 text-xl text-chalk">
+                {STAY.checkIn} <span className="text-smoke">/</span> {STAY.checkOut}
+              </dd>
             </div>
           </dl>
 
@@ -105,27 +108,40 @@ export default function Reserve() {
                 window.open(whatsappHref, '_blank', 'noopener,noreferrer');
               }}
             >
-              <p className="type-label mb-7">Compose an enquiry</p>
-
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label htmlFor="room" className="type-label mb-1 block">
-                    Room
-                  </label>
-                  <select
-                    id="room"
-                    value={room}
-                    onChange={(e) => setRoom(e.target.value)}
-                    className={field}
-                  >
-                    {ROOMS.map((r) => (
-                      <option key={r.id} value={r.name} className="bg-carbon text-bone">
-                        {r.name} — {r.bed}
-                      </option>
-                    ))}
-                  </select>
+              <fieldset className="border-0 p-0">
+                <legend className="type-label mb-3">Which one</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {LOCATIONS.map((loc) => {
+                    const active = loc.slug === slug;
+                    return (
+                      <button
+                        key={loc.slug}
+                        type="button"
+                        onClick={() => setSlug(loc.slug)}
+                        aria-pressed={active}
+                        className={cn(
+                          'rounded-lg border px-4 py-3 text-left transition-colors duration-300',
+                          active
+                            ? 'border-chalk bg-chalk text-void'
+                            : 'border-hairline-strong text-mist hover:border-chalk hover:text-chalk'
+                        )}
+                      >
+                        <span className="block text-sm font-medium">{loc.shortName}</span>
+                        <span
+                          className={cn(
+                            'mt-0.5 block text-xs',
+                            active ? 'text-void/70' : 'text-smoke'
+                          )}
+                        >
+                          {loc.room.name} · {loc.roomCount} rooms
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </fieldset>
 
+              <div className="mt-7 grid gap-6 sm:grid-cols-2">
                 <div>
                   <label htmlFor="arrival" className="type-label mb-1 block">
                     Arriving
@@ -163,7 +179,7 @@ export default function Reserve() {
                       id="guests"
                       type="number"
                       min={1}
-                      max={6}
+                      max={4}
                       value={guests}
                       onChange={(e) => setGuests(Math.max(1, Number(e.target.value) || 1))}
                       className={`${field} tabular`}

@@ -1,17 +1,23 @@
 'use client';
 
 import { useRef } from 'react';
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import Frame from '@/components/media/Frame';
-import { ROOMS, needsVerification } from '@/lib/content';
+import Emblem from '@/components/brand/Emblem';
+import { LOCATIONS, STAY } from '@/lib/content';
 import { gsap, ScrollTrigger, useIsoLayoutEffect } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
 import type { ImageSlug } from '@/lib/media';
 
 /**
- * On a wide screen the three rooms run sideways: the section pins and the
- * track translates, so vertical scroll reads as walking down a corridor.
- * Narrow screens get the same panels stacked, which is the honest layout for
- * a thumb — a horizontal rail on a phone is a trap, not a flourish.
+ * One room category per property, side by side. On a wide screen the section
+ * pins and the track translates, so vertical scroll reads as moving between
+ * the two. Narrow screens get the same panels stacked, which is the honest
+ * layout for a thumb.
+ *
+ * Guindy has not been photographed yet, so its panel is typographic. That
+ * state is designed rather than empty — it should not read as a failed image.
  */
 export default function Rooms() {
   const root = useRef<HTMLElement>(null);
@@ -50,12 +56,11 @@ export default function Rooms() {
             },
           });
 
-          // Each plate drifts against the rail, so the panels have depth
-          // rather than sliding as one flat sheet.
-          const plates = gsap.utils.toArray<HTMLElement>('.room-plate');
-          plates.forEach((plate) => {
+          gsap.utils.toArray<HTMLElement>('.room-plate').forEach((plate) => {
+            const img = plate.querySelector('img');
+            if (!img) return;
             gsap.fromTo(
-              plate.querySelector('img'),
+              img,
               { xPercent: -7 },
               {
                 xPercent: 7,
@@ -81,7 +86,6 @@ export default function Rooms() {
       return () => mm.revert();
     }, el);
 
-    // The rail's width depends on fonts and images settling.
     const refresh = () => ScrollTrigger.refresh();
     window.addEventListener('load', refresh);
 
@@ -97,76 +101,93 @@ export default function Rooms() {
         ref={track}
         className="flex flex-col md:h-[100svh] md:flex-row md:flex-nowrap md:will-change-transform"
       >
-        {/* Opening plate: the section title travels with the rail. */}
         <div className="gutter flex shrink-0 flex-col justify-end py-16 md:h-full md:w-[34vw] md:justify-center md:py-0">
-          <p className="type-label">Three rooms</p>
+          <p className="type-label">The rooms</p>
           <h2 className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk">
-            Every one
+            One room,
             <br />
-            of them.
+            done properly.
           </h2>
-          <p className="mt-6 max-w-[30ch] text-mist">
-            There are three. This is all of them, at the size they actually are.
+          <p className="mt-6 max-w-[32ch] text-mist">
+            Neither hotel makes you pick between five tiers of the same bed. There is one
+            category at each, and this is what is in it.
           </p>
           <p className="tabular mt-8 text-sm text-smoke">
-            From {needsVerification.currency} {needsVerification.ratesFrom.toLocaleString('en-IN')} a night
+            Check in from {STAY.checkIn} · out by {STAY.checkOut}
           </p>
         </div>
 
-        {ROOMS.map((room, i) => (
+        {LOCATIONS.map((loc, i) => (
           <article
-            key={room.id}
+            key={loc.slug}
             className={cn(
               'room-panel gutter flex shrink-0 flex-col gap-8 border-t border-hairline py-14 md:h-full md:w-[80vw] md:items-center md:gap-12 md:border-l md:border-t-0 md:py-0',
               i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
             )}
           >
-            <div className="room-plate aspect-[4/3] w-full overflow-hidden md:aspect-auto md:h-[62vh] md:w-[58%]">
-              <Frame
-                slug={room.images[0] as ImageSlug}
-                sizes="(min-width: 768px) 46vw, 100vw"
-                ratio="fill"
-                className="h-full w-full"
-                imgClassName="scale-[1.08]"
-              />
+            <div className="room-plate aspect-[4/3] w-full overflow-hidden md:aspect-auto md:h-[62vh] md:w-[54%]">
+              {loc.images.length ? (
+                <Frame
+                  slug={loc.images[0] as ImageSlug}
+                  sizes="(min-width: 768px) 44vw, 100vw"
+                  ratio="fill"
+                  className="h-full w-full"
+                  imgClassName="scale-[1.08]"
+                />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-6 border border-hairline bg-pitch p-8 text-center">
+                  <Emblem variant="mark" className="w-24 text-graphite md:w-32" />
+                  <p className="max-w-[28ch] text-sm text-smoke">
+                    {loc.shortName} is still being photographed. The specification is
+                    here, and the desk will send you pictures on request.
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div className="md:w-[42%]">
+            <div className="md:w-[46%]">
               <div className="flex items-baseline gap-4">
-                <span className="tabular type-label">{room.index}</span>
+                <span className="tabular type-label">{String(i + 1).padStart(2, '0')}</span>
                 <span className="h-px flex-1 bg-hairline" />
-                <span className="type-label">{room.sleeps}</span>
+                <span className="type-label">{loc.area}</span>
               </div>
 
               <h3 className="type-display mt-5 text-[clamp(2rem,4vw,3.25rem)] text-chalk">
-                {room.name}
+                {loc.room.name}
               </h3>
+              <p className="mt-2 text-mist">
+                at {loc.name} · {loc.roomCount} rooms
+              </p>
 
-              <p className="mt-5 max-w-[42ch] text-mist">{room.note}</p>
-
-              <dl className="mt-8 md:mt-10">
-                {room.spec.map((row) => (
+              <dl className="mt-8 md:mt-9">
+                {[
+                  { label: 'Bed', value: loc.room.bed },
+                  { label: 'Sleeps', value: loc.room.sleeps },
+                ].map((row) => (
                   <div
                     key={row.label}
-                    className="flex items-baseline justify-between gap-6 border-t border-hairline py-3 last:border-b"
+                    className="flex items-baseline justify-between gap-6 border-t border-hairline py-3"
                   >
                     <dt className="type-label">{row.label}</dt>
                     <dd className="text-right text-sm text-bone">{row.value}</dd>
                   </div>
                 ))}
+                <div className="border-t border-hairline py-3.5">
+                  <dt className="type-label mb-2">In the room</dt>
+                  <dd className="text-sm leading-relaxed text-bone">
+                    {loc.room.inclusions.join(' · ')}
+                  </dd>
+                </div>
               </dl>
 
-              <div className="mt-8 flex gap-2">
-                {room.images.slice(1).map((slug) => (
-                  <Frame
-                    key={slug}
-                    slug={slug as ImageSlug}
-                    sizes="120px"
-                    ratio={1}
-                    className="w-[clamp(66px,9vw,104px)]"
-                  />
-                ))}
-              </div>
+              <Link
+                href={`/${loc.slug}`}
+                data-cursor="Look inside"
+                className="mt-8 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-chalk transition-colors duration-300 hover:border-chalk"
+              >
+                Everything about {loc.shortName}
+                <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden />
+              </Link>
             </div>
           </article>
         ))}

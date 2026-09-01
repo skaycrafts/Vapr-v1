@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import SmoothScroll from '@/components/providers/SmoothScroll';
 import { IntroProvider } from '@/components/providers/Intro';
 import Preloader from '@/components/chrome/Preloader';
@@ -9,9 +8,12 @@ import Cursor from '@/components/chrome/Cursor';
 import FilmGrain from '@/components/chrome/FilmGrain';
 
 /**
- * Holds the client-only chrome so the page itself can stay a server
- * component. The entry sequence runs once per browsing session — coming back
- * from a room page should not make anyone watch it again.
+ * Holds the client-only chrome so each route's page can stay a server
+ * component.
+ *
+ * The entry sequence is rendered unconditionally and decides for itself
+ * whether to play — see the note in Preloader. Choosing here instead left an
+ * orphaned server-rendered overlay on every navigation after the first.
  */
 export default function SiteShell({
   children,
@@ -21,22 +23,10 @@ export default function SiteShell({
   /** Rendered outside `<main>` so the landmark structure stays correct. */
   footer?: React.ReactNode;
 }) {
-  const [seen] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const already = sessionStorage.getItem('vapr:intro') === '1';
-      sessionStorage.setItem('vapr:intro', '1');
-      return already;
-    } catch {
-      // Private modes can throw on access; treat it as a first visit.
-      return false;
-    }
-  });
-
   return (
-    <IntroProvider skipped={seen}>
+    <IntroProvider>
       <SmoothScroll>
-        {!seen && <Preloader />}
+        <Preloader />
         <Nav />
         <Cursor />
         <FilmGrain />

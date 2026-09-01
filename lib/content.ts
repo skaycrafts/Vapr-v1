@@ -1,161 +1,258 @@
 /**
  * Every string on the site lives here.
  *
- * VERIFY BEFORE LAUNCH — the block marked `needsVerification` holds the only
- * facts that were not read off the photography. Rates, the phone number and
- * the inbox are deliberate placeholders; the address and the travel times are
- * best-effort and should be confirmed by the property.
+ * Property facts — room categories, inclusions, facilities, ratings, check-in
+ * times and landmark distances — are taken from each hotel's own Treebo
+ * listing. Where a fact is not on the listing it is not asserted here; the
+ * handful of values still to be confirmed sit in `needsVerification` and
+ * nowhere else.
+ *
+ *   Ashok Nagar  treebo.com/hotels-in-chennai/treebo-premium-vapr-ashok-nagar-ashok-nagar-4050/
+ *   Guindy       treebo.com/hotels-in-chennai/treebo-vapr-guindy-ekkatuthangal-ekkatuthangal-2559/
  */
 
 export const SITE = {
   name: 'VAPR',
-  legalName: 'VAPR Ashok Nagar',
-  locality: 'Ashok Nagar',
+  legalName: 'VAPR Hotels',
   city: 'Chennai',
   region: 'Tamil Nadu',
   country: 'IN',
-  postalCode: '600083',
-  street: '59/31, 46th Street, Sarvamangala Colony',
-  tagline: 'A quiet floor above a loud street.',
+  tagline: 'Two small hotels in Chennai.',
   description:
-    'A small hotel in Ashok Nagar, Chennai. Cold air, dark stone, a door that closes properly, and the city kept where it belongs.',
+    'VAPR is two small hotels in Chennai — one in Ashok Nagar, one in Ekkatuthangal, near Guindy. Cold air, a proper desk, breakfast in the morning, and someone at the desk who knows your name.',
   url: 'https://vapr.example',
 } as const;
 
-/** Swap these for the real values before the site goes live. */
+/**
+ * Not on either listing. Replace before launch — these are the only invented
+ * values on the site.
+ */
 export const needsVerification = {
   phone: '+91 00000 00000',
   phoneHref: 'tel:+910000000000',
   whatsapp: 'https://wa.me/910000000000',
   email: 'stay@vapr.example',
-  ratesFrom: 3200, // per night, INR — placeholder
+  ratesFrom: 3200, // per night, INR
   currency: 'INR',
-  /** Approximate road distances from Ashok Nagar. Confirm before launch. */
-  distances: [
-    { place: 'Ashok Pillar', km: 0.6 },
-    { place: 'T. Nagar', km: 3.2 },
-    { place: 'Chennai International Airport', km: 8.4 },
-    { place: 'Marina Beach', km: 10.1 },
-  ],
-  coordinates: { lat: 13.0352, lng: 80.2119 },
 } as const;
 
+export type Landmark = { readonly place: string; readonly km: number };
+
+export type Location = {
+  readonly slug: string;
+  /** Full name, as the property is listed. */
+  readonly name: string;
+  /** How it is referred to in running copy and on buttons. */
+  readonly shortName: string;
+  readonly area: string;
+  readonly street: string;
+  readonly postalCode: string;
+  readonly rating: { readonly score: number; readonly count: number };
+  readonly roomCount: number;
+  readonly blurb: string;
+  /** One paragraph of voice, written for this property. */
+  readonly note: readonly string[];
+  readonly room: {
+    readonly name: string;
+    readonly bed: string;
+    readonly sleeps: string;
+    readonly inclusions: readonly string[];
+  };
+  readonly facilities: readonly string[];
+  readonly landmarks: readonly Landmark[];
+  /** Slugs from the media manifest. Empty where the shoot has not happened. */
+  readonly images: readonly string[];
+  readonly heroImage: string | null;
+};
+
+/** Both properties keep the same desk hours. */
+export const STAY = {
+  checkIn: '1.00 pm',
+  checkOut: '11.00 am',
+  /** Complimentary at both, per the listings. */
+  included: [
+    'Wi-Fi',
+    'Breakfast',
+    'Branded toiletries — shampoo, comb, dental kit, shaving kit, moisturiser, handwash, loofah, shower cap',
+  ],
+  /** Stated as unavailable at both. Saying so is more useful than silence. */
+  notAvailable: ['Laundry service', 'Swimming pool', 'Gym'],
+  earlyCheckIn:
+    'Early check-in depends on what is free that morning. Give the desk a day’s notice and they will try.',
+} as const;
+
+export const LOCATIONS: readonly Location[] = [
+  {
+    slug: 'ashok-nagar',
+    name: 'VAPR Ashok Nagar',
+    shortName: 'Ashok Nagar',
+    area: 'Ashok Nagar',
+    street: '59/31, 46th Street, Sarvamangala Colony',
+    postalCode: '600083',
+    rating: { score: 4.1, count: 168 },
+    roomCount: 30,
+    blurb: 'Thirty rooms on a residential street, eight minutes’ walk from the metro.',
+    note: [
+      'The building sits back from 46th Street behind two rain trees, which is the first quiet thing about it. Park under the deck and come up through the gate.',
+      'It is a residential street, so the mornings are quiet and the evenings are children and scooters. The metro is 850 metres away, which means you can leave the car and still be in T. Nagar in ten minutes.',
+    ],
+    room: {
+      name: 'Maple',
+      bed: 'Queen, or twin beds that join',
+      sleeps: 'Two',
+      inclusions: [
+        'Air conditioning',
+        'Work desk and chair',
+        'Wardrobe',
+        'Television with DTH',
+        'Geyser',
+        'Intercom',
+      ],
+    },
+    facilities: [
+      'Outdoor parking',
+      'Lift',
+      'Room service',
+      'Air-conditioned lobby',
+    ],
+    landmarks: [
+      { place: 'Ashok Nagar Metro', km: 0.85 },
+      { place: 'Valadapani Murugan Temple', km: 2.3 },
+      { place: 'T. Nagar', km: 2.6 },
+      { place: 'SIIMS Hospital', km: 2.6 },
+      { place: 'Forum Mall', km: 2.9 },
+      { place: 'Pondy Bazaar', km: 3.4 },
+      { place: 'Olympia Tech Park', km: 4.3 },
+      { place: 'Chennai Airport', km: 9 },
+      { place: 'Chennai Central', km: 10 },
+    ],
+    images: [
+      'room-a-bed',
+      'room-a-window',
+      'room-a-wide',
+      'room-twin',
+      'room-b-wide',
+      'room-a-bath',
+    ],
+    heroImage: 'facade-dusk',
+  },
+  {
+    slug: 'guindy',
+    name: 'VAPR Guindy',
+    shortName: 'Guindy',
+    area: 'Ekkatuthangal',
+    street: '4, 4th Cross Street, Kalaimagal Nagar',
+    postalCode: '600032',
+    rating: { score: 4.0, count: 377 },
+    roomCount: 16,
+    blurb: 'Sixteen rooms in Ekkatuthangal, close to the Guindy industrial belt.',
+    note: [
+      'Sixteen rooms, which makes it the smaller and the quieter of the two. Ekkatuthangal is working Chennai — offices, workshops, a good many places to eat within a few hundred metres.',
+      'The rooms here are the larger ones: a fridge, a locker, a sofa chair and a low table, and room for a third person if you need it. Parking is indoors, and there is someone on security through the night.',
+    ],
+    room: {
+      name: 'Deluxe',
+      bed: 'Queen, or two separate single beds',
+      sleeps: 'Three, plus one',
+      inclusions: [
+        'Air conditioning',
+        'Mini fridge',
+        'Work desk and chair',
+        'Sofa chair and coffee table',
+        'Wardrobe, locker and luggage shelf',
+        'Television with DTH',
+        'Geyser',
+        'Intercom',
+        'Smoke alarm',
+      ],
+    },
+    facilities: [
+      'Indoor parking',
+      'Lift',
+      'Pantry',
+      'Ironing boards',
+      '24-hour security',
+      'Air-conditioned lobby',
+      'Cab on request, charged',
+    ],
+    landmarks: [
+      { place: 'Ashok Pillar', km: 2.1 },
+      { place: 'Amma Park', km: 2.8 },
+      { place: 'Guindy Bus Stand', km: 3.1 },
+      { place: 'MIOT International', km: 3.3 },
+      { place: 'Forum Mall', km: 4.2 },
+      { place: 'Kauvery Hospital', km: 4.1 },
+      { place: 'Guindy Station', km: 5.4 },
+      { place: 'Phoenix Marketcity', km: 5.6 },
+      { place: 'Chennai Airport', km: 7.8 },
+      { place: 'Chennai Central', km: 8.6 },
+    ],
+    // No photography exists for this property yet — see README.
+    images: [],
+    heroImage: null,
+  },
+];
+
+export const locationBySlug = (slug: string) => LOCATIONS.find((l) => l.slug === slug);
+
+/**
+ * "Ekkatuthangal, Chennai" for Guindy; plain "Chennai" for Ashok Nagar, whose
+ * neighbourhood and short name are the same word.
+ */
+export const placeOf = (l: Location) =>
+  l.area === l.shortName ? SITE.city : `${l.area}, ${SITE.city}`;
+
 export const NAV = [
-  { label: 'Rooms', href: '#rooms' },
-  { label: 'Spaces', href: '#spaces' },
-  { label: 'Detail', href: '#detail' },
-  { label: 'Finding us', href: '#location' },
+  { label: 'Ashok Nagar', href: '/ashok-nagar' },
+  { label: 'Guindy', href: '/guindy' },
+  { label: 'The rooms', href: '/#rooms' },
 ] as const;
+
+/** The one call to action; kept out of NAV so it is not repeated as a link. */
+export const CTA = { label: 'Enquire', href: '/#reserve' } as const;
 
 export const HERO = {
   wordmark: 'VAPR',
-  place: 'Ashok Nagar, Chennai',
+  place: 'Two addresses in Chennai',
   statement: 'A quiet floor\nabove a loud street.',
   scrollCue: 'Scroll',
 } as const;
 
-/**
- * Read one word at a time as the section scrubs past. Kept near 50 words —
- * long enough to earn the pin, short enough not to strand anyone in it.
- */
-export const MANIFESTO = {
-  body: 'Chennai arrives all at once. Heat off the tar, three horns at every junction, white glare from the hoardings on 46th Street. VAPR takes all of that and turns it down. Cold air. Dark stone underfoot. A door that shuts properly behind you. Everything you need, and not one thing more.',
-  attribution: 'Ashok Nagar, Chennai',
-} as const;
-
-export const ARRIVAL = {
-  title: 'Off 46th Street',
+/** The section directly under the hero. */
+export const LOCATIONS_INTRO = {
+  eyebrow: 'Two addresses',
+  title: 'There are two of us.',
   body: [
-    'The building sits back from the road behind two rain trees, which is the first quiet thing about it. Park under the deck, come up through the gate.',
-    'Reception is one desk and one person, and they will already know your name. Check-in takes about ninety seconds.',
+    'VAPR is two small hotels in Chennai. One on a residential street in Ashok Nagar, one in Ekkatuthangal a few minutes from the Guindy junction. They are about twenty minutes apart on a good day.',
+    'Same beds, same breakfast, same person at the desk who will have your name ready before you have found your ID. Pick whichever one is closer to wherever you have to be in the morning — and if you are not sure, write to us and we will tell you honestly which one suits.',
   ],
-  marks: [
-    { at: 18, label: 'Rain trees' },
-    { at: 54, label: 'Covered deck' },
-    { at: 79, label: 'Four floors' },
-  ],
+  prompt: 'Have a look at either:',
 } as const;
 
-export type Room = {
-  readonly id: string;
-  readonly index: string;
-  readonly name: string;
-  readonly sleeps: string;
-  readonly bed: string;
-  readonly note: string;
-  readonly images: readonly string[];
-  readonly spec: readonly { readonly label: string; readonly value: string }[];
-};
+export const MANIFESTO = {
+  body: 'Chennai arrives all at once. Heat off the tar, three horns at every junction, white glare off the hoardings. Both of our doors do the same job: they shut behind you, and the noise stops. Cold air. A desk you can actually work at. Breakfast downstairs from the morning. Everything you need, and not one thing more.',
+  attribution: 'Ashok Nagar and Ekkatuthangal, Chennai',
+} as const;
 
-export const ROOMS: readonly Room[] = [
-  {
-    id: 'studio-king',
-    index: '01',
-    name: 'Studio King',
-    sleeps: 'Two guests',
-    bed: 'King',
-    note: 'The largest of the three. A king bed centred on the timber headboard, a desk that is actually a desk, and a window that takes the morning.',
-    images: ['room-a-bed', 'room-a-window', 'room-a-wide', 'room-a-bath'],
-    spec: [
-      { label: 'Bed', value: 'King' },
-      { label: 'Sleeps', value: 'Two' },
-      { label: 'Bath', value: 'Walk-in shower' },
-      { label: 'Desk', value: 'Full width' },
-      { label: 'Outlook', value: 'Street, east' },
-    ],
-  },
-  {
-    id: 'corner-twin',
-    index: '02',
-    name: 'Corner Twin',
-    sleeps: 'Two guests',
-    bed: 'Two singles',
-    note: 'Two beds made up separately, for the colleagues and the siblings. A corner position, so daylight arrives from two directions and corridor noise from none.',
-    images: ['room-b-wide', 'room-twin', 'room-b-bed', 'room-b-light'],
-    spec: [
-      { label: 'Bed', value: 'Two singles' },
-      { label: 'Sleeps', value: 'Two' },
-      { label: 'Bath', value: 'Walk-in shower' },
-      { label: 'Desk', value: 'Yes' },
-      { label: 'Outlook', value: 'Two aspects' },
-    ],
-  },
-  {
-    id: 'lounge-suite',
-    index: '03',
-    name: 'Lounge Suite',
-    sleeps: 'Two guests, plus one',
-    bed: 'King, plus seating',
-    note: 'A separate sitting area with leather chairs and a low table, for the stays that run past a week and the calls that run past an hour.',
-    images: ['room-lounge', 'room-pillows', 'room-headboard', 'detail-curtain'],
-    spec: [
-      { label: 'Bed', value: 'King' },
-      { label: 'Sleeps', value: 'Two, plus one' },
-      { label: 'Sitting', value: 'Two chairs' },
-      { label: 'Bath', value: 'Walk-in shower' },
-      { label: 'Outlook', value: 'Street' },
-    ],
-  },
-] as const;
-
+/** Shown on the home page. Photographed at Ashok Nagar. */
 export const SPACES = [
   {
     id: 'reception',
     name: 'Reception',
     image: 'reception-desk',
-    line: 'One desk, split stone, four pendants. Staffed around the clock.',
+    line: 'One desk, split stone, four pendants. Someone is on it when you arrive.',
   },
   {
     id: 'dining',
     name: 'Dining Room',
     image: 'dining-room',
-    line: 'Breakfast from seven. Idli, pongal, toast, and filter coffee worth getting up for.',
+    line: 'Breakfast is included. Idli, pongal, toast, and filter coffee worth getting up for.',
   },
   {
-    id: 'conference',
-    name: 'Conference Room',
+    id: 'meeting',
+    name: 'Meeting Room',
     image: 'conference-room',
-    line: 'Seats twelve. Projection wall, blackout blinds, a door you can close.',
+    line: 'A long table, a screen, and a door you can close.',
   },
   {
     id: 'common',
@@ -173,60 +270,33 @@ export const SPACES = [
     id: 'parking',
     name: 'Parking',
     image: 'parking-bay',
-    line: 'Covered, on site, monitored. Pull in off the street.',
+    line: 'On site at both — outdoors in Ashok Nagar, under cover in Guindy.',
   },
 ] as const;
 
 export const DETAIL = {
-  title: 'What is in the room',
-  intro: 'Nothing here is a surprise, which is rather the point. This is the whole list.',
-  groups: [
-    {
-      heading: 'In the room',
-      items: [
-        'Air conditioning, individually controlled',
-        'Keycard entry and a night latch',
-        'Do-not-disturb from the bedside',
-        'Blackout curtains',
-        'Work desk and task light',
-        'Kettle, tea, and filter coffee',
-        'Walk-in shower, hot water at all hours',
-        'Flat screen with cable',
-        'Daily housekeeping',
-      ],
-    },
-    {
-      heading: 'In the building',
-      items: [
-        'Reception staffed 24 hours',
-        'Lift to all four floors',
-        'Breakfast service, 7.00 to 10.30',
-        'Conference room for twelve',
-        'Common room, open all day',
-        'Covered parking on site',
-        'CCTV throughout the public floors',
-        'Laundry on request',
-      ],
-    },
-  ],
-} as const;
-
-export const LOCATION = {
-  title: 'Finding us',
-  body: 'Ashok Nagar is west Chennai going about its ordinary business: the pillar, the market, the metro two streets over. We are on 46th Street, set back behind the trees.',
+  title: 'What you get, either way',
+  intro:
+    'The two properties differ in size and in a few fittings. Everything below is true of both.',
 } as const;
 
 export const RESERVE = {
   title: 'Stay',
-  body: 'Write, call, or send a message. Someone answers.',
-  cta: 'Check availability',
+  body: 'Tell us which one and when. Someone answers.',
+  cta: 'Send the enquiry',
 } as const;
 
 export const FOOTER = {
-  note: 'VAPR is a small hotel in Ashok Nagar, Chennai. Four floors, three room types, one desk.',
+  note: 'VAPR is two small hotels in Chennai — Ashok Nagar and Ekkatuthangal. Same beds, same breakfast, twenty minutes apart.',
   legal: [
     { label: 'Terms', href: '/terms' },
     { label: 'Privacy', href: '/privacy' },
     { label: 'Cancellation', href: '/cancellation' },
   ],
 } as const;
+
+/** Google Maps deep link from the postal address — no invented coordinates. */
+export const mapsHref = (l: Location) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${l.name}, ${l.street}, ${l.area}, ${SITE.city} ${l.postalCode}`
+  )}`;

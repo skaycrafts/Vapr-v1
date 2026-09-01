@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Frame from '@/components/media/Frame';
-import { HERO, needsVerification } from '@/lib/content';
+import { HERO, LOCATIONS } from '@/lib/content';
 import { gsap, ScrollTrigger, useIsoLayoutEffect } from '@/lib/gsap';
 import { useCapability } from '@/lib/useCapability';
 import { useIntro } from '@/components/providers/Intro';
@@ -131,9 +131,8 @@ export default function Hero() {
           <div className="flex shrink-0 items-end justify-between gap-10 md:flex-col md:items-end md:gap-6">
             <div className="hero-meta text-right">
               <p className="type-label">{HERO.place}</p>
-              <p className="tabular mt-1 text-sm text-mist">
-                {needsVerification.coordinates.lat.toFixed(4)}&thinsp;N&nbsp;&nbsp;
-                {needsVerification.coordinates.lng.toFixed(4)}&thinsp;E
+              <p className="mt-1 text-sm text-mist">
+                {LOCATIONS.map((l) => l.area).join(' · ')}
               </p>
             </div>
 

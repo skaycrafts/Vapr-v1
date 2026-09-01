@@ -1,17 +1,22 @@
 'use client';
 
 import { useRef } from 'react';
+import { Check, Minus } from 'lucide-react';
 import Frame from '@/components/media/Frame';
-import { DETAIL } from '@/lib/content';
+import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
 import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
 import type { ImageSlug } from '@/lib/media';
 
 const CLOSE_UPS: ImageSlug[] = ['detail-number', 'detail-switch', 'detail-latch', 'detail-books'];
 
 /**
- * The full inventory, set as a specification sheet rather than a grid of
- * icons: hairline rules, tabular numbering, no illustration standing in for a
- * fact. A guest scanning for one item can find it in a single pass.
+ * What is true of both properties, and where they differ. Set as a
+ * specification sheet rather than a grid of icons: a guest scanning for one
+ * item finds it in a single pass.
+ *
+ * The "not here" column is deliberate. Both listings state that laundry, a
+ * pool and a gym are unavailable, and saying so plainly is worth more than
+ * letting someone discover it at check-in.
  */
 export default function Detail() {
   const root = useRef<HTMLElement>(null);
@@ -28,10 +33,8 @@ export default function Detail() {
         duration: 0.7,
         ease: 'expo.out',
         stagger: 0.035,
-        scrollTrigger: { trigger: '.detail-sheet', start: 'top 76%' },
+        scrollTrigger: { trigger: '.detail-sheet', start: 'top 78%' },
       });
-
-      // The close-up strip tracks slightly against the scroll.
       gsap.fromTo(
         '.detail-strip',
         { xPercent: 0 },
@@ -47,38 +50,68 @@ export default function Detail() {
   }, []);
 
   return (
-    <section ref={root} id="detail" className="relative overflow-hidden bg-void py-20 md:py-32">
+    <section ref={root} id="detail" className="relative overflow-hidden bg-void py-20 md:py-28">
       <div className="gutter">
         <header className="flex flex-col gap-6 border-b border-hairline pb-9 md:flex-row md:items-end md:justify-between">
-          <h2 className="type-display max-w-[14ch] text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">
+          <h2 className="type-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">
             {DETAIL.title}
           </h2>
-          <p className="max-w-[38ch] text-mist">{DETAIL.intro}</p>
+          <p className="max-w-[40ch] text-mist">{DETAIL.intro}</p>
         </header>
 
         <div className="detail-sheet grid gap-x-12 gap-y-12 pt-10 md:grid-cols-2 md:pt-14">
-          {DETAIL.groups.map((group) => (
-            <div key={group.heading}>
-              <h3 className="type-label mb-2">{group.heading}</h3>
-              <ul>
-                {group.items.map((item, i) => (
-                  <li
-                    key={item}
-                    className="detail-row group flex items-baseline gap-5 border-t border-hairline py-3.5 transition-colors duration-300 last:border-b hover:bg-carbon/60"
-                  >
-                    <span className="tabular w-6 shrink-0 text-2xs text-ash transition-colors duration-300 group-hover:text-smoke">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span className="text-bone">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div>
+            <h3 className="type-label mb-2">Included at both</h3>
+            <ul>
+              {STAY.included.map((item) => (
+                <li
+                  key={item}
+                  className="detail-row flex items-baseline gap-4 border-t border-hairline py-3.5 last:border-b"
+                >
+                  <Check size={14} strokeWidth={1.75} aria-hidden className="shrink-0 translate-y-0.5 text-chalk" />
+                  <span className="text-bone">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <h3 className="type-label mb-2 mt-10">Not here, at either</h3>
+            <ul>
+              {STAY.notAvailable.map((item) => (
+                <li
+                  key={item}
+                  className="detail-row flex items-baseline gap-4 border-t border-hairline py-3.5 last:border-b"
+                >
+                  <Minus size={14} strokeWidth={1.75} aria-hidden className="shrink-0 translate-y-0.5 text-ash" />
+                  <span className="text-smoke">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="detail-row mt-4 max-w-[44ch] text-sm text-smoke">
+              {STAY.earlyCheckIn}
+            </p>
+          </div>
+
+          <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
+            {LOCATIONS.map((loc) => (
+              <div key={loc.slug}>
+                <h3 className="type-label mb-2">{loc.shortName}</h3>
+                <ul>
+                  {loc.facilities.map((item) => (
+                    <li
+                      key={item}
+                      className="detail-row border-t border-hairline py-3 text-sm text-bone last:border-b"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Four things you actually touch. */}
+      {/* Four things you actually touch. Photographed at Ashok Nagar. */}
       <div className="detail-strip mt-14 flex gap-3 pl-[max(1.25rem,calc((100vw-90rem)/2))] md:mt-16 md:gap-4">
         {CLOSE_UPS.map((slug) => (
           <Frame

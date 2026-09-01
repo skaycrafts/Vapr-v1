@@ -3,26 +3,42 @@
 import { useRef, useState } from 'react';
 import Emblem from '@/components/brand/Emblem';
 import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
-import { useIntro } from '@/components/providers/Intro';
+import { introAlreadySeen, markIntroSeen, useIntro } from '@/components/providers/Intro';
 
 /**
  * The entry sequence: the seal draws itself line by line, a counter runs to
  * 100, and then the black field lifts off the top of the hero.
  *
  * It is an overlay, not a gate — the page is fully rendered underneath the
- * whole time, so a crawler, a reader with scripting off, or a failed
- * animation all still get the site. Repeat visits within a session skip it,
- * and `prefers-reduced-motion` collapses it to a short fade.
+ * whole time, so a crawler, a reader with scripting off, or a failed animation
+ * all still get the site. `prefers-reduced-motion` collapses it to a fade.
+ *
+ * It is rendered unconditionally, on the server as well as the client, and
+ * decides for itself whether to play. Deciding in the parent instead meant the
+ * server emitted this overlay while the client decided not to render it, and
+ * the orphaned node stayed on screen covering the whole page on every
+ * navigation after the first. The inline script in the document head hides it
+ * before first paint on a repeat visit, so skipping costs no flash.
  */
 export default function Preloader() {
   const root = useRef<HTMLDivElement>(null);
   const counter = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
   const [gone, setGone] = useState(false);
   const { finish } = useIntro();
 
   useIsoLayoutEffect(() => {
     const el = root.current;
-    if (!el) return;
+    if (!el || started.current) return;
+    started.current = true;
+
+    // Already played this session: dismiss without animating.
+    if (introAlreadySeen()) {
+      setGone(true);
+      finish();
+      return;
+    }
+    markIntroSeen();
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const lenis = window.__lenis;
@@ -32,8 +48,8 @@ export default function Preloader() {
     const ctx = gsap.context(() => {
       const strokes = gsap.utils.toArray<SVGGeometryElement>('.emblem-line *');
 
-      // Seed each path's dash pattern from its own length so they all draw
-      // at a comparable rate rather than snapping in together.
+      // Seed each path's dash pattern from its own length so they all draw at
+      // a comparable rate rather than snapping in together.
       strokes.forEach((node) => {
         const len = typeof node.getTotalLength === 'function' ? node.getTotalLength() : 0;
         if (!len) return;
@@ -80,15 +96,10 @@ export default function Preloader() {
           },
           0
         )
-        // The seal grows past the frame; the field lifts behind it.
         .to('.preloader-seal', { scale: 1.18, duration: 0.9, ease: 'power3.inOut' }, '-=0.25')
         .to('.preloader-seal', { autoAlpha: 0, duration: 0.5, ease: 'power2.in' }, '-=0.55')
         .to('.preloader-meta', { autoAlpha: 0, duration: 0.4 }, '<')
-        .to(
-          el,
-          { yPercent: -100, duration: 1.05, ease: 'expo.inOut' },
-          '-=0.2'
-        );
+        .to(el, { yPercent: -100, duration: 1.05, ease: 'expo.inOut' }, '-=0.2');
     }, el);
 
     return () => {
@@ -102,6 +113,7 @@ export default function Preloader() {
   return (
     <div
       ref={root}
+      data-preloader
       className="fixed inset-0 z-[var(--z-preloader)] flex items-center justify-center bg-void"
       role="status"
       aria-live="polite"

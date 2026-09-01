@@ -1,24 +1,27 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import Emblem from '@/components/brand/Emblem';
 import Glass from '@/components/ui/Glass';
-import { NAV, needsVerification } from '@/lib/content';
+import { CTA, NAV, needsVerification } from '@/lib/content';
 import { cn } from '@/lib/utils';
 
 /**
  * Deliberately not a full-width bar. The seal anchors the top-left corner and
- * the links ride in a glass pill on the right, so the photography runs edge
- * to edge underneath instead of being cropped by a header.
+ * the links ride in a glass pill on the right, so the photography runs edge to
+ * edge underneath instead of being cropped by a header.
  *
  * The bar retracts on the way down and returns on the way up — the reading
- * direction gets the full viewport, the moment you look for navigation it is
- * already there.
+ * direction gets the full viewport, and the moment you look for navigation it
+ * is already there.
  */
 export default function Nav() {
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const lastY = useRef(0);
   // Suspends the retract-on-scroll rule: a scroll the navigation started
   // itself should not make the navigation disappear.
@@ -55,12 +58,27 @@ export default function Nav() {
     };
   }, [open]);
 
-  const go = (href: string) => {
-    const target = document.querySelector<HTMLElement>(href);
-    setOpen(false);
-    if (!target) return;
+  /**
+   * Links are real hrefs, so a route change is Next's job. Only a hash that
+   * points at the page we are already on is intercepted, and then only to
+   * hand it to Lenis for the glide.
+   */
+  const handle = (href: string) => (event: React.MouseEvent) => {
+    const [path, hash] = href.split('#');
+    const samePage = (path || '/') === pathname;
+    if (!hash || !samePage) {
+      setOpen(false);
+      return; // let Next navigate
+    }
 
-    // Keep the bar on screen for the length of the glide.
+    const target = document.getElementById(hash);
+    if (!target) {
+      setOpen(false);
+      return;
+    }
+
+    event.preventDefault();
+    setOpen(false);
     setHidden(false);
     holding.current = true;
     if (holdTimer.current) clearTimeout(holdTimer.current);
@@ -68,9 +86,8 @@ export default function Nav() {
       holding.current = false;
     }, 1700);
 
-    // The overlay stops Lenis while it is open, and a stopped instance
-    // ignores scrollTo. Restart it here rather than waiting for the close
-    // effect's cleanup, which runs after this handler.
+    // The overlay stops Lenis while it is open, and a stopped instance ignores
+    // scrollTo. Restart it here rather than waiting for the close effect.
     const lenis = window.__lenis;
     if (lenis) {
       lenis.start();
@@ -95,48 +112,38 @@ export default function Nav() {
           hidden && !open && '-translate-y-[130%]'
         )}
       >
-        <a
-          href="#top"
-          onClick={(e) => {
-            e.preventDefault();
-            window.__lenis?.scrollTo(0, { duration: 1.6 }) ?? window.scrollTo({ top: 0 });
-          }}
-          data-cursor="Top"
-          className="group flex items-center gap-3 text-chalk"
-        >
+        <Link href="/" data-cursor="Home" className="group flex items-center gap-3 text-chalk">
           <Emblem
             variant="simple"
             title="VAPR"
             className="w-8 transition-transform duration-[1.6s] ease-[var(--ease-out-quart)] group-hover:rotate-90 md:w-9"
           />
           <span className="type-display text-lg tracking-[0.32em] md:text-xl">VAPR</span>
-        </a>
+        </Link>
 
         <nav aria-label="Primary" className="hidden md:block">
           <Glass className="flex items-center gap-1 rounded-full px-2 py-2" radius={999}>
             {NAV.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  go(item.href);
-                }}
-                className="rounded-full px-4 py-2 text-sm text-mist transition-colors duration-300 hover:text-chalk focus-visible:text-chalk"
+                onClick={handle(item.href)}
+                aria-current={pathname === item.href ? 'page' : undefined}
+                className={cn(
+                  'rounded-full px-4 py-2 text-sm transition-colors duration-300 hover:text-chalk focus-visible:text-chalk',
+                  pathname === item.href ? 'text-chalk' : 'text-mist'
+                )}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="#reserve"
-              onClick={(e) => {
-                e.preventDefault();
-                go('#reserve');
-              }}
+            <Link
+              href={CTA.href}
+              onClick={handle(CTA.href)}
               className="ml-1 rounded-full bg-chalk px-5 py-2 text-sm font-medium text-void transition-[background-color,transform] duration-300 hover:bg-bone active:scale-[0.97]"
             >
-              Reserve
-            </a>
+              {CTA.label}
+            </Link>
           </Glass>
         </nav>
 
@@ -167,30 +174,23 @@ export default function Nav() {
           </div>
 
           <nav aria-label="Primary, mobile" className="flex flex-1 flex-col justify-center gap-1">
-            {NAV.map((item, i) => (
-              <a
+            {NAV.map((item) => (
+              <Link
                 key={item.href}
                 href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  go(item.href);
-                }}
+                onClick={handle(item.href)}
                 className="type-display hairline-b py-5 text-4xl text-chalk"
-                style={{ transitionDelay: `${i * 40}ms` }}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="#reserve"
-              onClick={(e) => {
-                e.preventDefault();
-                go('#reserve');
-              }}
+            <Link
+              href={CTA.href}
+              onClick={handle(CTA.href)}
               className="type-display py-5 text-4xl text-chalk"
             >
-              Reserve
-            </a>
+              {CTA.label}
+            </Link>
           </nav>
 
           <div className="flex items-center justify-between py-8">
