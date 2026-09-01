@@ -12,26 +12,6 @@ const IntroContext = createContext<IntroState>({ ready: true, finish: () => {} }
 
 export const useIntro = () => useContext(IntroContext);
 
-export const INTRO_STORAGE_KEY = 'vapr:intro';
-
-/** Whether the entry sequence has already played this session. */
-export function introAlreadySeen() {
-  try {
-    return sessionStorage.getItem(INTRO_STORAGE_KEY) === '1';
-  } catch {
-    // Private modes can throw on access; treat it as a first visit.
-    return false;
-  }
-}
-
-export function markIntroSeen() {
-  try {
-    sessionStorage.setItem(INTRO_STORAGE_KEY, '1');
-  } catch {
-    /* no-op */
-  }
-}
-
 export function IntroProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 

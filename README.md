@@ -28,12 +28,14 @@ times, addresses and landmark distances — is taken from each hotel's own Treeb
 listing and is cited at the top of `lib/content.ts`. If a fact is not on the
 listing, it is not asserted anywhere.
 
-**Guindy has no photography.** Every image and clip supplied was shot at Ashok
-Nagar — the facade signage confirms it, and nothing in the source folders
-refers to Ekkatuthangal. Rather than show one hotel's rooms on the other's
-page, `/guindy` renders a designed placeholder wherever its pictures belong,
-and its `images` array in `lib/content.ts` is empty. Fill that array once the
-shoot happens and the placeholders disappear on their own.
+**Guindy has no photography of its own.** Every image and clip supplied was
+shot at Ashok Nagar — the facade signage confirms it, and nothing in the source
+folders refers to Ekkatuthangal. As an interim measure Guindy borrows Ashok
+Nagar's frames, flagged by `imagesArePlaceholder: true` in `lib/content.ts`,
+which prints a line under the gallery saying whose rooms are shown. Replace the
+slugs and clear that flag together once Guindy is shot; the disclosure then
+disappears on its own. Until then the site is showing one building's rooms on
+the other's page, which is worth being deliberate about.
 
 **2. The source media is not in the repository.** The web-ready renditions in
 `public/media` are committed. The originals live in
@@ -105,12 +107,17 @@ Every animated surface has a still counterpart:
 | Spaces | Image follows the cursor | Images inline under each row |
 | Cursor | Hairline ring with captions | Not mounted |
 
-The entry sequence is rendered unconditionally on server and client, and
-decides for itself whether to play. Choosing in the parent instead meant the
-server emitted the overlay while the client declined to render it, and the
-orphaned node stayed on screen covering the whole page on every navigation
-after the first. An inline script in the document head hides it before first
-paint on a repeat visit, so skipping costs no flash.
+The entry sequence runs in two beats — the seal draws itself, then the wordmark
+rises into place beneath it and holds — and plays on **every page load**. It
+lives in the root layout, so it mounts once per load: a refresh replays it, and
+moving between routes never interrupts it. Because the shell now persists
+across routes, `SmoothScroll` resets the scroll and refreshes ScrollTrigger on
+each pathname change.
+
+Its timeline uses absolute positions rather than relative offsets. The draw's
+length depends on how many strokes the seal has, and chaining off it left the
+wordmark arriving just as the field lifted — visible for a few frames, which is
+to say not visible at all.
 
 Reveals animate *from* a state set by script, never *to* one — so if a timeline
 never runs, the content is already visible. The entry sequence is an overlay,

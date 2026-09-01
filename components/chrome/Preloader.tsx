@@ -3,22 +3,22 @@
 import { useRef, useState } from 'react';
 import Emblem from '@/components/brand/Emblem';
 import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
-import { introAlreadySeen, markIntroSeen, useIntro } from '@/components/providers/Intro';
+import { useIntro } from '@/components/providers/Intro';
 
 /**
- * The entry sequence: the seal draws itself line by line, a counter runs to
- * 100, and then the black field lifts off the top of the hero.
+ * The entry sequence, in two beats: the seal draws itself line by line, and
+ * then the wordmark rises into place beneath it. A counter runs alongside, and
+ * the black field lifts off the top of the hero.
+ *
+ * The wordmark sits under the seal rather than inside its diamond, where it
+ * was too small to read at any sensible size for the mark.
  *
  * It is an overlay, not a gate — the page is fully rendered underneath the
  * whole time, so a crawler, a reader with scripting off, or a failed animation
  * all still get the site. `prefers-reduced-motion` collapses it to a fade.
  *
- * It is rendered unconditionally, on the server as well as the client, and
- * decides for itself whether to play. Deciding in the parent instead meant the
- * server emitted this overlay while the client decided not to render it, and
- * the orphaned node stayed on screen covering the whole page on every
- * navigation after the first. The inline script in the document head hides it
- * before first paint on a repeat visit, so skipping costs no flash.
+ * It lives in the root layout, so it mounts once per page load: it plays on
+ * every refresh, and never interrupts navigation between routes.
  */
 export default function Preloader() {
   const root = useRef<HTMLDivElement>(null);
@@ -32,21 +32,18 @@ export default function Preloader() {
     if (!el || started.current) return;
     started.current = true;
 
-    // Already played this session: dismiss without animating.
-    if (introAlreadySeen()) {
-      setGone(true);
-      finish();
-      return;
-    }
-    markIntroSeen();
-
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const lenis = window.__lenis;
     lenis?.stop();
     window.scrollTo(0, 0);
 
     const ctx = gsap.context(() => {
-      const strokes = gsap.utils.toArray<SVGGeometryElement>('.emblem-line *');
+      // Geometry only. `.emblem-line *` also matches the <g> wrappers, which
+      // draw nothing but still consume stagger slots and stretched the
+      // sequence well past the point the wordmark was meant to arrive.
+      const strokes = gsap.utils.toArray<SVGGeometryElement>(
+        '.emblem-line path, .emblem-line circle, .emblem-line line'
+      );
 
       // Seed each path's dash pattern from its own length so they all draw at
       // a comparable rate rather than snapping in together.
@@ -67,26 +64,36 @@ export default function Preloader() {
 
       if (reduce) {
         tl.set(strokes, { strokeDashoffset: 0 })
-          .set('.emblem-word', { opacity: 1 })
+          .set('.preloader-word > span', { yPercent: 0 })
           .set(counter.current, { textContent: '100' })
-          .to(el, { autoAlpha: 0, duration: 0.35 }, '+=0.2');
+          .to(el, { autoAlpha: 0, duration: 0.35 }, '+=0.25');
         return;
       }
 
       const count = { value: 0 };
 
-      tl.to(strokes, {
-        strokeDashoffset: 0,
-        duration: 1.15,
-        stagger: { each: 0.012, from: 'center' },
-        ease: 'power1.inOut',
-      })
-        .to('.emblem-word', { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.45')
+      // Absolute positions rather than relative offsets: the draw's length
+      // depends on how many strokes the seal has, and chaining off it left
+      // the wordmark arriving just as the field lifted.
+      tl
+        // 1 — the seal draws itself.
+        .to(
+          strokes,
+          {
+            strokeDashoffset: 0,
+            duration: 1,
+            stagger: { each: 0.007, from: 'center' },
+            ease: 'power1.inOut',
+          },
+          0
+        )
+        // 2 — the wordmark rises into place beneath it, and holds.
+        .from('.preloader-word > span', { yPercent: 115, duration: 0.85, ease: 'expo.out' }, 1.05)
         .to(
           count,
           {
             value: 100,
-            duration: 1.5,
+            duration: 1.8,
             ease: 'power1.inOut',
             onUpdate: () => {
               if (counter.current) {
@@ -96,10 +103,11 @@ export default function Preloader() {
           },
           0
         )
-        .to('.preloader-seal', { scale: 1.18, duration: 0.9, ease: 'power3.inOut' }, '-=0.25')
-        .to('.preloader-seal', { autoAlpha: 0, duration: 0.5, ease: 'power2.in' }, '-=0.55')
-        .to('.preloader-meta', { autoAlpha: 0, duration: 0.4 }, '<')
-        .to(el, { yPercent: -100, duration: 1.05, ease: 'expo.inOut' }, '-=0.2');
+        // 3 — the lockup grows past the frame and the field lifts behind it.
+        .to('.preloader-lockup', { scale: 1.12, duration: 0.85, ease: 'power3.inOut' }, 2.5)
+        .to('.preloader-lockup', { autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, 2.85)
+        .to('.preloader-meta', { autoAlpha: 0, duration: 0.4 }, 2.85)
+        .to(el, { yPercent: -100, duration: 1, ease: 'expo.inOut' }, 3.1);
     }, el);
 
     return () => {
@@ -119,12 +127,19 @@ export default function Preloader() {
       aria-live="polite"
       aria-label="Loading"
     >
-      <div className="preloader-seal w-[min(46vw,17rem)] text-chalk">
-        <Emblem animated variant="full" />
+      <div className="preloader-lockup flex flex-col items-center">
+        <Emblem animated variant="mark" className="w-[min(36vw,13rem)] text-chalk" />
+
+        <div className="preloader-word split-mask mt-7 md:mt-9">
+          {/* The trailing letter-space needs room, or tracking clips the R. */}
+          <span className="type-display block pr-[0.42em] text-[clamp(1.75rem,5vw,3rem)] leading-[1.15] tracking-[0.42em] text-chalk">
+            VAPR
+          </span>
+        </div>
       </div>
 
       <div className="preloader-meta gutter absolute inset-x-0 bottom-8 flex items-end justify-between">
-        <span className="type-label">VAPR</span>
+        <span className="type-label">Chennai</span>
         <span
           ref={counter}
           className="tabular type-wide text-[clamp(2rem,7vw,4rem)] leading-none text-chalk"
@@ -132,10 +147,6 @@ export default function Preloader() {
           000
         </span>
       </div>
-
-      <style>{`
-        .emblem-word { opacity: 0; }
-      `}</style>
     </div>
   );
 }

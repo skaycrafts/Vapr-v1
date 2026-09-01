@@ -16,7 +16,8 @@ import type { ImageSlug } from '@/lib/media';
  */
 export default function PropertyRoom({ location }: { location: Location }) {
   const root = useRef<HTMLElement>(null);
-  const gallery = location.images.slice(1);
+  // Four fills the row exactly; a fifth wrapped and left a hole.
+  const gallery = location.images.slice(1, 5);
 
   useIsoLayoutEffect(() => {
     const el = root.current;
@@ -107,17 +108,25 @@ export default function PropertyRoom({ location }: { location: Location }) {
       </div>
 
       {gallery.length ? (
-        <div className="pr-gallery mt-16 grid grid-cols-2 gap-3 md:mt-20 md:grid-cols-4 md:gap-4">
-          {gallery.map((slug, i) => (
-            <Frame
-              key={slug}
-              slug={slug as ImageSlug}
-              sizes="(min-width: 768px) 24vw, 48vw"
-              ratio={i % 3 === 0 ? 3 / 4 : 1}
-              className="pr-shot"
-            />
-          ))}
-        </div>
+        <>
+          <div className="pr-gallery mt-16 grid grid-cols-2 gap-3 md:mt-20 md:grid-cols-4 md:gap-4">
+            {gallery.map((slug) => (
+              <Frame
+                key={slug}
+                slug={slug as ImageSlug}
+                sizes="(min-width: 768px) 24vw, 48vw"
+                ratio={1}
+                className="pr-shot"
+              />
+            ))}
+          </div>
+          {location.imagesArePlaceholder ? (
+            <p className="pr-shot mt-4 text-xs text-smoke">
+              Photographs shown are of our Ashok Nagar rooms, which are finished to the
+              same standard. {location.shortName} is being shot shortly.
+            </p>
+          ) : null}
+        </>
       ) : (
         <div className="pr-gallery mt-16 flex flex-col items-center gap-5 border border-hairline bg-pitch px-6 py-16 text-center md:mt-20">
           <Emblem variant="mark" className="w-20 text-graphite md:w-24" />

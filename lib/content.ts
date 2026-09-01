@@ -62,6 +62,11 @@ export type Location = {
   readonly landmarks: readonly Landmark[];
   /** Slugs from the media manifest. Empty where the shoot has not happened. */
   readonly images: readonly string[];
+  /**
+   * True when `images` are borrowed from another property. The page says so
+   * rather than implying the pictures show this building.
+   */
+  readonly imagesArePlaceholder?: boolean;
   readonly heroImage: string | null;
 };
 
@@ -187,9 +192,20 @@ export const LOCATIONS: readonly Location[] = [
       { place: 'Chennai Airport', km: 7.8 },
       { place: 'Chennai Central', km: 8.6 },
     ],
-    // No photography exists for this property yet — see README.
-    images: [],
-    heroImage: null,
+    // PLACEHOLDER: these are Ashok Nagar's photographs, standing in until
+    // Guindy is shot. They are not this building. Swap them the moment real
+    // frames exist — `imagesArePlaceholder` drives the on-page disclosure, so
+    // clear that flag at the same time.
+    images: [
+      'room-b-wide',
+      'room-b-bed',
+      'room-headboard',
+      'room-pillows',
+      'room-b-light',
+      'detail-curtain',
+    ],
+    imagesArePlaceholder: true,
+    heroImage: 'facade-canopy',
   },
 ];
 

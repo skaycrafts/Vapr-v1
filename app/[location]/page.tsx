@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import SiteShell from '@/components/chrome/SiteShell';
 import PropertyHero from '@/components/property/PropertyHero';
 import PropertyRoom from '@/components/property/PropertyRoom';
 import GettingThere from '@/components/property/GettingThere';
 import Reserve from '@/components/sections/Reserve';
-import Footer from '@/components/sections/Footer';
 import { LOCATIONS, SITE, STAY, locationBySlug, placeOf } from '@/lib/content';
 
 type Params = { location: string };
@@ -78,7 +76,7 @@ export default async function LocationPage({ params }: { params: Promise<Params>
   };
 
   return (
-    <SiteShell footer={<Footer />}>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -87,6 +85,6 @@ export default async function LocationPage({ params }: { params: Promise<Params>
       <PropertyRoom location={location} />
       <GettingThere location={location} />
       <Reserve defaultSlug={location.slug} />
-    </SiteShell>
+    </>
   );
 }

@@ -245,12 +245,6 @@
   clip-path: inset(-15% -2% -15% -2%);
 }
 
-/* Set by the inline script in the document head when the entry sequence has
-   already played this session. Hides the overlay before it can paint. */
-html[data-intro-seen='1'] [data-preloader] {
-  display: none !important;
-}
-
 /* ════════════════════════════════════════════════════════════════════
    reduced motion — every animated surface has a still counterpart
    ════════════════════════════════════════════════════════════════════ */

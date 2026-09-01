@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Archivo } from 'next/font/google';
 import { LOCATIONS, SITE, needsVerification } from '@/lib/content';
+import SiteShell from '@/components/chrome/SiteShell';
+import Footer from '@/components/sections/Footer';
 import './globals.css';
 
 /**
@@ -94,19 +96,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-IN" className={`${bodoni.variable} ${archivo.variable}`}>
       <body>
         <script
-          // Runs before the overlay paints. Repeat visits within a session
-          // never see the entry sequence flash up and disappear.
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{if(sessionStorage.getItem('vapr:intro')==='1')document.documentElement.dataset.introSeen='1'}catch(e){}",
-          }}
-        />
-        <script
           type="application/ld+json"
           // Static object under our control; nothing user-supplied reaches it.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {children}
+        {/* The shell lives here rather than in each page, so Lenis, the
+            navigation and the entry sequence survive route changes — the
+            sequence plays once per page load, not on every link. */}
+        <SiteShell footer={<Footer />}>{children}</SiteShell>
       </body>
     </html>
   );

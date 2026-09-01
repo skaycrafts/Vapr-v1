@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Lenis from 'lenis';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 
@@ -13,6 +14,20 @@ import { gsap, ScrollTrigger } from '@/lib/gsap';
  * the browser's native scroll takes over.
  */
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // The shell persists across routes, so nothing resets the scroll or
+  // remeasures the pinned sections on its own. Both are done here.
+  useEffect(() => {
+    const lenis = window.__lenis;
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
+
+    // Let the incoming route paint before ScrollTrigger takes measurements.
+    const frame = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(frame);
+  }, [pathname]);
+
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (reduce.matches) {

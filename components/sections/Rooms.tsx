@@ -158,6 +158,11 @@ export default function Rooms() {
               <p className="mt-2 text-mist">
                 at {loc.name} · {loc.roomCount} rooms
               </p>
+              {loc.imagesArePlaceholder ? (
+                <p className="mt-2 text-xs text-smoke">
+                  Photograph shows an Ashok Nagar room, finished to the same standard.
+                </p>
+              ) : null}
 
               <dl className="mt-8 md:mt-9">
                 {[
