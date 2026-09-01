@@ -45,7 +45,7 @@ export default function Glass({
       scale,
       chroma,
       blur,
-      saturate: 1.15, // the page is monochrome; there is little to saturate
+      saturate: 1.25,
       mapBlur: 14,
       border: 0.08,
       radius: radius ?? null,

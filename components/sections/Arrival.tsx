@@ -9,6 +9,10 @@ import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
  * The building, annotated. The leader lines borrow the hairline weight of the
  * seal and read like a survey drawing laid over the photograph — which is
  * also the plainest way to point at three things at once.
+ *
+ * The labels carry their own shadow rather than blending with the backdrop:
+ * they land on both bright sky and dark foliage, and a blend mode that was
+ * elegant over a grey photograph inverts into colour noise over this one.
  */
 export default function Arrival() {
   const root = useRef<HTMLElement>(null);
@@ -93,19 +97,18 @@ export default function Arrival() {
           </div>
 
           {/* Leader lines. Decorative — the same facts are in the copy. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 hidden mix-blend-difference md:block"
-          >
+          <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
             {ARRIVAL.marks.map((mark) => (
               <div
                 key={mark.label}
                 className="arrival-mark absolute right-5 flex items-center gap-3"
                 style={{ top: `${mark.at}%` }}
               >
-                <span className="arrival-mark-rule block h-px w-[clamp(2rem,6vw,5rem)] origin-right bg-chalk" />
-                <span className="size-[5px] shrink-0 rounded-full bg-chalk" />
-                <span className="type-label whitespace-nowrap text-chalk">{mark.label}</span>
+                <span className="arrival-mark-rule block h-px w-[clamp(2rem,6vw,5rem)] origin-right bg-chalk shadow-[0_0_6px_rgb(0_0_0/0.7)]" />
+                <span className="size-[5px] shrink-0 rounded-full bg-chalk shadow-[0_0_6px_rgb(0_0_0/0.7)]" />
+                <span className="type-label whitespace-nowrap text-chalk [text-shadow:0_1px_2px_rgb(0_0_0/0.9),0_0_12px_rgb(0_0_0/0.65)]">
+                  {mark.label}
+                </span>
               </div>
             ))}
           </div>

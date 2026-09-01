@@ -4,7 +4,7 @@ Marketing site for VAPR, a small hotel in Ashok Nagar, Chennai.
 
 ```bash
 npm install
-npm run media     # grade the photography and encode the video (see below)
+npm run media     # crop, resize and encode the media (see below)
 npm run dev
 ```
 
@@ -21,8 +21,8 @@ a best-effort guess. Replace them with the property's real details. Nothing
 else on the site invents a fact; all the copy about the building was written
 from the photography.
 
-**2. The source media is not in the repository.** The graded, web-ready
-renditions in `public/media` are committed. The originals live in
+**2. The source media is not in the repository.** The web-ready renditions in
+`public/media` are committed. The originals live in
 `media-source/`, which is gitignored — roughly 800 MB of camera files. Restore
 that folder from the client's Drive before re-running `npm run media`.
 
@@ -35,14 +35,17 @@ captions and disabled states, never for body copy. The palette is defined once
 in `app/globals.css`, in OKLCH, with the contrast ratio of each ink token
 against the page black noted beside it.
 
-**The photography is graded to monochrome at build time.** This is the central
-art-direction decision and it is doing real work. The source photography is
-bright, warm and high-key, and the building operates under a franchise whose
-signage and livery appear throughout the frames. Draining the colour unifies a
-set shot in very different light, and it lets the architecture rather than
-another brand's orange carry the page. Several frames are additionally cropped
-to remove third-party signage outright — see the `crop` entries in
-`scripts/media.config.mjs`.
+**The photography ships in its original colour.** The interface around it stays
+monochrome, so the black ground and white type frame the pictures rather than
+competing with them — the ochre facade and the green room walls are the only
+colour on the page, which is what makes them read.
+
+The building operates under a franchise whose signage and livery appear
+throughout the source frames. Six photographs are cropped so that branding
+falls outside the frame: the facade shots sit above the street sign, and the
+reception crop holds the stone wall and pendants rather than the desk. Those
+crops live in `scripts/media.config.mjs` and matter more in colour than they
+did in grey — re-check them if the photography is ever re-exported.
 
 **Type is one Didone and one grotesque.** The wordmark inside the VAPR seal is
 a high-contrast Didone, so Bodoni Moda sets the display type and the logo and
@@ -70,7 +73,7 @@ Every animated surface has a still counterpart:
 | Entry sequence | Seal draws on, counter runs, field lifts | Short fade |
 | Manifesto | Pinned, lit one word at a time | A paragraph |
 | Rooms | Pinned horizontal rail | Stacked vertically |
-| Hero | WebGL dissolve between three stills | The graded photograph |
+| Hero | WebGL dissolve between three stills | The photograph, still |
 | Spaces | Image follows the cursor | Images inline under each row |
 | Cursor | Hairline ring with captions | Not mounted |
 
@@ -89,12 +92,12 @@ Measured against `next build && next start` at 1440×900:
 |---|---|
 | LCP | ~210 ms |
 | CLS | 0 |
-| Images, first load | ~540 KB (AVIF) |
+| Images, first load | ~480 KB (AVIF) |
 | Fonts | 133 KB (two variable faces) |
 | JS | ~445 KB encoded, most of it three.js in a deferred chunk |
 
-The WebGL hero is additive, never load-bearing. The graded photograph renders
-underneath it and carries the LCP; the canvas composites on top and fades in.
+The WebGL hero is additive, never load-bearing. The photograph renders underneath it
+and carries the LCP; the canvas composites on top and fades in.
 If the GPU drops the context, a texture fails, or the device looks modest
 (`lib/useCapability.ts`), the canvas stops painting and the photograph is
 already there. The hero `<img>` carries `crossOrigin="anonymous"` to share a
@@ -105,9 +108,10 @@ is fetched twice.
 
 ## Media pipeline
 
-`npm run media` reads `scripts/media.config.mjs`, grades and crops the stills
+`npm run media` reads `scripts/media.config.mjs`, crops and resizes the stills
 into responsive AVIF and WebP, encodes the video, and writes a typed manifest
-with inline blur placeholders to `lib/media.generated.ts`. Do not edit the
+with inline blur placeholders to `lib/media.generated.ts`. Colour is passed
+through untouched; `GRADE` in the config is the hook if that ever changes. Do not edit the
 manifest; edit the config and re-run. `--force` ignores the freshness check,
 and `--images` / `--videos` limit the pass.
 

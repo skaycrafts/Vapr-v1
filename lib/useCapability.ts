@@ -15,8 +15,8 @@ export type Capability = {
  * Decides whether this device gets the WebGL treatment.
  *
  * The rule is conservative: reduced motion, a missing context, or an obviously
- * modest device all fall back to the plain graded photograph. The fallback is
- * not a degraded experience — it is the same picture without the dissolve.
+ * modest device all fall back to the plain photograph. That is not a degraded
+ * experience — it is the same picture without the dissolve.
  */
 export function useCapability(): Capability {
   const [state, setState] = useState<Capability>({

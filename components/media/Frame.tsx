@@ -29,7 +29,7 @@ export type FrameProps = {
 };
 
 /**
- * A graded still, served as AVIF with a WebP fallback.
+ * A still from the property shoot, served as AVIF with a WebP fallback.
  *
  * The 20px placeholder is painted underneath and cross-fades out once the
  * real file decodes, so a slow connection never shows an empty rectangle.

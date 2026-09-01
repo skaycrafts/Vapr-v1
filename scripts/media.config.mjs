@@ -84,6 +84,8 @@ export const VIDEOS = [
   },
 ];
 
-// Cinematic monochrome grade, tuned against the source set (bright, high-key HDR interiors).
-export const GRADE = img => img.grayscale().linear(1.3, -46).gamma(1.12);
+// The photographs ship in their original colour. The source set is already
+// HDR-processed and well exposed, so this is a pass-through rather than a
+// grade — nothing is neutralised, warmed, or crushed on the way out.
+export const GRADE = img => img;
 export const WIDTHS = [640, 1080, 1600, 2400];

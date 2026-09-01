@@ -1,6 +1,7 @@
 /**
- * Grades the source photography to monochrome and emits responsive AVIF/WebP
- * renditions plus a typed manifest with LQIP placeholders.
+ * Crops, resizes and encodes the source photography into responsive AVIF/WebP
+ * renditions, and emits a typed manifest with LQIP placeholders. Colour is
+ * passed through untouched.
  *
  *   node scripts/optimize-media.mjs [--images] [--videos] [--force]
  */
@@ -57,8 +58,8 @@ async function processImage(entry) {
   for (const w of WIDTHS) {
     if (w > width * 1.05) continue;
     for (const [fmt, opts] of [
-      ['avif', { quality: 52, effort: 6, chromaSubsampling: '4:2:0' }],
-      ['webp', { quality: 80, effort: 5 }],
+      ['avif', { quality: 58, effort: 6, chromaSubsampling: '4:2:0' }],
+      ['webp', { quality: 82, effort: 5 }],
     ]) {
       const out = path.join(IMG_OUT, `${entry.slug}-${w}.${fmt}`);
       if (fresh(out, src)) continue;
@@ -84,8 +85,8 @@ async function processImage(entry) {
   };
 }
 
-// Mirrors the stills grade: desaturate, lift contrast, ease gamma.
-const VF_GRADE = 'format=gray,eq=contrast=1.30:brightness=-0.03:gamma=1.12';
+// Colour is left alone, matching the stills. Only the scale filter is applied.
+const VF_GRADE = null;
 
 async function processVideo(entry) {
   const src = path.join(RAW, 'video', entry.src);
@@ -94,7 +95,7 @@ async function processVideo(entry) {
 
   const mp4 = path.join(VID_OUT, `${entry.slug}.mp4`);
   const poster = path.join(VID_OUT, `${entry.slug}-poster.jpg`);
-  const vf = `scale=-2:1080,${VF_GRADE}`;
+  const vf = VF_GRADE ? `scale=-2:1080,${VF_GRADE}` : 'scale=-2:1080';
 
   // Seek before -i so the trim is a fast keyframe seek, and cap with -t.
   const trim = entry.trim

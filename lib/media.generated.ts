@@ -19,7 +19,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 1693,
     "aspect": 2.2729,
-    "lqip": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAACwAwCdASoUAAkAPwl0sFCrpySisAgBcCEJaQAASqu/ztn4ZMXOAAD+pRrSLw3h1ljxMSmBsB7dw58AAAA="
+    "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAACQAwCdASoUAAkAPwlurk+rpiQiMAgBcCEJYwAAWo7YSUPricAAAP57sTvFTskGOERqtwxp1aXPnEpAUNa5AAAA"
   },
   "facade-canopy": {
     "slug": "facade-canopy",
@@ -27,7 +27,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 1744,
     "aspect": 2.2064,
-    "lqip": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAABwAwCdASoUAAkAPwl0s1CrpySisAgBcCEJaQAALE80iSoM1kQA/R2frVLvdjwiz2mo7VkN9d2EPCY1AAA="
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAADQAwCdASoUAAkAPwlyr1ArpyQisAgBcCEJZgCsABTuPQYLNXY+48AA+dmYwCGH2Qw3eLje1VHRp04p1RsQwmbprYgD2AAA"
   },
   "facade-street": {
     "slug": "facade-street",
@@ -35,7 +35,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 1795,
     "aspect": 2.1437,
-    "lqip": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAABQAwCdASoUAAkAPwl0sFCrpySisAgBcCEJaQAAK2mNqUx8EADf59l8MudPmtfAjz1XI3V4XurGPEId2gAAAA=="
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACwAwCdASoUAAkAPwlur0+rpiQiMAgBcCEJYgC7ABE7H784c6qAAADf59lOGBIfVYk5YrnOw1O+Yhr6CiyncCpGNwAAAA=="
   },
   "facade-side": {
     "slug": "facade-side",
@@ -43,7 +43,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 1795,
     "aspect": 2.1437,
-    "lqip": "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAABwAwCdASoUAAkAPwlwr1ArpqQisAgBcCEJaQAATt3Xu7hAaAAA/u7evzaSD7ayscIz/+fiDgkAAA=="
+    "lqip": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAACwAwCdASoUAAkAPwlwr1ArpqQisAgBcCEJZQC/OB06ScR9ISCkAAD+5CK2AYZJGYBXVorx/PMIpUVw6vbgAA=="
   },
   "sky-cutout": {
     "slug": "sky-cutout",
@@ -51,7 +51,7 @@ export const IMAGES = {
     "width": 3926,
     "height": 5889,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAADwBACdASoUAB4APvVeq0+qpKQiN/qoAVAeiWkAAO0mnPG9gDJlqqMuJtC/H90mPQAA/c6ilCXSVA43dsekRwyczbhZdU0G/YPcAAAA"
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAACwBACdASoUAB4APuliqE+zJaQiN+gCYB0JZQC2yDJSwRxN+7y96T/Gc/tFhQKAAPxRxpv46ar6NcG1314uCrpc1kusTBiUWTtENPkDPI/mAA=="
   },
   "parking-bay": {
     "slug": "parking-bay",
@@ -59,7 +59,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAABwAwCdASoUAA0APwlwsE+rpqSiMAgBcCEJaQAAKPDQAMITA5wA+bd502Xv9py99qQMyUCZk5J4/CnMeAAAAA=="
+    "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAACwAwCdASoUAA0APwlwsFArpiSisAgBcCEJZQCdMoAC6m7ks+krYACfQoV6O1fabKos2uJ7Hxp5ALG+3oReAAAA"
   },
   "lift-stone": {
     "slug": "lift-stone",
@@ -67,7 +67,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAADQAwCdASoUAA0APwlyr0+rpyQiMAgBcCEJaQAAVETBNlfO1rEkyAAA/F2dA45j3BkENnAZtICePvkE4AgKQSAmHcAAAA=="
+    "lqip": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAADwAwCdASoUAA0APwlwrk+rpqQiMAgBcCEJZACdMoAC6n+njl0Sv6egAPxcSQkg8hzx5zwQ5O4XnjWjhGRtsDgqgS7SQx6tdJkDolGg0cYh6R7AAAA="
   },
   "lift-wide": {
     "slug": "lift-wide",
@@ -75,7 +75,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAACwAwCdASoUAA0APwlys1CrpqSisAgBcCEJaQAAWRoRYdYkU9AuwAD9dxnZ3u9j/GOz39xYf+dGsb1685rogS6cHdXOGLkMAAA="
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADwAwCdASoUAA0APwlwsFArpiSisAgBcCEJQBOmUI4AAtPdTqw8UnfAAPQxT3CpMnz0VPzsIZhoOx6MBQyYlhapN/afweXKRFfYGh4DHUr2gAAA"
   },
   "stair-flight": {
     "slug": "stair-flight",
@@ -83,7 +83,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAACwAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaQAAW9YYGV1l0P2vAAD5Wiv+k2UxS/47KFGOwmjTu03H5tA+AAAA"
+    "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAACwAwCdASoUAA0APwlurk+rpiQiMAgBcCEJQBOmUABpuiD43fDQAAD5KK3R+c6d9War7PAmLh+E8yBCd21nGv4rNLSZRAmwGnJsgAAA"
   },
   "stair-palm": {
     "slug": "stair-palm",
@@ -91,7 +91,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAADQAwCdASoUAA0APwlysFArpySisAgBcCEJaQAARP2ZssKAc07OSggA/pfc2/z7hnzJrKnxJd0O+a+vPn8K/Iglq4AAAA=="
+    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADQAwCdASoUAA0APwlwr1ArpiQisAgBcCEJQBdgApXaXSPl9zQaVQAA/mYAFVyF+qZOYUVDRL1pitMtWzyDEM8bVIHq7ln8AAAAAA=="
   },
   "corridor-door": {
     "slug": "corridor-door",
@@ -99,7 +99,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoUAA0APwl0sFCrpySisAgBcCEJaQAAPSSZuuwnwqegAP3636NsmIH6XNy10bSK8R46ZeiyCykg7W+6neoAAA=="
+    "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAACwAwCdASoUAA0APwlwr1ArpiQisAgBcCEJQBUegzMsThFLhHk9AAD80rs5UdMrZNSwMkP4K14Q8UgvH94qbg5cVnoooBx+AAA="
   },
   "room-a-bed": {
     "slug": "room-a-bed",
@@ -107,7 +107,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADQAwCdASoUAA0APwlusE+rpiSiMAgBcCEJaQAAQvbSvVUvuEXyDkAA/rGAYOBkm1qGPEWCU19zaC6GOaydbhkdtjpVYpUAAAA="
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAACQAwCdASoUAA0APwlwr0+rpqQiMAgBcCEJYwCsABjWCYbxSli8AP6QeqcGbiSN+8kucJD3SsKM6O0QK5RLRNNHSHkQ0fRkHwT+aKcqwAA="
   },
   "room-a-wide": {
     "slug": "room-a-wide",
@@ -115,7 +115,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAABwAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaQAAMH1pE9WG2AAA9b65iB/8QiLbS1e+FIiVYOzW5Sdnm2QTHRfAAAA="
+    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADQAwCdASoUAA0APwlyr1ArpyQisAgBcCEJQBOmUI+PA7j7DSb7pyQAzRH5LDuynkaldwxFRBwg90DLnClKezwFyjxLZC7kwYkAAA=="
   },
   "room-a-window": {
     "slug": "room-a-window",
@@ -123,7 +123,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAACQAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaQAAUzLwerDSF2sIAP3PHmtfSDwjpMDHLY/mHtsNX9RsOAA="
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAADQAwCdASoUAA0APwlwr0+rpqQiMAgBcCEJYwCdMoABp0ZyjglQHYAA/c6yqwDFb2Q9AgbyR6d6eRT9cALIIimtCULBJ0AA"
   },
   "room-a-bath": {
     "slug": "room-a-bath",
@@ -131,7 +131,7 @@ export const IMAGES = {
     "width": 9378,
     "height": 7008,
     "aspect": 1.3382,
-    "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACwAwCdASoUAA8APwlysFArpySisAgBcCEJaQAAUTBP/p1h/EqwAAD+1dx81UcwwPlThvWnmGIlnquK7JMBqiQAAAA="
+    "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADwAwCdASoUAA8APwlyr1ArpyQisAgBcCEJZQCdAB4I5fWgPL2oUYnAAP7HFlLLJaMR2gVHdencTGvlAAURaxIAAAA="
   },
   "room-b-bed": {
     "slug": "room-b-bed",
@@ -139,7 +139,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAABQAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaQAATy2i+FUgAADh3d955z0s2ZKECMYGMZnn5fp0DHcWWPzphAAA"
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAA0APwlur0+rpiQiMAgBcCEJYwCdABK5aA35T1kCAADhcgPm9FWRhvJKOKJVFTXfRN9AKImW+82WwMB0wAAA"
   },
   "room-b-wide": {
     "slug": "room-b-wide",
@@ -147,7 +147,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAABwAwCdASoUAA0APwlyr0+rpyQiMAgBcCEJaQAAO2jx21itjAAA/JjaQJ7puslYBM9/SPqAIY8y6QeKOkdUJ1O+bIM9s+iRuAAAAA=="
+    "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAABwAwCdASoUAA0APwlwr0+rpqQiMAgBcCEJYwCdAAMWQIjNQgAA/E6wSDmIUewLW6bI2geJnZ/QZBnpjKaDw+MUFhVcze0TpNYcdAAA"
   },
   "room-b-light": {
     "slug": "room-b-light",
@@ -155,7 +155,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAABQAwCdASoUAA0APwlysVArpqSisAgBcCEJaQAAT5clWtnzQAD86PWJR3IQg9ITV4UcHuJdOy66JGRHYmD+IwKnnTFNAAAA"
+    "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAABwAwCdASoUAA0APwlwsFArpqSisAgBcCEJZQCdMoABi6LLQMAA/Oj0od9nNtsQJz8IqEZIxObB5yr7SAVS8eLciYbK6M3QAAA="
   },
   "room-twin": {
     "slug": "room-twin",
@@ -163,7 +163,7 @@ export const IMAGES = {
     "width": 4000,
     "height": 6000,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRmwAAABXRUJQVlA4IGAAAAAwBQCdASoUAB4APwlyrk+rpyQiMBgMAXAhCWkAACG8cz0q/9lSKnzwtAZye8rohPQCAAD+3G+NTLnHZdxh3rZPhy24r6orMEYaX7V+oPAruSPRovfrbO19epV51nQAAAA="
+    "lqip": "data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAADwBACdASoUAB4APwlssVIrpSSisBgIAXAhCWMAsOwN0F5ebv5Jgr6eZ4kbmVlTmkAA/qha72pZHdfqRzG5PzQMB2NKJ4PkiyCXEzAilBIZ5vWllOO6yUkYEqwsZmtnjtHh8YSD7wAAAA=="
   },
   "room-pillows": {
     "slug": "room-pillows",
@@ -171,7 +171,7 @@ export const IMAGES = {
     "width": 3989,
     "height": 5983,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAADwBACdASoUAB4APwlwrU+rpqQiMAgBcCEJaQAAQckMC1MVHPreKxjf+8SAeHoF+oAA/u9betlmJa4gmsZem1g1HI0Hf83LppOtiiVms+L2c1HgWfVW/SOYAIv0Jt+5BMbuVnaQw0AAAA=="
+    "lqip": "data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAACwBACdASoUAB4APwlysFGrpqSisBgIAXAhCUAToAX2ulnjkPj0Rwn6pK3anW0AAP7szH+dVUV6aE8HdwQFU0POZMHNIxQ1XKI0i3WvUe1X9pcUSbpKY8neoVv8xqslb/H8Q8/kFmGXRUJsL6FZ+AAA"
   },
   "room-headboard": {
     "slug": "room-headboard",
@@ -179,7 +179,7 @@ export const IMAGES = {
     "width": 4000,
     "height": 6000,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAADQBACdASoUAB4APv1qrU+rJiSiMAwBYB+JaQAASn4UjZr1q2fXkuDCoVUzID3qAAD8ofOJIQ7I3zyUVbyX9DEJe0KRKkFXPZfg+q57foZfZpAdUBelNmqFMSnKXNlpsVKJ2QAA"
+    "lqip": "data:image/webp;base64,UklGRoIAAABXRUJQVlA4IHYAAAAwBQCdASoUAB4APv1qqk+rJiOiMAwBYB+JQBWGbIBV+9txe6MQSAVT6QziDWoN3Vj9wAD8XdlQnMxf/ns7Ow8pSahKG1on4ru1FAwBhBjFKKG7RcAfo6AsW9GkZfkHBMCJYg9DSh8svLjX18NkKKTaP0zPCAAA"
   },
   "room-lounge": {
     "slug": "room-lounge",
@@ -187,7 +187,7 @@ export const IMAGES = {
     "width": 3932,
     "height": 5898,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRngAAABXRUJQVlA4IGwAAADQBACdASoUAB4APwl6sFCrqKSisBgIAXAhCWkAAI7Jl4+wJ7LtQJ9fwxhULw+EAAD+5+tKYEndG5TVIaRnPaNdLoJwz1j3joq0LVsqXfuBNjVBYoJU5pGGY7ZcDM3XdgGzdfpu/i4eRhGAAAA="
+    "lqip": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAADQBACdASoUAB4APwFuqE+rJqOiMAwBYCAJQBOgA2lN2dUHxYGZXh+6QfSD309cgAD+1duuhjjyhevrK3Wh6PkYwmO6iZ/OI6gjy7c5O3DxTQHpGCYa7s/QEiRwCL/6cAAsJjpWQWzUCNloMOidV+UWA8RLEIlrjAA="
   },
   "detail-number": {
     "slug": "detail-number",
@@ -195,7 +195,7 @@ export const IMAGES = {
     "width": 3996,
     "height": 5994,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAACwBACdASoUAB4APwl0tlMrpqUisBgIAXAhCWkAAI91m3Q1AA8d3S8RGtezx0AgAP30CJihgpRQm1eQyAHJKdl/k+NIMmM/Ny6kO3w+nCAAAA=="
+    "lqip": "data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAABwBACdASoUAB4APv1srk+rJiSiMAwBYB+JaAC7M4CC/LmO0UswMLUQbJn+AAD8XIVxdUFLFKDX+vWUJqq/5HNEGLYcoCqRmuL2pDACkb2owGuAAmp0VaFIMTJjBv5GQUq0b8eltbIqrRw7SfphQAAA"
   },
   "detail-switch": {
     "slug": "detail-switch",
@@ -203,7 +203,7 @@ export const IMAGES = {
     "width": 3979,
     "height": 5969,
     "aspect": 0.6666,
-    "lqip": "data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAACwBACdASoUAB4APwl6sVOrp6QiqAqpcCEJaQAAHPqT48HC7MGvo23olN2ldi1gAP7nJXoW7hiFOELVKjIL5qWV5qQe4FBWsx24wy+s0Znm5Ihg8D/lJc9zy2Y9kukUt5tGSZTntxiAAA=="
+    "lqip": "data:image/webp;base64,UklGRoIAAABXRUJQVlA4IHYAAABwBACdASoUAB4APwl+t1UrqCUjKAgBcCEJQBWAAPBaGHMAaXpjfRz2RBfmAAD+02FZxwobCXJlQF2dY5e+TvBVyJyb3KSVCY7JrHyMavn4OveDFW1TdyQ6b+xaBmTevW9Zi5Y7fnnusj3EM72atuw4b9I43AAA"
   },
   "detail-latch": {
     "slug": "detail-latch",
@@ -211,7 +211,7 @@ export const IMAGES = {
     "width": 3867,
     "height": 5800,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRmwAAABXRUJQVlA4IGAAAABwBACdASoUAB4APwlwsU+rpqSiMAgBcCEJaQAAUz7KP+6MOJY3OmTk2sj5CAD+xr/Jr5TSQ7Lwq1Y0vLXQ7Q6M2RTM/edujZQr1pdRgNL3GDoOQgYqHH8i3LGMx0QgAAA="
+    "lqip": "data:image/webp;base64,UklGRnIAAABXRUJQVlA4IGYAAACwBACdASoUAB4APwlyr0+rpyQiMAgBcCEJYwC2yB4Y22PlI0XK8PdeKef2CtwAAP6vnzPkmppeVXR5bVyOHYVdD3CuHBeucHsjcQVBqBQh+BskJxJu3ztrrahx8EyBZ6V3UcefsAA="
   },
   "detail-lock": {
     "slug": "detail-lock",
@@ -219,7 +219,7 @@ export const IMAGES = {
     "width": 3940,
     "height": 5910,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAACwBACdASoUAB4APwl0s1IrpqSisBgIAXAhCWkAAC5Gcep+CQ9Jh6lEwJES3GeAAP65r0A5NM+bUlkeau4NfwhjJFB2OTlYPULLQydSB0AAAA=="
+    "lqip": "data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAAAwBACdASoUAB4APwl8tVUrp6SjKAgBcCEJQAAFyB94evc/M5dCtjT4dAAA/p2GTPbIXRjiav/69UtcNf/O1bMA92MurzHLGYfN6plkAjjqSBUtmxZny8qtCJ8V6QAA"
   },
   "detail-books": {
     "slug": "detail-books",
@@ -227,7 +227,7 @@ export const IMAGES = {
     "width": 3984,
     "height": 5976,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAACwBACdASoUAB4APwlus1KrpaSisBgIAXAhCWkAAI94GvQ7Mg5htsfkuAiRdDwAAP7u2WJevT5YfTvBm4rcJhjsUz1O8UgXvxTrQi2jVTIil/QOQCC3ZpJazyjHwDBOOuYAAA=="
+    "lqip": "data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAABwBACdASoUAB4APv1ork+rJiSiMAwBYB+JQBadBDwwJSGSefK/ZLCgiSVD0AD+y4oYZj8fqdcKrSNXt/PhAnWwUeogdseaCh3TK0/hSETyjDpkyOyoX+PXT9yBMskv+oZWwbxA5WDlQAAA"
   },
   "detail-curtain": {
     "slug": "detail-curtain",
@@ -235,7 +235,7 @@ export const IMAGES = {
     "width": 3945,
     "height": 5918,
     "aspect": 0.6666,
-    "lqip": "data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAADQBACdASoUAB4APwlyr0+rpyQiMAgBcCEJaQAAO0DKlLOjk6VOHUtK/1mlpPv1AAD+r5qNdkN6TMjEs6LUh7zasG7aoQrlGOg/FEmD/os9kIcnj6KByWfTbC0yTBEafLOxT5k/zVQk2AAA"
+    "lqip": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAABQBQCdASoUAB4APwl0slIrpqSisBgIAXAhCWMAnQANrIGMfDLZjgYqmSg2wSyq6Y4gcAAA/o0rGdrBQjwSV/PtCbKxg35pBGGfrI1iZQqLQtqB0bfruDHVMzXfSaV1DUrlZlTE+5kvu8krzFKjA7t/R93Wp7CAAAA="
   },
   "reception-desk": {
     "slug": "reception-desk",
@@ -243,7 +243,7 @@ export const IMAGES = {
     "width": 2309,
     "height": 1590,
     "aspect": 1.4522,
-    "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAACQAwCdASoUAA4ALs2EwmEjq6uri4DMS0gABENKR0tJiK6cWlUAAP33fGly6gQOq2DUKtNAbLpHj24P5ufBogAA"
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAA4APwlws0+rpqUiMAgBcCEJZQAAUVh1O8dTTIFOUAD8xo8CPNcU4+96GmDdfaf7UZgUNR56WxouvTG1VUAA"
   },
   "reception-wide": {
     "slug": "reception-wide",
@@ -251,7 +251,7 @@ export const IMAGES = {
     "width": 1770,
     "height": 2565,
     "aspect": 0.6901,
-    "lqip": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAADwBACdASoUAB0APwl0s1IrpqSisBgIAXAhCWkAACBarm0LeupiJqhr+V8izyQyyGQA/uno46kyUEofejZloUiOkfVT6nZ/gXx6NYE4+b+w3pMe1VJ8nt1gNWUAAA=="
+    "lqip": "data:image/webp;base64,UklGRnIAAABXRUJQVlA4IGYAAACwBACdASoUAB0APwlsrlArpaQisBgMAXAhCWIAAIFUN8FOUwmmW5Gxs++RLuXwAP7diDAufItnvx4srnxgKb/MnjmRwDHq2tPMA96ZE0Ng5J1DwCA0Ik85OyN+oOMJ7e7NK7XVAAA="
   },
   "dining-room": {
     "slug": "dining-room",
@@ -259,7 +259,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAADwAwCdASoUAA0APwlusE+rpiSiMAgBcCEJaQAAW+hM6Hr0TNNkHZAAAP7DmEICnSLoISzNeA7QBuQ3VtrakWixIazgAAAA"
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAABQBACdASoUAA0APwlur0+rpiQiMAgBcCEJZACdMoRwACmn8/L4kaV7iHV4AP6u+kydQNOhxOzCbDWSdoPzCWNuM+2fTmx2PCEeQadcQr6PKJwA"
   },
   "dining-wide": {
     "slug": "dining-wide",
@@ -267,7 +267,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAA0APwlys1CrpqSisAgBcCEJaQAAW7Or41SQO6/5mAD+w5fs5K0SVS6XKj9XnkWhNjIDZbJbgqbwNpBoAAAA"
+    "lqip": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAAAQBACdASoUAA0APwlurk+rpiQiMAgBcCEJZACdMoAC+az5ob3yWmkeYAD+r5b/hpSgstU3Hs51LvtFSwLgTeLPDNOV0a7O6PB/M1k7nSFtI664AAA="
   },
   "dining-counter": {
     "slug": "dining-counter",
@@ -275,7 +275,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaQAAW+uCshd6E9GAAP7UHF6ZH1yBZYwmxte/GX0Q1Qu9PU0P5+i+f0AAAA=="
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADwAwCdASoUAA0APwlusFArpiSisAgBcCEJZACxC8ADApzT55EyZtYIAP7ErFg/+jtlvAgUta7Fw64W1yAUE1qDYwifa8HdhzVvXrWbQgOAAA=="
   },
   "conference-room": {
     "slug": "conference-room",
@@ -283,7 +283,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAABwAwCdASoUAA0APwlur0+rpiQiMAgBcCEJaQAAWlmQ9BhclAAA/q9JEmuZrXsn8O5wRZO+XjH4cwyyMQNoTpQAAAA="
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADQAwCdASoUAA0APwlur0+rpiQiMAgBcCEJQBYja5ApQn7voLvHNwAA/ozrhEspR0ebCRlcuFHz6oa7XrAHfvJ2rwkxTEeyvtUHAX9uVcFOAAAA"
   },
   "conference-wide": {
     "slug": "conference-wide",
@@ -291,7 +291,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACQAwCdASoUAA0APwlwr0+rpqQiMAgBcCEJaQAAQ9VJpNaTCICAAP6MZjCZvOvV6OBnLY0JE2aJawSz32zjS0YAAAA="
+    "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAAAQBACdASoUAA0APwlwr1ArpqQisAgBcCEJYgCdMoACtA1LutZ1gjGgAAD+Uwxs7eSSQfDDgt/CpvRSo1uiP+Leqm/1jGmX8+TEAAAA"
   },
   "common-area": {
     "slug": "common-area",
@@ -299,7 +299,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAACwAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaQAAUq1CTvmla0y2uAD+05anDyIo3YtmQAqewuCiQP8wPASQAA=="
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAAAQBACdASoUAA0APwlwsFArpiSisAgBcCEJQBOmUABshchnZviFQbjpAAD+rqfg/lxlvVsTFpkdST8OaoVHLWMFREbgAA=="
   },
   "common-wide": {
     "slug": "common-wide",
@@ -307,7 +307,7 @@ export const IMAGES = {
     "width": 3848,
     "height": 2565,
     "aspect": 1.5002,
-    "lqip": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAACQAwCdASoUAA0APwlys1CrpqSisAgBcCEJaQAAUkhQNgXE4e+AAN2g9wFl7GV3vsBDY5C7SAy9AItBWsAAAA=="
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADwAwCdASoUAA0APwlys1CrpqSisAgBcCEJYgCdMoKCAAoRCyDoEPoAAPex3gsVQuZcuJ9pQzGME9D5KimpgbIXfJegZmZB/WqdRWnYyI2LgAAA"
   },
   "breakfast-plate": {
     "slug": "breakfast-plate",
@@ -315,34 +315,34 @@ export const IMAGES = {
     "width": 4000,
     "height": 6000,
     "aspect": 0.6667,
-    "lqip": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAACQBQCdASoUAB4APwlws1KrpaSisBgIAXAhCWkAAI6OA457jIM4QqjmtxEFQrkXaKjx3w2YAAD+cD1SmqyC3FzRyY0WNNg9xuJyIZnVk+XyceXmkuxHPzjgQ1Z19wTBMcHwySVQ4wLhge9f50p08DF4gAA="
+    "lqip": "data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAACwBACdASoUAB4APv1urE+rJqSiMAwBYB+JQBUeglXiTo3lTT4d6EdhFzwyXxiAAP0SYGpxoS+ogpL1PxIkNBzs/ezJlsA7XukrwjkFg59wrXGqpU69LVpoqSthAFPtp4FkV3ybsh9F4K1K4vsNygIN1UAAAA=="
   }
 } as const satisfies Record<string, Rendition>;
 
 export const VIDEOS = {
   "reel-morning": {
     "slug": "reel-morning",
-    "alt": "Curtains drawn open onto the morning",
+    "alt": "Housekeeping making up a room in the morning",
     "width": 608,
     "height": 1080,
     "aspect": 0.563,
-    "lqip": "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAAAwAgCdASoQABwAA8BmJaQAApxQh3Mg9vFkQAD+ZAuaXairOSs1oTrc/e9Afyr/4BsTjLU5tgAAAA=="
+    "lqip": "data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAACwAwCdASoQABwAPwlur0+rpiQiMAgBcCEJZACdABEGllhVL+QHsAD+UmkWdst5bcHz8vJixWSzOoaXW5T+qqyH7r/jrR414iYxA/R9zzc/aOuCMSRY/h30gAA="
   },
   "reel-tea": {
     "slug": "reel-tea",
-    "alt": "Tea made in the room",
+    "alt": "Working at the desk, and tea made in the room",
     "width": 608,
     "height": 1080,
     "aspect": 0.563,
-    "lqip": "data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAADwAwCdASoQABwAPwl0s1CrpySisAgBcCEJaQAANy1+fLJP8xa4tfoAAK6DBbyHz3/+N6EVSqGmNXztzG48ee656gVL1Y4P3V5o8s5Iv8VpWcy8AoYTz0EAAAA="
+    "lqip": "data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAACQBACdASoQABwAPwlwsVArpiSisAgBcCEJaACdMoR3N5LbgAJpcrSEMRoJuAAA3IfFP0fVG2pbtq5rHYf02IE/F9ikIsjs+3Nj7Eh6rehi3J95ftZmV6QA"
   },
   "reel-common": {
     "slug": "reel-common",
-    "alt": "Guests around the table in the common area",
+    "alt": "Guests around the long table in the common room",
     "width": 608,
     "height": 1080,
     "aspect": 0.563,
-    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAACwAwCdASoQABwAPwlMvVmroqekmAFwIQlpAABLMtkOTD5gjS1oAAD9QlycsuFq90D+JEiWLzRQVBvqgGz845CI+uRsc/BTJUlyrsQAAAA="
+    "lqip": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAADwAwCdASoQABwAPwl+s1GrqSSisAgBcCEJYwC/OBuEF50MLGEKL3jAAP5aC78bOxgMy/aqtlogT0z+MFq4RqdSzgMBFNQXAp3aTnJk9btiA6Q/sZGqPiQXJWAAAA=="
   }
 } as const satisfies Record<string, Rendition>;
 

@@ -23,9 +23,9 @@ const VERT = /* glsl */ `
 `;
 
 /**
- * Two graded stills dissolved through value noise, with a very shallow lens
- * pull under the cursor. No colour work happens here — the photographs were
- * graded at build time, so the shader only moves things.
+ * Two stills dissolved through value noise, with a very shallow lens pull
+ * under the cursor. No colour work happens here: the photographs ship as
+ * shot, and the shader only moves them.
  */
 const FRAG = /* glsl */ `
   precision highp float;
