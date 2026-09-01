@@ -131,8 +131,13 @@ export default function Preloader() {
         <Emblem animated variant="mark" className="w-[min(36vw,13rem)] text-chalk" />
 
         <div className="preloader-word split-mask mt-7 md:mt-9">
-          {/* The trailing letter-space needs room, or tracking clips the R. */}
-          <span className="type-display block pr-[0.42em] text-[clamp(1.75rem,5vw,3rem)] leading-[1.15] tracking-[0.42em] text-chalk">
+          {/*
+            Letter-spacing is applied after the final R too, so the box carries
+            one trailing space the glyphs do not. Centring the box therefore
+            pushes the visible word half a space left of the seal above it.
+            An equal indent on the left restores true optical centring.
+          */}
+          <span className="type-display block pl-[0.42em] text-[clamp(1.75rem,5vw,3rem)] leading-[1.15] tracking-[0.42em] text-chalk">
             VAPR
           </span>
         </div>
