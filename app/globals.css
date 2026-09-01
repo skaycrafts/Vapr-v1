@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════════════════════════════
+   VAPR — design tokens
+   A drenched-black surface. White carries the type. Grey is a minority
+   voice: hairlines, captions, disabled states. Never body copy.
+   Neutrals hold a 0.002–0.004 chroma toward 250° so large black fields
+   read as air rather than as a dead screen. It is below the just-
+   noticeable difference — the palette still reads as pure monochrome.
+   ════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* ── surface ──────────────────────────────────────────────────── */
+  --color-void: oklch(0.09 0 0);
+  --color-pitch: oklch(0.128 0.002 250);
+  --color-carbon: oklch(0.175 0.003 250);
+  --color-graphite: oklch(0.265 0.004 250);
+
+  /* ── grey (sparing) ───────────────────────────────────────────── */
+  --color-ash: oklch(0.44 0.004 250);      /* hairlines, rules — never text */
+  --color-smoke: oklch(0.635 0.004 250);   /* captions ≥14px — 6.3:1 on void */
+
+  /* ── ink ──────────────────────────────────────────────────────── */
+  --color-mist: oklch(0.80 0.003 250);     /* body — 10.3:1 on void */
+  --color-bone: oklch(0.93 0.002 250);     /* emphasis — 15.4:1 */
+  --color-chalk: oklch(0.985 0 0);         /* headings, pure white */
+
+  /* ── type ─────────────────────────────────────────────────────── */
+  --font-display: var(--font-bodoni), "Didot", "Bodoni MT", Georgia, serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid scale, 1.28 ratio. Display ceiling stays at 96px — the page
+     should be composed, not shouting. */
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: clamp(0.9375rem, 0.9rem + 0.18vw, 1.0625rem);
+  --text-lg: clamp(1.0625rem, 0.99rem + 0.34vw, 1.3125rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.7vw, 1.75rem);
+  --text-2xl: clamp(1.5rem, 1.24rem + 1.2vw, 2.375rem);
+  --text-3xl: clamp(1.875rem, 1.4rem + 2.1vw, 3.25rem);
+  --text-4xl: clamp(2.375rem, 1.6rem + 3.4vw, 4.5rem);
+  --text-5xl: clamp(2.875rem, 1.6rem + 5.6vw, 6rem);
+
+  /* ── motion ───────────────────────────────────────────────────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+
+  /* ── depth ────────────────────────────────────────────────────── */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-nav: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-cursor: 90;
+  --z-preloader: 100;
+}
+
+/* Semantic aliases — read as roles at the call site. */
+@theme {
+  --color-hairline: color-mix(in oklab, var(--color-chalk) 14%, transparent);
+  --color-hairline-strong: color-mix(in oklab, var(--color-chalk) 26%, transparent);
+  --color-glass: color-mix(in oklab, var(--color-chalk) 6%, transparent);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   base
+   ════════════════════════════════════════════════════════════════════ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: auto; /* Lenis owns scrolling */
+    background-color: var(--color-void);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-void);
+    color: var(--color-mist);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: 400;
+    line-height: 1.6;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  /* Lenis is running: the wrapper must not clip the sticky/pinned sections. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    color: var(--color-chalk);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  img, video, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  ::selection {
+    background: var(--color-chalk);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-chalk);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+
+  /* The scroll container is dark; make the native bar match rather than
+     hiding it — a hidden scrollbar removes an affordance. */
+  ::-webkit-scrollbar { width: 9px; }
+  ::-webkit-scrollbar-track { background: var(--color-void); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-graphite);
+    border: 3px solid var(--color-void);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-ash); }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   utilities
+   ════════════════════════════════════════════════════════════════════ */
+@utility gutter {
+  padding-inline: clamp(1.25rem, 0.7rem + 2.6vw, 4.5rem);
+}
+
+/* Wide industrial grotesque — Archivo's width axis is the contrast
+   partner to the Bodoni wordmark, standing in for a second family. */
+@utility type-wide {
+  font-family: var(--font-sans);
+  font-variation-settings: "wdth" 118;
+  letter-spacing: -0.015em;
+}
+
+@utility type-label {
+  font-family: var(--font-sans);
+  font-variation-settings: "wdth" 100;
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-smoke);
+}
+
+@utility type-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Hides the element from sighted users while leaving it in the a11y tree. */
+@utility sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@utility hairline-t {
+  border-top: 1px solid var(--color-hairline);
+}
+@utility hairline-b {
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+/* Paired utilities for the follow-the-cursor plate in Spaces.
+   The floating image only exists where a pointer can hover AND motion is
+   welcome; everywhere else — touch, keyboard-only, reduced motion — the same
+   photograph renders inline instead. Splitting on capability rather than on
+   viewport width means a hover-capable tablet and a reduced-motion desktop
+   both get something that works. */
+@utility plate-follow {
+  display: none;
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    display: block;
+  }
+}
+
+@utility plate-inline {
+  display: block;
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    display: none;
+  }
+}
+
+/* Per-glyph and per-line reveal targets produced by SplitType. */
+@utility split-mask {
+  display: block;
+  overflow: hidden;
+  clip-path: inset(-15% -2% -15% -2%);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   reduced motion — every animated surface has a still counterpart
+   ════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-motion] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}
