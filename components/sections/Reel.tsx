@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { video, VIDEOS, type VideoSlug } from '@/lib/media';
-import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { EASE, SCRUB } from '@/motion/config';
 
 const CLIPS: { slug: VideoSlug; caption: string }[] = [
   { slug: 'reel-morning', caption: 'Before you arrive' },
@@ -44,27 +46,29 @@ export default function Reel() {
     return () => observer.disconnect();
   }, []);
 
-  useIsoLayoutEffect(() => {
+  useMotionEffect(root, ({ q }) => {
     const el = root.current;
     if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>('.reel-column').forEach((column, i) => {
-        gsap.fromTo(
-          column,
-          { yPercent: i === 1 ? 10 : 0 },
-          {
-            yPercent: i === 1 ? -10 : -4,
-            ease: 'none',
-            scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 1 },
-          }
-        );
-      });
-    }, el);
-
-    return () => ctx.revert();
-  }, []);
+    // The middle column travels further, and the other way, so the three
+    // clips read as separate planes rather than one moving block.
+    q('.reel-column').forEach((column, i) => {
+      gsap.fromTo(
+        column,
+        { yPercent: i === 1 ? 10 : 0 },
+        {
+          yPercent: i === 1 ? -10 : -4,
+          ease: EASE.none,
+          scrollTrigger: {
+            trigger: el,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: SCRUB.loose,
+          },
+        }
+      );
+    });
+  });
 
   return (
     <section

@@ -8,26 +8,49 @@ import Emblem from '@/components/brand/Emblem';
 import Glass from '@/components/ui/Glass';
 import { CTA, NAV, needsVerification } from '@/lib/content';
 import { cn } from '@/lib/utils';
+import { gsap } from '@/lib/gsap';
+import { useCapability } from '@/motion/capability';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { useScroll } from '@/motion/ScrollProvider';
+import { ENTRY, useEntry } from '@/motion/entry';
+import { CINEMA, EASE, MICRO, STAGGER } from '@/motion/config';
 
 /**
  * Deliberately not a full-width bar. The seal anchors the top-left corner and
  * the links ride in a glass pill on the right, so the photography runs edge to
  * edge underneath instead of being cropped by a header.
  *
- * The bar retracts on the way down and returns on the way up — the reading
- * direction gets the full viewport, and the moment you look for navigation it
- * is already there.
+ * Two behaviours, and they are separate on purpose (§18):
+ *
+ *  Retract — the bar leaves on the way down and returns on the way up. The
+ *            reading direction gets the full viewport, and the moment you look
+ *            for navigation it is already there.
+ *  Morph   — over the hero the bar is pure overlay, because the photograph
+ *            behind it is doing the work. Past the hero a very quiet contrast
+ *            layer fades in behind it, so the links stay legible against
+ *            whatever section happens to be underneath without ever becoming
+ *            an opaque header.
  */
 export default function Nav() {
+  const root = useRef<HTMLElement>(null);
+  const overlay = useRef<HTMLDivElement>(null);
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { animate } = useCapability();
+  const { started } = useEntry();
+  const { scrollTo, stop, start } = useScroll();
+
   const lastY = useRef(0);
-  // Suspends the retract-on-scroll rule: a scroll the navigation started
-  // itself should not make the navigation disappear.
+  // Suspends the retract rule: a scroll the navigation started itself should
+  // not make the navigation disappear.
   const holding = useRef(false);
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /**
+   * Retract. Reads the native scroll position, which Lenis keeps authoritative
+   * — it smooths the scroll, it does not virtualise it.
+   */
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -45,23 +68,76 @@ export default function Nav() {
     };
   }, []);
 
-  // The overlay is a modal surface: lock the page and let Escape close it.
+  /** Entrance — the bar settles in on the entry clock, not before. */
+  useMotionEffect(
+    root,
+    () => {
+      if (!started) return;
+      gsap.from(root.current, {
+        opacity: 0,
+        y: -10,
+        duration: CINEMA.fast,
+        ease: EASE.out,
+        delay: Math.max(0, ENTRY.nav - ENTRY.lift),
+      });
+    },
+    [started]
+  );
+
+  /**
+   * Morph. A single scrub across the first viewport rather than a class
+   * toggled at a threshold, so the layer arrives with the scroll instead of
+   * snapping on at one pixel.
+   */
+  useMotionEffect(root, () => {
+    gsap.fromTo(
+      '.nav-backdrop',
+      { opacity: 0 },
+      {
+        opacity: 1,
+        ease: EASE.none,
+        scrollTrigger: {
+          trigger: document.documentElement,
+          start: '60vh top',
+          end: '110vh top',
+          scrub: true,
+        },
+      }
+    );
+  });
+
+  /** The overlay is a modal surface: lock the page and let Escape close it. */
   useEffect(() => {
     if (!open) return;
-    const lenis = window.__lenis;
-    lenis?.stop();
+    stop();
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
-      lenis?.start();
+      start();
     };
-  }, [open]);
+  }, [open, stop, start]);
+
+  /** Menu items arrive one after another rather than all at once (§25). */
+  useMotionEffect(
+    overlay,
+    ({ q }) => {
+      if (!open) return;
+      const items = q('.menu-item');
+      if (!items.length) return;
+
+      gsap
+        .timeline({ defaults: { ease: EASE.outLong } })
+        .from(overlay.current, { opacity: 0, duration: MICRO.base, ease: EASE.outSoft })
+        .from(items, { yPercent: 105, duration: CINEMA.fast, stagger: STAGGER.lines }, 0.05);
+    },
+    [open]
+  );
 
   /**
    * Links are real hrefs, so a route change is Next's job. Only a hash that
-   * points at the page we are already on is intercepted, and then only to
-   * hand it to Lenis for the glide.
+   * points at the page we are already on is intercepted, and then only to hand
+   * it to the scroll provider for the glide.
    */
   const handle = (href: string) => (event: React.MouseEvent) => {
     const [path, hash] = href.split('#');
@@ -86,15 +162,7 @@ export default function Nav() {
       holding.current = false;
     }, 1700);
 
-    // The overlay stops Lenis while it is open, and a stopped instance ignores
-    // scrollTo. Restart it here rather than waiting for the close effect.
-    const lenis = window.__lenis;
-    if (lenis) {
-      lenis.start();
-      lenis.scrollTo(target, { offset: 0, duration: 1.4 });
-    } else {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollTo(target);
   };
 
   return (
@@ -107,60 +175,77 @@ export default function Nav() {
       </a>
 
       <header
+        ref={root}
         className={cn(
-          'gutter fixed inset-x-0 top-0 z-[var(--z-nav)] flex items-center justify-between py-5 transition-transform duration-500 ease-[var(--ease-out-quart)] md:py-7',
+          'fixed inset-x-0 top-0 z-[var(--z-nav)] transition-transform duration-500 ease-[var(--ease-out-quart)]',
           hidden && !open && '-translate-y-[130%]'
         )}
       >
-        <Link href="/" data-cursor="Home" className="group flex items-center gap-3 text-chalk">
-          <Emblem
-            variant="simple"
-            title="VAPR"
-            className="w-8 transition-transform duration-[1.6s] ease-[var(--ease-out-quart)] group-hover:rotate-90 md:w-9"
-          />
-          <span className="type-display text-lg tracking-[0.32em] md:text-xl">VAPR</span>
-        </Link>
+        {/* The contrast layer. A gradient rather than a filled bar: it gives
+            the type something to sit on without drawing an edge across the
+            photography. */}
+        <div
+          aria-hidden
+          className="nav-backdrop pointer-events-none absolute inset-x-0 top-0 h-[130%] opacity-0"
+          style={{
+            background:
+              'linear-gradient(to bottom, color-mix(in oklab, var(--color-void) 72%, transparent), transparent)',
+          }}
+        />
 
-        <nav aria-label="Primary" className="hidden md:block">
-          <Glass className="flex items-center gap-1 rounded-full px-2 py-2" radius={999}>
-            {NAV.map((item) => (
+        <div className="gutter relative flex items-center justify-between py-5 md:py-7">
+          <Link href="/" data-cursor="Home" className="group flex items-center gap-3 text-chalk">
+            <Emblem
+              variant="simple"
+              title="VAPR"
+              className="w-8 transition-transform duration-[1.6s] ease-[var(--ease-out-quart)] group-hover:rotate-90 md:w-9"
+            />
+            <span className="type-display text-lg tracking-[0.32em] md:text-xl">VAPR</span>
+          </Link>
+
+          <nav aria-label="Primary" className="hidden md:block">
+            <Glass className="flex items-center gap-1 rounded-full px-2 py-2" radius={999}>
+              {NAV.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={handle(item.href)}
+                  aria-current={pathname === item.href ? 'page' : undefined}
+                  className={cn(
+                    'rounded-full px-4 py-2 text-sm transition-colors duration-300 hover:text-chalk focus-visible:text-chalk',
+                    pathname === item.href ? 'text-chalk' : 'text-mist'
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
               <Link
-                key={item.href}
-                href={item.href}
-                onClick={handle(item.href)}
-                aria-current={pathname === item.href ? 'page' : undefined}
-                className={cn(
-                  'rounded-full px-4 py-2 text-sm transition-colors duration-300 hover:text-chalk focus-visible:text-chalk',
-                  pathname === item.href ? 'text-chalk' : 'text-mist'
-                )}
+                href={CTA.href}
+                onClick={handle(CTA.href)}
+                data-cursor="Open"
+                className="ml-1 rounded-full bg-chalk px-5 py-2 text-sm font-medium text-void transition-[background-color,transform] duration-300 hover:bg-bone active:scale-[0.97]"
               >
-                {item.label}
+                {CTA.label}
               </Link>
-            ))}
-            <Link
-              href={CTA.href}
-              onClick={handle(CTA.href)}
-              className="ml-1 rounded-full bg-chalk px-5 py-2 text-sm font-medium text-void transition-[background-color,transform] duration-300 hover:bg-bone active:scale-[0.97]"
-            >
-              {CTA.label}
-            </Link>
-          </Glass>
-        </nav>
+            </Glass>
+          </nav>
 
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-expanded={open}
-          aria-controls="menu-overlay"
-          className="flex items-center gap-2 text-chalk md:hidden"
-        >
-          <span className="type-label text-chalk">Menu</span>
-          <Menu size={20} strokeWidth={1.25} aria-hidden />
-        </button>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-expanded={open}
+            aria-controls="menu-overlay"
+            className="flex items-center gap-2 text-chalk md:hidden"
+          >
+            <span className="type-label text-chalk">Menu</span>
+            <Menu size={20} strokeWidth={1.25} aria-hidden />
+          </button>
+        </div>
       </header>
 
       {/* Mobile overlay */}
       <div
+        ref={overlay}
         id="menu-overlay"
         hidden={!open}
         className="fixed inset-0 z-[var(--z-modal)] bg-void/97 md:hidden"
@@ -174,23 +259,17 @@ export default function Nav() {
           </div>
 
           <nav aria-label="Primary, mobile" className="flex flex-1 flex-col justify-center gap-1">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={handle(item.href)}
-                className="type-display hairline-b py-5 text-4xl text-chalk"
-              >
-                {item.label}
-              </Link>
+            {[...NAV, CTA].map((item) => (
+              <span key={item.href} className="split-mask hairline-b">
+                <Link
+                  href={item.href}
+                  onClick={handle(item.href)}
+                  className="menu-item type-display block py-5 text-4xl text-chalk"
+                >
+                  {'label' in item ? item.label : ''}
+                </Link>
+              </span>
             ))}
-            <Link
-              href={CTA.href}
-              onClick={handle(CTA.href)}
-              className="type-display py-5 text-4xl text-chalk"
-            >
-              {CTA.label}
-            </Link>
           </nav>
 
           <div className="flex items-center justify-between py-8">
@@ -201,6 +280,12 @@ export default function Nav() {
           </div>
         </div>
       </div>
+
+      {/* Without motion the overlay must still be usable the instant it opens;
+          the timeline above is what would otherwise reveal the items. */}
+      {!animate && open ? (
+        <style>{`.menu-item { transform: none !important; }`}</style>
+      ) : null}
     </>
   );
 }

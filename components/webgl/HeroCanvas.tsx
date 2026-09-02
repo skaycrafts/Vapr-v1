@@ -8,7 +8,7 @@
  */
 /* eslint-disable react-hooks/immutability */
 
-import { Component, Suspense, useEffect, useMemo, useRef } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -249,9 +249,39 @@ export default function HeroCanvas({
   intro: boolean;
   onFail: () => void;
 }) {
+  const host = useRef<HTMLDivElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
+
+  /**
+   * The hero is one section of a long page, but R3F's default frame loop
+   * paints every frame for the life of the component — so the shader went on
+   * burning GPU while the visitor was six sections further down, for a canvas
+   * nobody could see. Parking the loop when it leaves the viewport is the
+   * single largest performance win available here, and it is invisible: by
+   * the time the hero scrolls back into view the loop has already resumed.
+   */
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      // A margin, so the loop is already running by the time the frame is
+      // genuinely on screen rather than starting from a stalled clock.
+      { rootMargin: '15% 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <ShaderBoundary onFail={onFail}>
+    <div ref={host} className="absolute inset-0">
+      <ShaderBoundary onFail={onFail}>
       <Canvas
+        // Parked when off screen. `demand` rather than `never` so a resize or
+        // a texture settling still gets one frame to repaint with.
+        frameloop={onScreen ? 'always' : 'demand'}
         // A range: R3F reads the device ratio and clamps it, capping the
         // shader's fill cost on high-density displays.
         dpr={[1, 1.75]}
@@ -276,6 +306,7 @@ export default function HeroCanvas({
           <Plane sources={sources} intro={intro} />
         </Suspense>
       </Canvas>
-    </ShaderBoundary>
+      </ShaderBoundary>
+    </div>
   );
 }

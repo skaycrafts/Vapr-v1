@@ -6,7 +6,9 @@ import { ArrowUpRight } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import Emblem from '@/components/brand/Emblem';
 import { LOCATIONS, STAY } from '@/lib/content';
-import { gsap, ScrollTrigger, useIsoLayoutEffect } from '@/lib/gsap';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
+import { EASE, SCRUB } from '@/motion/config';
 import { cn } from '@/lib/utils';
 import type { ImageSlug } from '@/lib/media';
 
@@ -23,77 +25,71 @@ export default function Rooms() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
 
-  useIsoLayoutEffect(() => {
+  useMotionEffect(root, () => {
     const el = root.current;
     const rail = track.current;
     if (!el || !rail) return;
 
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
+    // Reduced motion is already handled by the hook, so this only has to
+    // answer the width question: a thumb gets the panels stacked (§29).
+    const mm = gsap.matchMedia();
 
-      mm.add(
-        {
-          horizontal: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
-          stacked: '(max-width: 767px), (prefers-reduced-motion: reduce)',
+    mm.add({ horizontal: '(min-width: 768px)' }, (context) => {
+      const { horizontal } = context.conditions as { horizontal: boolean };
+      if (!horizontal) return;
+
+      const distance = () => rail.scrollWidth - window.innerWidth;
+
+      const tween = gsap.to(rail, {
+        x: () => -distance(),
+        ease: EASE.none,
+        scrollTrigger: {
+          trigger: el,
+          start: 'top top',
+          // Measured in a function so a resize recomputes it rather than
+          // pinning to a width the visitor has since changed.
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: SCRUB.weighted,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
-        (context) => {
-          const { horizontal } = context.conditions as { horizontal: boolean };
-          if (!horizontal) return;
+      });
 
-          const distance = () => rail.scrollWidth - window.innerWidth;
-
-          const tween = gsap.to(rail, {
-            x: () => -distance(),
-            ease: 'none',
+      // Parallax inside a horizontal track: `containerAnimation` tells
+      // ScrollTrigger to measure against the track's travel rather than the
+      // page's, which is the only way this reads correctly.
+      gsap.utils.toArray<HTMLElement>('.room-plate').forEach((plate) => {
+        const img = plate.querySelector('img');
+        if (!img) return;
+        gsap.fromTo(
+          img,
+          { xPercent: -7 },
+          {
+            xPercent: 7,
+            ease: EASE.none,
             scrollTrigger: {
-              trigger: el,
-              start: 'top top',
-              end: () => `+=${distance()}`,
-              pin: true,
-              scrub: 0.8,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
+              trigger: plate,
+              containerAnimation: tween,
+              start: 'left right',
+              end: 'right left',
+              scrub: SCRUB.tight,
             },
-          });
+          }
+        );
+      });
 
-          gsap.utils.toArray<HTMLElement>('.room-plate').forEach((plate) => {
-            const img = plate.querySelector('img');
-            if (!img) return;
-            gsap.fromTo(
-              img,
-              { xPercent: -7 },
-              {
-                xPercent: 7,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: plate,
-                  containerAnimation: tween,
-                  start: 'left right',
-                  end: 'right left',
-                  scrub: true,
-                },
-              }
-            );
-          });
+      return () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      };
+    });
 
-          return () => {
-            tween.scrollTrigger?.kill();
-            tween.kill();
-          };
-        }
-      );
+    // The track's width depends on imagery that may still be decoding.
+    refreshScrollTriggers();
 
-      return () => mm.revert();
-    }, el);
-
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener('load', refresh);
-
-    return () => {
-      window.removeEventListener('load', refresh);
-      ctx.revert();
-    };
-  }, []);
+    return () => mm.revert();
+  });
 
   return (
     <section ref={root} id="rooms" className="relative bg-void">

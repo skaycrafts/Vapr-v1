@@ -4,7 +4,9 @@ import { useRef } from 'react';
 import { Check, Minus } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
-import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
 import type { ImageSlug } from '@/lib/media';
 
 const CLOSE_UPS: ImageSlug[] = ['detail-number', 'detail-switch', 'detail-latch', 'detail-books'];
@@ -21,33 +23,34 @@ const CLOSE_UPS: ImageSlug[] = ['detail-number', 'detail-switch', 'detail-latch'
 export default function Detail() {
   const root = useRef<HTMLElement>(null);
 
-  useIsoLayoutEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  useMotionEffect(root, () => {
+    // A specification sheet: the rows should arrive quickly and get out of
+    // the way. This is the one section where reading speed beats
+    // choreography, so the stagger is the tightest on the site.
+    gsap.from('.detail-row', {
+      opacity: 0,
+      y: 12,
+      duration: CONTENT.base,
+      ease: EASE.outLong,
+      stagger: STAGGER.chars * 3,
+      scrollTrigger: { trigger: '.detail-sheet', start: 'top 78%', once: true },
+    });
 
-    const ctx = gsap.context(() => {
-      gsap.from('.detail-row', {
-        opacity: 0,
-        y: 12,
-        duration: 0.7,
-        ease: 'expo.out',
-        stagger: 0.035,
-        scrollTrigger: { trigger: '.detail-sheet', start: 'top 78%' },
-      });
-      gsap.fromTo(
-        '.detail-strip',
-        { xPercent: 0 },
-        {
-          xPercent: -8,
-          ease: 'none',
-          scrollTrigger: { trigger: '.detail-strip', start: 'top bottom', end: 'bottom top', scrub: 1 },
-        }
-      );
-    }, el);
-
-    return () => ctx.revert();
-  }, []);
+    gsap.fromTo(
+      '.detail-strip',
+      { xPercent: 0 },
+      {
+        xPercent: -8,
+        ease: EASE.none,
+        scrollTrigger: {
+          trigger: '.detail-strip',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: SCRUB.loose,
+        },
+      }
+    );
+  });
 
   return (
     <section ref={root} id="detail" className="relative overflow-hidden bg-void py-20 md:py-28">

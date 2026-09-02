@@ -4,10 +4,15 @@ import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Frame from '@/components/media/Frame';
 import { HERO, LOCATIONS } from '@/lib/content';
-import { gsap, ScrollTrigger, useIsoLayoutEffect } from '@/lib/gsap';
-import { useCapability } from '@/lib/useCapability';
-import { useIntro } from '@/components/providers/Intro';
+import { gsap } from '@/lib/gsap';
+import { useCapability } from '@/motion/capability';
+import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
+import { useScroll } from '@/motion/ScrollProvider';
+import { ENTRY, useEntry } from '@/motion/entry';
+import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
 
+// Lazily loaded and never server-rendered: the shader must not sit on the
+// critical path, and the photograph underneath is what carries the LCP (§28).
 const HeroCanvas = dynamic(() => import('@/components/webgl/HeroCanvas'), { ssr: false });
 
 /**
@@ -24,55 +29,112 @@ const LINES = HERO.statement.split('\n');
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
-  const { webgl, ready } = useCapability();
-  const { ready: introDone } = useIntro();
+  const { animate, ready } = useCapability();
+  const { started } = useEntry();
+  const { scrollTo } = useScroll();
   // Set if the GPU drops the context or a texture fails; the photograph
   // underneath is already on screen, so the canvas simply stops painting.
   const [shaderFailed, setShaderFailed] = useState(false);
 
-  useIsoLayoutEffect(() => {
+  const webgl = ready && animate && !shaderFailed;
+
+  /**
+   * Entry. Scheduled against the moment the overture's field begins to lift,
+   * so the headline is already rising while the black is still travelling —
+   * the two read as one movement rather than a handover (§03).
+   */
+  useMotionEffect(
+    root,
+    () => {
+      if (!started) return;
+
+      // Offsets are relative to `lift`, which is when `started` fires.
+      const at = (mark: number) => Math.max(0, mark - ENTRY.lift);
+
+      const tl = gsap.timeline({ defaults: { ease: EASE.outLong } });
+
+      tl.from(
+        '.hero-line > span',
+        { yPercent: 118, duration: CINEMA.fast, stagger: STAGGER.lines },
+        at(ENTRY.headline)
+      )
+        .from(
+          '.hero-rule',
+          { scaleX: 0, duration: CINEMA.base, ease: EASE.inOutHeavy },
+          at(ENTRY.headline)
+        )
+        .from(
+          '.hero-meta',
+          { opacity: 0, y: 14, duration: CINEMA.fast, stagger: STAGGER.items },
+          at(ENTRY.nav)
+        )
+        .from('.hero-cue', { opacity: 0, duration: 0.8 }, at(ENTRY.cue));
+
+      // The hero is the first pinned measurement on the page; remeasure once
+      // the entrance has released the scroll and heights are final.
+      refreshScrollTriggers();
+    },
+    [started]
+  );
+
+  /**
+   * The photograph settles out of a slight over-scale across the first
+   * viewport, then drifts against the scroll. Both are deliberately below the
+   * threshold of notice: if the visitor sees the image moving, it is too much.
+   *
+   * Only applied when the shader is absent — the canvas runs the equivalent
+   * settle in its own `uIntro` uniform, and doing both double-scales the frame.
+   */
+  useMotionEffect(
+    root,
+    () => {
+      const el = root.current;
+      if (!el || webgl) return;
+
+      gsap.fromTo(
+        '.hero-plate',
+        { scale: 1.05 },
+        { scale: 1, duration: CINEMA.epic * 1.6, ease: EASE.outLong }
+      );
+
+      gsap.to('.hero-plate', {
+        yPercent: 8,
+        ease: EASE.none,
+        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: SCRUB.tight },
+      });
+    },
+    [webgl]
+  );
+
+  /**
+   * Depart. The frame dims and the copy drifts up as the next section takes
+   * over, so the two overlap rather than butting against each other (§19).
+   */
+  useMotionEffect(root, () => {
     const el = root.current;
     if (!el) return;
 
-    const ctx = gsap.context(() => {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    gsap.to('.hero-veil', {
+      opacity: 1,
+      ease: EASE.none,
+      scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: SCRUB.tight },
+    });
 
-      // Entry. The `from` state is set by script, so the copy is legible even
-      // if this never runs.
-      if (!reduce) {
-        gsap
-          .timeline({ paused: true, defaults: { ease: 'expo.out' } })
-          .from('.hero-line > span', { yPercent: 118, duration: 1.25, stagger: 0.11 })
-          .from('.hero-rule', { scaleX: 0, duration: 1.4, ease: 'expo.inOut' }, 0.15)
-          .from('.hero-meta', { opacity: 0, y: 14, duration: 1, stagger: 0.08 }, 0.5)
-          .play();
-      }
+    gsap.to('.hero-copy', {
+      yPercent: -32,
+      opacity: 0,
+      ease: EASE.none,
+      scrollTrigger: { trigger: el, start: 'top top', end: '70% top', scrub: SCRUB.tight },
+    });
 
-      // Depart. The frame drifts up and dims as the manifesto takes over,
-      // so the two sections overlap rather than butt against each other.
-      if (!reduce) {
-        gsap.to('.hero-veil', {
-          opacity: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
-        });
-        gsap.to('.hero-copy', {
-          yPercent: -32,
-          opacity: 0,
-          ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top top', end: '70% top', scrub: true },
-        });
-      }
-    }, el);
-
-    return () => ctx.revert();
-  }, [introDone]);
-
-  useIsoLayoutEffect(() => {
-    // The hero is the first pinned measurement on the page; recompute once
-    // the entry sequence has released the scroll.
-    if (introDone) ScrollTrigger.refresh();
-  }, [introDone]);
+    // The indicator fills as the first viewport is consumed, then retires. It
+    // never becomes a permanent progress bar across the page (§23).
+    gsap.to('.hero-cue-fill', {
+      scaleY: 1,
+      ease: EASE.none,
+      scrollTrigger: { trigger: el, start: 'top top', end: '55% top', scrub: SCRUB.tight },
+    });
+  });
 
   return (
     <section
@@ -84,8 +146,7 @@ export default function Hero() {
           carries the LCP. The shader layers on top and is free to fail. */}
       <Frame
         slug="facade-dusk"
-        className="absolute inset-0 h-full w-full"
-        imgClassName="scale-[1.02]"
+        className="hero-plate absolute inset-0 h-full w-full"
         ratio="fill"
         crossOrigin="anonymous"
         sizes="100vw"
@@ -93,13 +154,9 @@ export default function Hero() {
         position="50% 42%"
       />
 
-      {ready && webgl && !shaderFailed ? (
+      {webgl ? (
         <div className="absolute inset-0">
-          <HeroCanvas
-            sources={SEQUENCE}
-            intro={introDone}
-            onFail={() => setShaderFailed(true)}
-          />
+          <HeroCanvas sources={SEQUENCE} intro={started} onFail={() => setShaderFailed(true)} />
         </div>
       ) : null}
 
@@ -137,32 +194,23 @@ export default function Hero() {
             </div>
 
             <a
-              href="#manifesto"
-              className="hero-meta group flex items-center gap-3 text-mist transition-colors hover:text-chalk"
+              href="#chennai"
+              className="hero-cue group flex items-center gap-3 text-mist transition-colors duration-300 hover:text-chalk"
               onClick={(e) => {
                 e.preventDefault();
-                const target = document.querySelector<HTMLElement>('#manifesto');
-                if (!target) return;
-                if (window.__lenis) window.__lenis.scrollTo(target, { duration: 1.4 });
-                else target.scrollIntoView({ behavior: 'smooth' });
+                scrollTo('#chennai');
               }}
             >
               <span className="type-label text-inherit">{HERO.scrollCue}</span>
+              {/* A rail that fills as the hero is consumed, rather than a
+                  looping arrow that keeps asking after you have answered. */}
               <span aria-hidden className="relative block h-10 w-px overflow-hidden bg-hairline">
-                <span className="absolute inset-x-0 top-0 h-1/2 bg-chalk motion-safe:animate-[cue_2.4s_var(--ease-in-out-quint)_infinite]" />
+                <span className="hero-cue-fill absolute inset-x-0 top-0 h-full origin-top scale-y-0 bg-chalk" />
               </span>
             </a>
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes cue {
-          0%   { transform: translateY(-100%); }
-          55%  { transform: translateY(100%); }
-          100% { transform: translateY(100%); }
-        }
-      `}</style>
     </section>
   );
 }

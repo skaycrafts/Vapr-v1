@@ -316,3 +316,29 @@ export const mapsHref = (l: Location) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${l.name}, ${l.street}, ${l.area}, ${SITE.city} ${l.postalCode}`
   )}`;
+
+/**
+ * The Chennai chapter — the one scripted scene on the page.
+ *
+ * The words are the city as it arrives: heat, traffic, horns, glare, stacked
+ * on top of each other until the screen is as loud as the street. Then they
+ * all go, and what is left is the hotel. The copy below is the same sentence
+ * the manifesto has always carried; the chapter just gives it somewhere to
+ * land.
+ */
+export const CHENNAI = {
+  city: 'Chennai',
+  /** Arrive in order, and overlap. Each one is a fragment of the sentence. */
+  noise: [
+    { word: 'Heat', note: 'off the tar' },
+    { word: 'Traffic', note: 'at every junction' },
+    { word: 'Horns', note: 'three of them' },
+    { word: 'Glare', note: 'white, off the hoardings' },
+  ],
+  /** The turn. One line, held in silence. */
+  turn: 'Then a door shuts behind you.',
+  resolution: 'And the noise stops.',
+  closing:
+    'Cold air. A desk you can actually work at. Breakfast downstairs from the morning. Everything you need, and not one thing more.',
+  attribution: 'Ashok Nagar and Ekkatuthangal, Chennai',
+} as const;

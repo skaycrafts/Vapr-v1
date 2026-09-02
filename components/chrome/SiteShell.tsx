@@ -1,8 +1,9 @@
 'use client';
 
-import SmoothScroll from '@/components/providers/SmoothScroll';
-import { IntroProvider } from '@/components/providers/Intro';
-import Preloader from '@/components/chrome/Preloader';
+import { CapabilityProvider } from '@/motion/capability';
+import { ScrollProvider } from '@/motion/ScrollProvider';
+import { EntryProvider } from '@/motion/entry';
+import Overture from '@/motion/Overture';
 import Nav from '@/components/chrome/Nav';
 import Cursor from '@/components/chrome/Cursor';
 import FilmGrain from '@/components/chrome/FilmGrain';
@@ -11,9 +12,17 @@ import FilmGrain from '@/components/chrome/FilmGrain';
  * Holds the client-only chrome so each route's page can stay a server
  * component.
  *
- * The entry sequence is rendered unconditionally and decides for itself
- * whether to play — see the note in Preloader. Choosing here instead left an
- * orphaned server-rendered overlay on every navigation after the first.
+ * The provider order is the motion architecture, and it is load-bearing:
+ *
+ *   Capability  — what this device will allow. Everything below reads it, so
+ *                 nothing can animate without having asked.
+ *   Scroll      — the one Lenis instance and the one GSAP ticker. Needs the
+ *                 capability answer before it decides whether to exist at all.
+ *   Entry       — the entrance clock, shared by the overture and the hero.
+ *
+ * The overture is rendered unconditionally and decides for itself whether to
+ * play. Choosing here instead left an orphaned server-rendered overlay on
+ * every navigation after the first.
  */
 export default function SiteShell({
   children,
@@ -24,15 +33,17 @@ export default function SiteShell({
   footer?: React.ReactNode;
 }) {
   return (
-    <IntroProvider>
-      <SmoothScroll>
-        <Preloader />
-        <Nav />
-        <Cursor />
-        <FilmGrain />
-        <main id="main">{children}</main>
-        {footer}
-      </SmoothScroll>
-    </IntroProvider>
+    <CapabilityProvider>
+      <ScrollProvider>
+        <EntryProvider>
+          <Overture />
+          <Nav />
+          <Cursor />
+          <FilmGrain />
+          <main id="main">{children}</main>
+          {footer}
+        </EntryProvider>
+      </ScrollProvider>
+    </CapabilityProvider>
   );
 }

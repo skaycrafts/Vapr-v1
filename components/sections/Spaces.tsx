@@ -1,142 +1,152 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import Frame from '@/components/media/Frame';
 import { SPACES } from '@/lib/content';
-import { damp } from '@/lib/utils';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { EASE, SCRUB } from '@/motion/config';
 import type { ImageSlug } from '@/lib/media';
 
 /**
- * An index rather than a gallery. Reading the list gives you the whole
- * building in six lines; a pointer over any line brings that room up under
- * the cursor.
+ * Six shared rooms, one at a time, moved through rather than browsed.
  *
- * The split is by capability, not width: anything that can hover gets the
- * floating plate, anything that cannot gets the same photograph inline under
- * each row. No image is only reachable through an interaction the device
- * cannot perform, and the description beside every name carries the meaning
- * on its own.
+ * The section pins and the scroll walks the sequence. The important detail is
+ * the overlap: each photograph starts arriving a beat *before* the one in
+ * front of it has gone, so there is never a frame of empty stage between two
+ * rooms. That continuity is the difference between walking through a building
+ * and clicking through a gallery (§15).
+ *
+ * The number and the name change on the same beat as the image, so the label
+ * always belongs to what is on screen — a caption that lags its photograph by
+ * even a couple of hundred milliseconds reads as a bug.
+ *
+ * Without motion this is a plain list: every photograph in document order with
+ * its name and its sentence beneath. The pinned composition is applied by the
+ * effect, so a visitor who never gets the timeline never gets a stack of six
+ * images piled on one another either.
  */
 export default function Spaces() {
-  const [active, setActive] = useState<number | null>(null);
-  const plate = useRef<HTMLDivElement>(null);
-  const list = useRef<HTMLUListElement>(null);
+  const root = useRef<HTMLElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const el = plate.current;
-    const container = list.current;
-    if (!el || !container) return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  useMotionEffect(root, ({ q }) => {
+    const el = root.current;
+    const scene = stage.current;
+    if (!el || !scene) return;
 
-    const pointer = { x: 0, y: 0 };
-    const pos = { x: 0, y: 0 };
-    let seeded = false;
-    let frame = 0;
-    let last = performance.now();
+    el.dataset.scene = 'on';
 
-    const onMove = (e: PointerEvent) => {
-      const box = container.getBoundingClientRect();
-      pointer.x = e.clientX - box.left;
-      pointer.y = e.clientY - box.top;
-      if (!seeded) {
-        pos.x = pointer.x;
-        pos.y = pointer.y;
-        seeded = true;
+    const plates = q('.space-plate');
+    const labels = q('.space-label');
+    if (!plates.length) return;
+
+    const tl = gsap.timeline({
+      defaults: { ease: EASE.out },
+      scrollTrigger: {
+        trigger: el,
+        start: 'top top',
+        // A little under half a viewport per room. Enough that each one is
+        // genuinely looked at, short enough that six of them do not become a
+        // corridor the visitor has to escape from.
+        end: () => `+=${plates.length * 55}%`,
+        pin: scene,
+        anticipatePin: 1,
+        scrub: SCRUB.weighted,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    plates.forEach((plate, i) => {
+      const label = labels[i];
+      // One unit of timeline per room, with each arrival pulled a quarter of a
+      // unit early so it crosses the outgoing one.
+      const enter = i - 0.25;
+
+      if (i > 0) {
+        tl.fromTo(
+          plate,
+          { opacity: 0, scale: 1.07 },
+          { opacity: 1, scale: 1, duration: 0.7 },
+          enter
+        );
+        if (label) {
+          tl.fromTo(
+            label,
+            { opacity: 0, yPercent: 40 },
+            { opacity: 1, yPercent: 0, duration: 0.6 },
+            enter + 0.05
+          );
+        }
       }
-    };
 
-    const tick = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.1);
-      last = now;
-      pos.x = damp(pos.x, pointer.x, 0.12, dt);
-      pos.y = damp(pos.y, pointer.y, 0.12, dt);
-      // Trailing rotation from the horizontal lag — the plate leans into
-      // the direction it is being dragged.
-      const lean = Math.max(-7, Math.min(7, (pointer.x - pos.x) * 0.06));
-      el.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%) rotate(${lean}deg)`;
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
+      // Everything except the last room leaves as its successor arrives.
+      if (i < plates.length - 1) {
+        const leave = i + 1 - 0.25;
+        tl.to(plate, { opacity: 0, scale: 0.985, duration: 0.7 }, leave);
+        if (label) {
+          tl.to(label, { opacity: 0, yPercent: -35, duration: 0.55 }, leave);
+        }
+      }
+    });
 
-    container.addEventListener('pointermove', onMove);
     return () => {
-      cancelAnimationFrame(frame);
-      container.removeEventListener('pointermove', onMove);
+      delete el.dataset.scene;
     };
-  }, []);
+  });
 
   return (
-    <section id="spaces" className="gutter relative bg-void py-20 md:py-32">
-      <header className="flex flex-wrap items-end justify-between gap-6 border-b border-hairline pb-8">
-        <h2 className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">
-          The rest of it
-        </h2>
-        <p className="max-w-[34ch] text-mist">
-          Six shared rooms, and what each one is for.
-        </p>
-      </header>
+    <section
+      ref={root}
+      id="spaces"
+      aria-label="The shared rooms"
+      className="group relative bg-void"
+    >
+      <div
+        ref={stage}
+        className="gutter py-20 group-data-[scene=on]:flex group-data-[scene=on]:h-[100svh] group-data-[scene=on]:flex-col group-data-[scene=on]:justify-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:py-0 md:py-32"
+      >
+        <header className="flex flex-wrap items-end justify-between gap-6 border-b border-hairline pb-8 group-data-[scene=on]:border-none group-data-[scene=on]:pb-6">
+          <h2 className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">
+            The rest of it
+          </h2>
+          <p className="max-w-[34ch] text-mist">Six shared rooms, and what each one is for.</p>
+        </header>
 
-      <div className="relative">
-        <ul ref={list} className="relative" onPointerLeave={() => setActive(null)}>
+        {/*
+          In flow: an ordinary list. Once the scene engages the list becomes a
+          single stage and the items stack on top of each other.
+        */}
+        <ol className="group-data-[scene=on]:relative group-data-[scene=on]:mt-8 group-data-[scene=on]:min-h-0 group-data-[scene=on]:flex-1">
           {SPACES.map((space, i) => (
-            <li key={space.id}>
-              {/* Not focusable: the row is a heading and a sentence, with no
-                  action behind it. A tab stop that does nothing is worse than
-                  no tab stop. */}
-              <div
-                onPointerEnter={() => setActive(i)}
-                data-cursor=""
-                className="group grid grid-cols-[auto_1fr] items-baseline gap-x-5 gap-y-2 border-b border-hairline py-6 transition-colors duration-500 md:grid-cols-[3rem_minmax(0,1fr)_minmax(0,26rem)] md:py-8"
-              >
-                <span className="tabular type-label transition-colors duration-500 group-hover:text-chalk">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+            <li
+              key={space.id}
+              className="mt-12 first:mt-0 group-data-[scene=on]:absolute group-data-[scene=on]:inset-0 group-data-[scene=on]:mt-0 group-data-[scene=on]:grid group-data-[scene=on]:grid-cols-1 group-data-[scene=on]:items-center group-data-[scene=on]:gap-8 md:group-data-[scene=on]:grid-cols-12 md:group-data-[scene=on]:gap-12"
+            >
+              <div className="space-plate group-data-[scene=on]:h-full group-data-[scene=on]:min-h-0 md:group-data-[scene=on]:col-span-7">
+                <Frame
+                  slug={space.image as ImageSlug}
+                  sizes="(min-width: 768px) 58vw, 100vw"
+                  ratio={16 / 10}
+                  className="h-full w-full"
+                />
+              </div>
 
-                <h3 className="type-display text-[clamp(1.75rem,3.6vw,2.75rem)] leading-none text-mist transition-colors duration-500 group-hover:text-chalk">
+              <div className="space-label mt-5 group-data-[scene=on]:mt-0 md:group-data-[scene=on]:col-span-5">
+                <div className="flex items-baseline gap-4">
+                  <span className="tabular type-label">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="h-px flex-1 bg-hairline" />
+                </div>
+
+                <h3 className="type-display mt-4 text-[clamp(1.75rem,3.6vw,2.75rem)] leading-none text-chalk">
                   {space.name}
                 </h3>
 
-                <p className="col-start-2 text-sm text-smoke transition-colors duration-500 group-hover:text-mist md:col-start-3 md:text-right">
-                  {space.line}
-                </p>
-              </div>
-
-              {/* Rendered wherever the follow plate is not. */}
-              <div className="plate-inline pb-6">
-                <Frame
-                  slug={space.image as ImageSlug}
-                  sizes="100vw"
-                  ratio={16 / 10}
-                />
+                <p className="mt-4 max-w-[32ch] text-mist">{space.line}</p>
               </div>
             </li>
           ))}
-        </ul>
-
-        {/* The plate that follows the cursor. Decorative: every image it can
-            show is already reachable inline above. */}
-        <div
-          ref={plate}
-          aria-hidden
-          className="plate-follow pointer-events-none absolute left-0 top-0 z-[var(--z-raised)] w-[clamp(15rem,22vw,20rem)]"
-          style={{ willChange: 'transform' }}
-        >
-          {SPACES.map((space, i) => (
-            <div
-              key={space.id}
-              className="absolute inset-0 transition-[opacity,transform] duration-[600ms] ease-[var(--ease-out-quart)]"
-              style={{
-                opacity: active === i ? 1 : 0,
-                transform: active === i ? 'scale(1)' : 'scale(0.94)',
-              }}
-            >
-              <Frame slug={space.image as ImageSlug} sizes="22vw" ratio={4 / 5} />
-            </div>
-          ))}
-          {/* Reserve the height so the absolutely-placed plates have a box. */}
-          <div className="invisible aspect-[4/5]" />
-        </div>
+        </ol>
       </div>
     </section>
   );
