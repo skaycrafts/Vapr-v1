@@ -46,10 +46,13 @@ export default function Spaces() {
       scrollTrigger: {
         trigger: el,
         start: 'top top',
-        // A little under half a viewport per room. Enough that each one is
-        // genuinely looked at, short enough that six of them do not become a
-        // corridor the visitor has to escape from.
-        end: () => `+=${plates.length * 55}%`,
+        // Enough that each room is genuinely looked at, short enough that six
+        // of them do not become a corridor the visitor has to escape from.
+        //
+        // Shorter on a phone: the same 55% costs 4.3 screens of scrolling on
+        // a 812px viewport, and a thumb pays for that in a way a wheel does
+        // not. Read at refresh, so rotating the device recomputes it.
+        end: () => `+=${plates.length * (window.innerWidth < 768 ? 38 : 55)}%`,
         pin: scene,
         anticipatePin: 1,
         scrub: SCRUB.weighted,

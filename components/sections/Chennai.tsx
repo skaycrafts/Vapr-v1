@@ -128,9 +128,10 @@ export default function Chennai() {
      * viewport — so the whole approach was a viewport of black with the title
      * waiting invisibly at the end of it.
      *
-     * Now it is fully in by the time the section is a third of the way up the
-     * screen, and then holds, still, until the pin takes over. The stillness
-     * between the two is deliberate: the word arrives, and is left alone.
+     * Now it starts the moment the section's edge appears and is fully in
+     * within about one gesture, then holds, still, until the pin takes over.
+     * The stillness between the two is deliberate: the word arrives, and is
+     * left alone.
      */
     gsap.fromTo(
       '.chennai-title',
@@ -141,8 +142,11 @@ export default function Chennai() {
         ease: EASE.none,
         scrollTrigger: {
           trigger: el,
-          start: 'top 85%',
-          end: 'top 35%',
+          // Begins the instant the section's top edge clears the bottom of the
+          // viewport and is fully in less than half a screen later — about one
+          // gesture. It used to need half a viewport before it even started.
+          start: 'top bottom',
+          end: 'top 58%',
           scrub: SCRUB.weighted,
         },
       }
@@ -153,9 +157,14 @@ export default function Chennai() {
       scrollTrigger: {
         trigger: el,
         start: 'top top',
-        // 260vh of travel for one viewport of content: the scene needs room
-        // to breathe, and the silence needs room to be uncomfortable.
-        end: '+=260%',
+        // 170vh of travel, down from 260. Most of that budget was being spent
+        // on scroll rather than on anything moving, and reaching the turn had
+        // become a chore.
+        //
+        // This is close to the floor. At 170 each word still gets about one
+        // gesture of scroll to arrive; much below it and the scrub turns
+        // twitchy, which reads as cheap rather than as fast.
+        end: '+=170%',
         pin: scene,
         // Pre-empts the pin's layout shift on fast scrolls, which otherwise
         // shows as a one-frame jump at the moment of pinning.
@@ -169,13 +178,13 @@ export default function Chennai() {
     // top of the title while it is still leaving. Kept to 8%: the placement
     // CSS above reserves clearance for exactly this much travel, and a larger
     // drift walks the title into the words parked above it.
-    tl.to('.chennai-title', { yPercent: -8, opacity: 0.12, duration: 0.8 }, 0.6);
+    tl.to('.chennai-title', { yPercent: -8, opacity: 0.12, duration: 0.7 }, 0.5);
 
     // ── 2. The noise. ────────────────────────────────────────────────────
     // Each word enters before the previous has settled. The overlap is what
     // makes four words feel like a crowd rather than a list.
     noise.forEach((word, i) => {
-      const at = 0.8 + i * 0.55;
+      const at = 0.7 + i * 0.45;
 
       tl.fromTo(
         word,
@@ -186,45 +195,45 @@ export default function Chennai() {
 
       // A slow drift while it is on screen, each at its own rate, so the
       // stack never settles into a static composition.
-      tl.to(word, { yPercent: i % 2 === 0 ? -7 : 5, duration: 1.6 }, at);
+      tl.to(word, { yPercent: i % 2 === 0 ? -7 : 5, duration: 1.4 }, at);
     });
 
     // ── 3. The turn. ─────────────────────────────────────────────────────
     // Everything goes at once. A stagger would soften it, and this is the one
     // moment on the site that should be abrupt.
-    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 3.2).to(
+    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 2.6).to(
       '.chennai-title',
       { opacity: 0, duration: 0.3 },
-      3.2
+      2.6
     );
 
     // ── The silence. ─────────────────────────────────────────────────────
-    // Nothing is scheduled between 3.65 and 4.35. The gap is the animation.
+    // Nothing is scheduled between 3.05 and 3.55. The gap is the animation.
 
     tl.fromTo(
       '.chennai-turn',
       { opacity: 0, y: 16 },
       { opacity: 1, y: 0, duration: 0.5, ease: EASE.out },
-      4.35
+      3.55
     )
       .fromTo(
         '.chennai-resolution',
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.5, ease: EASE.out },
-        4.9
+        3.95
       )
       // The mark, last, and barely.
-      .fromTo('.chennai-seal', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 5.3)
+      .fromTo('.chennai-seal', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 4.3)
       .fromTo(
         '.chennai-closing',
         { opacity: 0, y: 12 },
         { opacity: 1, y: 0, duration: 0.6, ease: EASE.out },
-        5.6
+        4.55
       )
       // The attribution belongs to this block and was the one part of it with
       // no animation at all — so it sat at full opacity through the noise,
       // which is what "Glare" was colliding with.
-      .fromTo('.chennai-attribution', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 5.9);
+      .fromTo('.chennai-attribution', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 4.8);
 
     return () => {
       delete el.dataset.scene;
@@ -236,7 +245,7 @@ export default function Chennai() {
       ref={root}
       id="chennai"
       aria-label="Chennai, and what VAPR is for"
-      className="group relative mt-[8vh] bg-void md:mt-[14vh]"
+      className="group relative mt-[6vh] bg-void md:mt-[10vh]"
     >
       <style>{NOISE_PLACEMENT_CSS}</style>
       <div

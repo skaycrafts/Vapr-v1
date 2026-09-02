@@ -8,7 +8,7 @@ import Emblem from '@/components/brand/Emblem';
 import { LOCATIONS, STAY } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
-import { EASE, SCRUB } from '@/motion/config';
+import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
 import { cn } from '@/lib/utils';
 import type { ImageSlug } from '@/lib/media';
 
@@ -31,8 +31,94 @@ export default function Rooms() {
     if (!el || !rail) return;
 
     // Reduced motion is already handled by the hook, so this only has to
-    // answer the width question: a thumb gets the panels stacked (§29).
+    // answer the width question. Both branches get real choreography — a
+    // thumb gets the panels stacked, but stacked is not the same as still.
     const mm = gsap.matchMedia();
+
+    mm.add(
+      { horizontal: '(min-width: 768px)', stacked: '(max-width: 767px)' },
+      (context) => {
+        const { stacked } = context.conditions as { stacked: boolean };
+        if (!stacked) return;
+
+        // The vertical counterpart of the horizontal track: the same curtain
+        // reveal and counter-scale the rest of the site uses, arriving one
+        // panel at a time. Scroll-jacking a phone sideways to show two rooms
+        // would cost more than it returns, so the language is kept and the
+        // mechanism is not.
+        gsap.from('.room-intro > *', {
+          y: 20,
+          opacity: 0,
+          duration: CONTENT.slow,
+          ease: EASE.out,
+          stagger: STAGGER.items,
+          scrollTrigger: { trigger: '.room-intro', start: 'top 82%', once: true },
+        });
+
+        gsap.utils.toArray<HTMLElement>('.room-panel').forEach((panel) => {
+          const plate = panel.querySelector<HTMLElement>('.room-plate');
+          const img = plate?.querySelector('img');
+          const copy = panel.querySelectorAll('[data-room-copy] > *');
+
+          const tl = gsap.timeline({
+            scrollTrigger: { trigger: panel, start: 'top 78%', once: true },
+          });
+
+          if (plate) {
+            tl.fromTo(
+              plate,
+              { clipPath: 'inset(100% 0% 0% 0%)' },
+              { clipPath: 'inset(0% 0% 0% 0%)', duration: CINEMA.base, ease: EASE.inOutHeavy },
+              0
+            );
+          }
+
+          // Settles back to the 1.08 the plate rests at, not to 1 — the crop
+          // is deliberate and the reveal must not quietly undo it.
+          if (img) {
+            tl.fromTo(
+              img,
+              { scale: 1.18 },
+              { scale: 1.08, duration: CINEMA.epic, ease: EASE.outLong },
+              0
+            );
+          }
+
+          if (copy.length) {
+            tl.from(
+              copy,
+              {
+                y: 18,
+                opacity: 0,
+                duration: CONTENT.slow,
+                ease: EASE.out,
+                stagger: STAGGER.items,
+              },
+              0.25
+            );
+          }
+
+          // A little drift as the panel passes, so it is not inert once it
+          // has arrived.
+          if (img) {
+            gsap.fromTo(
+              img,
+              { yPercent: -4 },
+              {
+                yPercent: 4,
+                ease: EASE.none,
+                scrollTrigger: {
+                  trigger: panel,
+                  start: 'top bottom',
+                  end: 'bottom top',
+                  scrub: SCRUB.tight,
+                },
+              }
+            );
+          }
+        });
+      }
+    );
 
     mm.add({ horizontal: '(min-width: 768px)' }, (context) => {
       const { horizontal } = context.conditions as { horizontal: boolean };
@@ -97,7 +183,7 @@ export default function Rooms() {
         ref={track}
         className="flex flex-col md:h-[100svh] md:flex-row md:flex-nowrap md:will-change-transform"
       >
-        <div className="gutter flex shrink-0 flex-col justify-end py-16 md:h-full md:w-[34vw] md:justify-center md:py-0">
+        <div className="room-intro gutter flex shrink-0 flex-col justify-end py-16 md:h-full md:w-[34vw] md:justify-center md:py-0">
           <p className="type-label">The rooms</p>
           <h2 className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk">
             One room,
@@ -141,7 +227,7 @@ export default function Rooms() {
               )}
             </div>
 
-            <div className="md:w-[46%]">
+            <div data-room-copy className="md:w-[46%]">
               <div className="flex items-baseline gap-4">
                 <span className="tabular type-label">{String(i + 1).padStart(2, '0')}</span>
                 <span className="h-px flex-1 bg-hairline" />

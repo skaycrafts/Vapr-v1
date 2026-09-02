@@ -1,11 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, MessageCircle, Phone } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import Glass from '@/components/ui/Glass';
 import { LOCATIONS, RESERVE, SITE, STAY, needsVerification } from '@/lib/content';
 import { cn } from '@/lib/utils';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
 
 const { phone, phoneHref, whatsapp, email, currency, ratesFrom } = needsVerification;
 
@@ -22,6 +25,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
   const [slug, setSlug] = useState(defaultSlug ?? LOCATIONS[0].slug);
   const [arrival, setArrival] = useState('');
+  const root = useRef<HTMLElement>(null);
   const [nights, setNights] = useState(2);
   const [guests, setGuests] = useState(2);
 
@@ -42,11 +46,59 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
   const field =
     'w-full border-b border-hairline-strong bg-transparent py-2.5 text-bone outline-none transition-colors duration-300 focus-visible:border-chalk [color-scheme:dark]';
 
+  /**
+   * The one section that had no motion at all, on any viewport — which made
+   * the page's last act arrive flat, immediately after the rooms sequence.
+   *
+   * Restrained on purpose: this is the section a guest is trying to *use*, so
+   * the copy rises, the panel arrives, and nothing here waits on an animation
+   * before it can be typed into.
+   */
+  useMotionEffect(root, () => {
+    gsap.from('.reserve-copy > *', {
+      y: 22,
+      opacity: 0,
+      duration: CONTENT.slow,
+      ease: EASE.outLong,
+      stagger: STAGGER.items,
+      scrollTrigger: { trigger: '.reserve-copy', start: 'top 82%', once: true },
+    });
+
+    gsap.from('.reserve-panel', {
+      y: 28,
+      opacity: 0,
+      duration: CINEMA.fast,
+      ease: EASE.out,
+      scrollTrigger: { trigger: '.reserve-panel', start: 'top 86%', once: true },
+    });
+
+    // The photograph behind it drifts, so the panel reads as sitting over a
+    // scene rather than on a flat backdrop.
+    gsap.fromTo(
+      '.reserve-plate img',
+      { yPercent: -4 },
+      {
+        yPercent: 4,
+        ease: EASE.none,
+        scrollTrigger: {
+          trigger: '#reserve',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: SCRUB.tight,
+        },
+      }
+    );
+  });
+
   return (
-    <section id="reserve" className="relative overflow-hidden bg-void py-20 md:py-28">
+    <section
+      ref={root}
+      id="reserve"
+      className="relative overflow-hidden bg-void py-20 md:py-28"
+    >
       <Frame
         slug="room-b-light"
-        className="absolute inset-0 h-full w-full"
+        className="reserve-plate absolute inset-0 h-full w-full"
         ratio="fill"
         sizes="100vw"
         imgClassName="opacity-30"
@@ -62,7 +114,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
       />
 
       <div className="gutter relative grid gap-12 md:grid-cols-12 md:items-center md:gap-10">
-        <div className="md:col-span-5">
+        <div className="reserve-copy md:col-span-5">
           <h2 className="type-display text-[clamp(2.5rem,6vw,5rem)] text-chalk">{RESERVE.title}</h2>
           <p className="mt-5 max-w-[34ch] text-lg text-mist">{RESERVE.body}</p>
 
@@ -100,7 +152,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
           </div>
         </div>
 
-        <div className="md:col-span-6 md:col-start-7">
+        <div className="reserve-panel md:col-span-6 md:col-start-7">
           <Glass className="rounded-2xl p-6 md:p-9" radius={16} scale={-64}>
             <form
               onSubmit={(e) => {
