@@ -3,6 +3,8 @@
 import { useRef } from 'react';
 import { Check, Minus } from 'lucide-react';
 import Frame from '@/components/media/Frame';
+import RevealText from '@/motion/primitives/RevealText';
+import RevealImage from '@/motion/primitives/RevealImage';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
@@ -56,9 +58,15 @@ export default function Detail() {
     <section ref={root} id="detail" className="relative overflow-hidden bg-void py-20 md:py-28">
       <div className="gutter">
         <header className="flex flex-col gap-6 border-b border-hairline pb-9 md:flex-row md:items-end md:justify-between">
-          <h2 className="type-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">
+          {/* A major section title, so it gets the line reveal rather than a
+              fade — the type is uncovered by its own mask (§06). */}
+          <RevealText
+            as="h2"
+            mode="lines"
+            className="type-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+          >
             {DETAIL.title}
-          </h2>
+          </RevealText>
           <p className="max-w-[40ch] text-mist">{DETAIL.intro}</p>
         </header>
 
@@ -116,14 +124,23 @@ export default function Detail() {
 
       {/* Four things you actually touch. Photographed at Ashok Nagar. */}
       <div className="detail-strip mt-14 flex gap-3 pl-[max(1.25rem,calc((100vw-90rem)/2))] md:mt-16 md:gap-4">
-        {CLOSE_UPS.map((slug) => (
-          <Frame
+        {CLOSE_UPS.map((slug, i) => (
+          // `crop` is the quietest of the four signature reveals — right for
+          // supporting imagery that should not announce itself (§10).
+          <RevealImage
             key={slug}
-            slug={slug}
-            sizes="(min-width: 768px) 26vw, 62vw"
-            ratio={4 / 5}
+            style="crop"
+            delay={i * 0.06}
+            scaleFrom={1.08}
             className="w-[62vw] shrink-0 md:w-[26vw]"
-          />
+          >
+            <Frame
+              slug={slug}
+              sizes="(min-width: 768px) 26vw, 62vw"
+              ratio={4 / 5}
+              className="w-full"
+            />
+          </RevealImage>
         ))}
       </div>
     </section>
