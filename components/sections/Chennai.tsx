@@ -37,6 +37,72 @@ import { EASE, SCRUB } from '@/motion/config';
  * CSS and revealed by script, because anything hidden that way stays hidden
  * when the script does not arrive.
  */
+
+/**
+ * Where the four words sit once the scene engages.
+ *
+ * Expressed as CSS rather than utility classes because the constraint is
+ * geometric and needs to be stated as one: every word must stay clear of the
+ * band the title occupies.
+ *
+ * Percentages of the stage cannot express that. The title's size is capped in
+ * pixels (`clamp(3rem, 16vw, 12rem)`) while the stage is a share of the
+ * viewport *height*, so as the window gets shorter the title takes up a
+ * steadily deeper fraction of it — a word parked at a fixed 22% clears the
+ * title at 900px tall and lands on top of it at 680px.
+ *
+ * So the words are anchored to the same centre line the title is centred on:
+ * the upper two measure up from it, the lower two measure down. `--band` is
+ * half the title's own height plus a gap, in the title's own units, which
+ * makes the clearance hold at any viewport.
+ */
+const NOISE_PLACEMENT_CSS = `
+  #chennai[data-scene='on'] .chennai-noise {
+    position: absolute;
+
+    /* Half the title's height. Mirrors its own clamp(3rem, 16vw, 12rem). */
+    --half: min(8vw, 96px);
+
+    /* The title does not hold still — it drifts up by 8% of its height as the
+       noise arrives, so it walks into anything parked above it. That travel
+       has to be part of the clearance, not discovered afterwards. */
+    --drift: calc(var(--half) * 0.16);
+
+    /* Up needs the drift; down gets it for free, as the title moves away. */
+    --band-up: calc(var(--half) + var(--drift) + 22px);
+    --band-down: calc(var(--half) + 22px);
+  }
+
+  /* Heat — top left, the first thing that hits you. */
+  #chennai[data-scene='on'] .chennai-noise:nth-child(1) {
+    bottom: calc(50% + var(--band-up) + 40px);
+    left: 6%;
+  }
+  /* Traffic — above the title rather than across it. */
+  #chennai[data-scene='on'] .chennai-noise:nth-child(2) {
+    bottom: calc(50% + var(--band-up));
+    left: 44%;
+  }
+  /* Horns — below the title, on the left. */
+  #chennai[data-scene='on'] .chennai-noise:nth-child(3) {
+    top: calc(50% + var(--band-down));
+    left: 8%;
+  }
+  /* Glare — bottom right, out of the way of the attribution line. */
+  #chennai[data-scene='on'] .chennai-noise:nth-child(4) {
+    top: calc(50% + var(--band-down) + 60px);
+    left: 40%;
+  }
+
+  /* Wider screens have room to push the two right-hand words further out. */
+  @media (min-width: 768px) {
+    #chennai[data-scene='on'] .chennai-noise:nth-child(1) { left: 8%; }
+    #chennai[data-scene='on'] .chennai-noise:nth-child(2) { left: 55%; }
+    #chennai[data-scene='on'] .chennai-noise:nth-child(3) { left: 10%; }
+    #chennai[data-scene='on'] .chennai-noise:nth-child(4) { left: 68%; }
+  }
+`;
+
 export default function Chennai() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -52,6 +118,35 @@ export default function Chennai() {
     el.dataset.scene = 'on';
 
     const noise = q('.chennai-noise');
+
+    /**
+     * ── 1. The city, named. ──────────────────────────────────────────────
+     *
+     * On its own trigger, tied to the section's *approach* rather than to the
+     * pinned timeline below. It used to sit at position 0 of that timeline,
+     * which does not start until the section has reached the top of the
+     * viewport — so the whole approach was a viewport of black with the title
+     * waiting invisibly at the end of it.
+     *
+     * Now it is fully in by the time the section is a third of the way up the
+     * screen, and then holds, still, until the pin takes over. The stillness
+     * between the two is deliberate: the word arrives, and is left alone.
+     */
+    gsap.fromTo(
+      '.chennai-title',
+      { yPercent: 18, opacity: 0 },
+      {
+        yPercent: 0,
+        opacity: 1,
+        ease: EASE.none,
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          end: 'top 35%',
+          scrub: SCRUB.weighted,
+        },
+      }
+    );
 
     const tl = gsap.timeline({
       defaults: { ease: EASE.none },
@@ -70,22 +165,17 @@ export default function Chennai() {
       },
     });
 
-    // ── 1. The city, named. ──────────────────────────────────────────────
-    tl.fromTo(
-      '.chennai-title',
-      { yPercent: 18, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 0.6 },
-      0
-    )
-      // Drifts up and dims rather than cutting, so the noise arrives over the
-      // top of it while it is still leaving.
-      .to('.chennai-title', { yPercent: -14, opacity: 0.12, duration: 0.8 }, 1);
+    // Drifts up and dims rather than cutting, so the noise arrives over the
+    // top of the title while it is still leaving. Kept to 8%: the placement
+    // CSS above reserves clearance for exactly this much travel, and a larger
+    // drift walks the title into the words parked above it.
+    tl.to('.chennai-title', { yPercent: -8, opacity: 0.12, duration: 0.8 }, 0.6);
 
     // ── 2. The noise. ────────────────────────────────────────────────────
     // Each word enters before the previous has settled. The overlap is what
     // makes four words feel like a crowd rather than a list.
     noise.forEach((word, i) => {
-      const at = 1.2 + i * 0.55;
+      const at = 0.8 + i * 0.55;
 
       tl.fromTo(
         word,
@@ -102,35 +192,39 @@ export default function Chennai() {
     // ── 3. The turn. ─────────────────────────────────────────────────────
     // Everything goes at once. A stagger would soften it, and this is the one
     // moment on the site that should be abrupt.
-    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 3.6).to(
+    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 3.2).to(
       '.chennai-title',
       { opacity: 0, duration: 0.3 },
-      3.6
+      3.2
     );
 
     // ── The silence. ─────────────────────────────────────────────────────
-    // Nothing is scheduled between 4.05 and 4.75. The gap is the animation.
+    // Nothing is scheduled between 3.65 and 4.35. The gap is the animation.
 
     tl.fromTo(
       '.chennai-turn',
       { opacity: 0, y: 16 },
       { opacity: 1, y: 0, duration: 0.5, ease: EASE.out },
-      4.75
+      4.35
     )
       .fromTo(
         '.chennai-resolution',
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.5, ease: EASE.out },
-        5.3
+        4.9
       )
       // The mark, last, and barely.
-      .fromTo('.chennai-seal', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 5.7)
+      .fromTo('.chennai-seal', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 5.3)
       .fromTo(
         '.chennai-closing',
         { opacity: 0, y: 12 },
         { opacity: 1, y: 0, duration: 0.6, ease: EASE.out },
-        6
-      );
+        5.6
+      )
+      // The attribution belongs to this block and was the one part of it with
+      // no animation at all — so it sat at full opacity through the noise,
+      // which is what "Glare" was colliding with.
+      .fromTo('.chennai-attribution', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 5.9);
 
     return () => {
       delete el.dataset.scene;
@@ -142,8 +236,9 @@ export default function Chennai() {
       ref={root}
       id="chennai"
       aria-label="Chennai, and what VAPR is for"
-      className="group relative bg-void"
+      className="group relative mt-[8vh] bg-void md:mt-[14vh]"
     >
+      <style>{NOISE_PLACEMENT_CSS}</style>
       <div
         ref={stage}
         className="gutter mx-auto flex max-w-6xl flex-col items-center gap-12 py-24 text-center group-data-[scene=on]:grid group-data-[scene=on]:h-[100svh] group-data-[scene=on]:max-w-6xl group-data-[scene=on]:gap-0 group-data-[scene=on]:place-items-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:py-0"
@@ -159,17 +254,12 @@ export default function Chennai() {
           is applied, so one set of markup serves both layouts.
         */}
         <ul className="flex flex-col items-center gap-6 group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1 group-data-[scene=on]:block group-data-[scene=on]:h-full group-data-[scene=on]:w-full">
-          {CHENNAI.noise.map((item, i) => (
+          {CHENNAI.noise.map((item) => (
             <li
               key={item.word}
-              className="chennai-noise group-data-[scene=on]:absolute"
-              style={{
-                // Scattered by hand rather than randomly: these four positions
-                // read as a composition at any viewport, and a random layout
-                // would differ on every reload.
-                top: ['18%', '34%', '56%', '72%'][i],
-                left: ['8%', '52%', '14%', '46%'][i],
-              }}
+              // Placement lives in NOISE_PLACEMENT_CSS above, which anchors
+              // each word to the title's centre line so nothing lands on it.
+              className="chennai-noise"
             >
               <span className="type-display block text-[clamp(2rem,7vw,5.5rem)] leading-none text-chalk group-data-[scene=on]:text-left">
                 {item.word}
@@ -200,7 +290,7 @@ export default function Chennai() {
             {CHENNAI.closing}
           </p>
 
-          <p className="type-label mt-10">{CHENNAI.attribution}</p>
+          <p className="chennai-attribution type-label mt-10">{CHENNAI.attribution}</p>
         </div>
       </div>
     </section>
