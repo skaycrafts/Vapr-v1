@@ -43,24 +43,32 @@ function RadialMap({ location }: { location: Location }) {
       {location.landmarks.map((d, i) => {
         const angle = (-64 + (i * 360) / location.landmarks.length) * (Math.PI / 180);
         const r = scale(d.km);
+
+        /*
+         * Rounded, and it has to be.
+         *
+         * `Math.cos` is not required to be correctly rounded, so Node and the
+         * browser can disagree in the last bit or two — 88.25995270087633 on
+         * the server against 88.25995270087631 on the client. React compares
+         * the two as strings and reports a hydration mismatch for a difference
+         * of one ten-trillionth of an SVG unit. Three decimals is far finer
+         * than a 220-unit viewBox can show and identical on both sides.
+         */
+        const x = +(110 + Math.cos(angle) * r).toFixed(3);
+        const y = +(110 + Math.sin(angle) * r).toFixed(3);
+
         return (
           <g key={d.place} className="gt-mark">
             <line
               x1={110}
               y1={110}
-              x2={110 + Math.cos(angle) * r}
-              y2={110 + Math.sin(angle) * r}
+              x2={x}
+              y2={y}
               stroke="currentColor"
               strokeWidth={0.55}
               className="text-graphite"
             />
-            <circle
-              cx={110 + Math.cos(angle) * r}
-              cy={110 + Math.sin(angle) * r}
-              r={2.6}
-              fill="currentColor"
-              className="text-chalk"
-            />
+            <circle cx={x} cy={y} r={2.6} fill="currentColor" className="text-chalk" />
           </g>
         );
       })}
