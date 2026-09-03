@@ -2,8 +2,11 @@
 
 import { useRef } from 'react';
 import { ExternalLink } from 'lucide-react';
+import RevealText from '@/motion/primitives/RevealText';
 import { SITE, mapsHref, type Location } from '@/lib/content';
-import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { CONTENT, EASE, STAGGER } from '@/motion/config';
 
 const RINGS = [2, 4, 6, 8, 10];
 
@@ -82,39 +85,43 @@ function RadialMap({ location }: { location: Location }) {
 export default function GettingThere({ location }: { location: Location }) {
   const root = useRef<HTMLElement>(null);
 
-  useIsoLayoutEffect(() => {
+  useMotionEffect(root, () => {
     const el = root.current;
     if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const ctx = gsap.context(() => {
-      gsap.from('.gt-mark', {
-        opacity: 0,
-        scale: 0.4,
-        transformOrigin: '110px 110px',
-        duration: 0.7,
-        ease: 'expo.out',
-        stagger: 0.06,
-        scrollTrigger: { trigger: el, start: 'top 70%' },
-      });
-      gsap.from('.gt-row', {
-        opacity: 0,
-        y: 12,
-        duration: 0.6,
-        ease: 'expo.out',
-        stagger: 0.045,
-        scrollTrigger: { trigger: el, start: 'top 70%' },
-      });
-    }, el);
+    // Each landmark is placed by measuring outward from the property, so the
+    // marks arrive from the centre in the order the eye would read them.
+    gsap.from('.gt-mark', {
+      opacity: 0,
+      scale: 0.4,
+      transformOrigin: '110px 110px',
+      duration: CONTENT.base,
+      ease: EASE.outLong,
+      stagger: STAGGER.items,
+      scrollTrigger: { trigger: el, start: 'top 70%', once: true },
+    });
 
-    return () => ctx.revert();
-  }, []);
+    gsap.from('.gt-row', {
+      opacity: 0,
+      y: 12,
+      duration: CONTENT.fast,
+      ease: EASE.outLong,
+      stagger: STAGGER.rows,
+      scrollTrigger: { trigger: el, start: 'top 70%', once: true },
+    });
+  });
 
   return (
     <section ref={root} id="getting-there" className="gutter relative bg-void py-20 md:py-28">
       <div className="grid gap-12 md:grid-cols-12 md:gap-10">
         <div className="md:col-span-4">
-          <h2 className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">Getting there</h2>
+          <RevealText
+            as="h2"
+            mode="lines"
+            className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+          >
+            Getting there
+          </RevealText>
           <address className="mt-7 not-italic text-lg leading-relaxed text-mist">
             {location.street}
             <br />

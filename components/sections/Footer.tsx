@@ -73,11 +73,11 @@ export default function Footer() {
       scrollTrigger: { trigger: '.footer-wordmark', start: 'top 92%', once: true },
     });
 
-    gsap.to('.footer-seal', {
-      rotate: 90,
-      ease: EASE.none,
-      scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom bottom', scrub: SCRUB.loose },
-    });
+    // The seal used to rotate 90° across the footer's scroll. Chennai's whole
+    // closing movement rests on the mark being the one thing that does not
+    // perform — it "does not spin, draw, pulse or shimmer" — and a
+    // scroll-linked logo rotation two sections later contradicts that for no
+    // reason beyond decoration. It sits still now.
   });
 
   return (
@@ -199,8 +199,18 @@ export default function Footer() {
           </nav>
         </div>
 
+        {/*
+          The ceiling was 17rem — a fixed 272px whatever the screen is doing —
+          which set the word at barely half the measure it is centred in. This
+          is the one place on the page the wordmark is allowed to be the
+          largest thing; at 53% of the column it was merely a large heading
+          with a lot of air either side. 26vw is the size that actually fills
+          the measure, and it holds the same proportion on a phone as on a
+          desktop rather than collapsing to a cap at one end and a floor at
+          the other.
+        */}
         <div className="footer-wordmark mt-16 overflow-hidden pb-[0.06em] md:mt-24" aria-hidden>
-          <span className="type-display block text-center text-[clamp(4rem,20vw,17rem)] leading-[1.02] tracking-[0.02em] text-chalk">
+          <span className="type-display block text-center text-[clamp(3.5rem,26vw,24rem)] leading-[1.02] tracking-[0.02em] text-chalk">
             VAPR
           </span>
         </div>

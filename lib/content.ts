@@ -63,6 +63,14 @@ export type Location = {
   /** Slugs from the media manifest. Empty where the shoot has not happened. */
   readonly images: readonly string[];
   /**
+   * The frame this property shows when the two are set side by side on the
+   * home page. Deliberately not `heroImage`: Ashok Nagar's hero *is* the
+   * site's own opening photograph, and showing it again a screen and a half
+   * later made the second appearance read as a placeholder rather than as a
+   * choice. Falls back to `heroImage` where a property has only the one.
+   */
+  readonly panelImage?: string;
+  /**
    * True when `images` are borrowed from another property. The page says so
    * rather than implying the pictures show this building.
    */
@@ -140,6 +148,9 @@ export const LOCATIONS: readonly Location[] = [
       'room-a-bath',
     ],
     heroImage: 'facade-dusk',
+    // The hero photograph is this building; the panel shows it from the
+    // street instead, so the two are not the same frame twice.
+    panelImage: 'facade-street',
   },
   {
     slug: 'guindy',

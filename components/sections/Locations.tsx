@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import Frame from '@/components/media/Frame';
+import RevealText from '@/motion/primitives/RevealText';
 import { LOCATIONS, LOCATIONS_INTRO, SITE, placeOf } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
@@ -52,7 +53,9 @@ export default function Locations() {
 
   /** The intro copy arrives normally — this part is a page, not a scene. */
   useMotionEffect(root, () => {
-    gsap.from('.loc-copy > *', {
+    // Scoped to the two columns' own children rather than to the title, which
+    // now carries its own line mask and must not be faded on top of it.
+    gsap.from('.loc-copy [data-lede]', {
       y: 20,
       opacity: 0,
       duration: CINEMA.fast,
@@ -126,9 +129,12 @@ export default function Locations() {
         // The outgoing frame keeps moving underneath. It never blinks out.
         .to(leavingPlate, { scale: 1.04, opacity: 0.35, duration: WIPE }, 0)
         // Type changes over: out through the top of its mask, in from below.
+        // 130 clears `split-mask`'s 15% descender bleed as well as the box;
+        // at 110 the incoming name sat in that bleed as a faint ghost before
+        // it moved.
         .fromTo(
           entering.querySelectorAll('[data-swap] > *'),
-          { yPercent: 110 },
+          { yPercent: 130 },
           { yPercent: 0, duration: 0.75, ease: EASE.outLong, stagger: STAGGER.lines },
           0.1
         )
@@ -167,18 +173,22 @@ export default function Locations() {
       <div className="gutter">
         <div className="loc-copy grid gap-10 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-5">
-            <p className="type-label">{LOCATIONS_INTRO.eyebrow}</p>
-            <h2
+            <p data-lede className="type-label">
+              {LOCATIONS_INTRO.eyebrow}
+            </p>
+            <RevealText
+              as="h2"
               id="locations-title"
+              mode="lines"
               className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk"
             >
               {LOCATIONS_INTRO.title}
-            </h2>
+            </RevealText>
           </div>
 
           <div className="space-y-5 md:col-span-6 md:col-start-7 md:pt-3">
             {LOCATIONS_INTRO.body.map((para) => (
-              <p key={para} className="max-w-[52ch] text-lg leading-relaxed text-mist">
+              <p key={para} data-lede className="max-w-[52ch] text-lg leading-relaxed text-mist">
                 {para}
               </p>
             ))}
@@ -223,7 +233,7 @@ export default function Locations() {
             </button>
           ))}
 
-          <span className="tabular type-label ml-auto" aria-hidden>
+          <span className="tabular type-label ml-2 self-end pb-2" aria-hidden>
             {String(active + 1).padStart(2, '0')} / {String(LOCATIONS.length).padStart(2, '0')}
           </span>
         </div>
@@ -236,7 +246,9 @@ export default function Locations() {
         id="loc-panel"
         role="tabpanel"
         aria-labelledby={`loc-tab-${location.slug}`}
-        aria-live="polite"
+        // Not a live region. A tabpanel already moves the reader's context
+        // when its tab is selected; announcing the whole panel on top of that
+        // means every arrow key re-reads four paragraphs.
         className="loc-stage relative mt-10 md:mt-14"
       >
         {LOCATIONS.map((loc, i) => (
@@ -262,7 +274,7 @@ export default function Locations() {
           >
             <div data-plate className="md:col-span-7">
               <Frame
-                slug={loc.heroImage as ImageSlug}
+                slug={(loc.panelImage ?? loc.heroImage) as ImageSlug}
                 sizes="(min-width: 768px) 58vw, 100vw"
                 ratio={16 / 10}
                 className="w-full"

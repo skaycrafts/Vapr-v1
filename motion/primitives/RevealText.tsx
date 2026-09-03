@@ -20,6 +20,8 @@ export type RevealTextProps = {
   mode?: Mode;
   as?: ElementType;
   className?: string;
+  /** Needed where a landmark points at this title with `aria-labelledby`. */
+  id?: string;
   /** Start when the element reaches this point in the viewport. */
   start?: string;
   /** Seconds of delay after the trigger fires. */
@@ -50,6 +52,7 @@ export default function RevealText({
   mode = 'lines',
   as = 'div',
   className,
+  id,
   start = 'top 82%',
   delay = 0,
   immediate = false,
@@ -145,7 +148,7 @@ export default function RevealText({
   // `data-motion` is the hook the global reduced-motion rule uses to force
   // everything back to its resting state (see globals.css).
   return (
-    <Tag ref={ref} className={className} data-motion={animate ? 'text' : undefined}>
+    <Tag ref={ref} id={id} className={className} data-motion={animate ? 'text' : undefined}>
       {children}
     </Tag>
   );

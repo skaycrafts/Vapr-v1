@@ -17,7 +17,14 @@ export default function FilmGrain() {
     <>
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-[var(--z-overlay)] opacity-[0.055] mix-blend-overlay motion-safe:animate-[grain_1.2s_steps(6)_infinite]"
+        // The tile itself is free. The *animation* is not: a full-viewport
+        // fixed layer in `mix-blend-overlay`, stepping forever, forces the
+        // whole page through a separate compositing pass on every frame for
+        // the life of the visit. On a desktop GPU that is nothing; on a phone
+        // it is a tax paid continuously for six pixels of drift nobody can see
+        // at that size. The grain still sits there — it just holds still where
+        // holding still is worth more than moving.
+        className="grain-layer pointer-events-none fixed inset-0 z-[var(--z-overlay)] opacity-[0.055] mix-blend-overlay"
         style={{ backgroundImage: NOISE, backgroundSize: '180px 180px' }}
       />
       <div
@@ -29,6 +36,9 @@ export default function FilmGrain() {
         }}
       />
       <style>{`
+        @media (prefers-reduced-motion: no-preference) and (min-width: 768px) and (pointer: fine) {
+          .grain-layer { animation: grain 1.2s steps(6) infinite; }
+        }
         @keyframes grain {
           0%   { transform: translate3d(0, 0, 0); }
           16%  { transform: translate3d(-6%, 4%, 0); }

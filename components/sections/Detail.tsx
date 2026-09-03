@@ -3,7 +3,6 @@
 import { useRef } from 'react';
 import { Check, Minus } from 'lucide-react';
 import Frame from '@/components/media/Frame';
-import Glass from '@/components/ui/Glass';
 import RevealText from '@/motion/primitives/RevealText';
 import RevealImage from '@/motion/primitives/RevealImage';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
@@ -35,7 +34,7 @@ export default function Detail() {
       y: 12,
       duration: CONTENT.base,
       ease: EASE.outLong,
-      stagger: STAGGER.chars * 3,
+      stagger: STAGGER.rows,
       scrollTrigger: { trigger: '.detail-sheet', start: 'top 78%', once: true },
     });
 
@@ -72,17 +71,26 @@ export default function Detail() {
         </header>
 
         {/*
-          Four panes: what both hotels give you, what neither does, and then
-          each property's own list. Set as glass rather than as rules on a flat
-          field so the specification reads as four separate answers instead of
-          one long column a guest has to parse.
+          Four columns: what both hotels give you, what neither does, and then
+          each property's own list.
 
-          One box per question, and the boxes stay the same shape whatever
-          length the list inside them happens to be.
+          These used to be four <Glass> panes. Glass is a real refracting
+          surface — it earns its cost by bending whatever is behind it, which
+          is why the site spends it on the navigation and the reserve panel,
+          both of which float over photography. Here the ground is flat black.
+          There is nothing to refract, so all four rendered as grey rounded
+          rectangles with a 2%-white fill: the most generic component on the
+          site, sitting in the section that is otherwise the most
+          typographically disciplined.
+
+          A rule and a label separate four answers perfectly well, and it is
+          the language the rest of the page is already written in.
         */}
-        <div className="detail-sheet grid gap-3 pt-10 sm:grid-cols-2 md:pt-14 xl:grid-cols-4">
-          <Glass className="rounded-2xl p-6 md:p-7" radius={16} scale={-58}>
-            <h3 className="type-label mb-4">Included at both</h3>
+        <div className="detail-sheet grid gap-x-10 gap-y-12 pt-10 sm:grid-cols-2 md:pt-14 xl:grid-cols-4 xl:gap-x-12">
+          <section>
+            <h3 className="type-label mb-4 border-t border-hairline-strong pt-4">
+              Included at both
+            </h3>
             <ul>
               {STAY.included.map((item) => (
                 <li
@@ -99,10 +107,12 @@ export default function Detail() {
                 </li>
               ))}
             </ul>
-          </Glass>
+          </section>
 
-          <Glass className="rounded-2xl p-6 md:p-7" radius={16} scale={-58}>
-            <h3 className="type-label mb-4">Not here, at either</h3>
+          <section>
+            <h3 className="type-label mb-4 border-t border-hairline-strong pt-4">
+              Not here, at either
+            </h3>
             <ul>
               {STAY.notAvailable.map((item) => (
                 <li
@@ -122,16 +132,13 @@ export default function Detail() {
             <p className="detail-row mt-4 border-t border-hairline pt-4 text-xs leading-relaxed text-smoke">
               {STAY.earlyCheckIn}
             </p>
-          </Glass>
+          </section>
 
           {LOCATIONS.map((loc) => (
-            <Glass
-              key={loc.slug}
-              className="rounded-2xl p-6 md:p-7"
-              radius={16}
-              scale={-58}
-            >
-              <h3 className="type-label mb-4">{loc.shortName}</h3>
+            <section key={loc.slug}>
+              <h3 className="type-label mb-4 border-t border-hairline-strong pt-4">
+                {loc.shortName}
+              </h3>
               <ul>
                 {loc.facilities.map((item) => (
                   <li
@@ -142,7 +149,7 @@ export default function Detail() {
                   </li>
                 ))}
               </ul>
-            </Glass>
+            </section>
           ))}
         </div>
       </div>

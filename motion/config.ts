@@ -64,6 +64,11 @@ export const STAGGER = {
   lines: 0.08,
   items: 0.06,
   panels: 0.1,
+  /**
+   * Specification rows. Tighter than `items` because a reader scanning a list
+   * of facts should never be waiting on the twelfth row to arrive.
+   */
+  rows: 0.035,
 } as const;
 
 /**

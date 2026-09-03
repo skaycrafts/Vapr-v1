@@ -195,12 +195,14 @@ export default function Nav() {
 
         <div className="gutter relative flex items-center justify-between py-5 md:py-7">
           <Link href="/" data-cursor="Home" className="group flex items-center gap-3 text-chalk">
-            <Emblem
-              variant="simple"
-              title="VAPR"
-              className="w-8 transition-transform duration-[1.6s] ease-[var(--ease-out-quart)] group-hover:rotate-90 md:w-9"
-            />
-            <span className="type-display text-lg tracking-[0.32em] md:text-xl">VAPR</span>
+            {/* The mark held still and the wordmark's tracking opens a
+                fraction — the same restraint the rest of the site's hover
+                states keep (§21). It used to rotate 90°, which is a
+                decoration rather than a response. */}
+            <Emblem variant="simple" title="VAPR" className="w-8 md:w-9" />
+            <span className="type-display text-lg tracking-[0.32em] transition-[letter-spacing,color] duration-500 ease-[var(--ease-out-quart)] group-hover:tracking-[0.4em] md:text-xl">
+              VAPR
+            </span>
           </Link>
 
           <nav aria-label="Primary" className="hidden md:block">

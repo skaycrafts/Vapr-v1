@@ -5,8 +5,12 @@ import Link from 'next/link';
 import { ArrowLeft, Star } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import Emblem from '@/components/brand/Emblem';
+import RevealText from '@/motion/primitives/RevealText';
+import RevealImage from '@/motion/primitives/RevealImage';
 import { SITE, placeOf, type Location } from '@/lib/content';
-import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
+import { gsap } from '@/lib/gsap';
+import { useMotionEffect } from '@/motion/useMotionEffect';
+import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
 import type { ImageSlug } from '@/lib/media';
 
 /**
@@ -14,31 +18,34 @@ import type { ImageSlug } from '@/lib/media';
  * full-bleed behind the name; where it does not, the seal takes the field
  * instead, at a scale that reads as a deliberate frontispiece rather than a
  * gap waiting for an image.
+ *
+ * The photograph arrives on `expand` — the reveal reserved for a chapter's
+ * first image — so opening a property reads as the same kind of event as any
+ * other arrival on the site, rather than as a page that simply appeared.
  */
 export default function PropertyHero({ location }: { location: Location }) {
   const root = useRef<HTMLElement>(null);
   const hasPhoto = Boolean(location.heroImage);
 
-  useIsoLayoutEffect(() => {
+  useMotionEffect(root, () => {
     const el = root.current;
     if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const ctx = gsap.context(() => {
-      gsap
-        .timeline({ defaults: { ease: 'expo.out' } })
-        .from('.ph-line > span', { yPercent: 118, duration: 1.2, stagger: 0.09 })
-        .from('.ph-meta', { opacity: 0, y: 14, duration: 0.9, stagger: 0.07 }, 0.35);
+    gsap.from('.ph-meta', {
+      opacity: 0,
+      y: 14,
+      duration: CINEMA.fast,
+      ease: EASE.outLong,
+      stagger: STAGGER.items,
+      delay: 0.35,
+    });
 
-      gsap.to('.ph-plate', {
-        yPercent: 12,
-        ease: 'none',
-        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
-      });
-    }, el);
-
-    return () => ctx.revert();
-  }, []);
+    gsap.to('.ph-plate', {
+      yPercent: 12,
+      ease: EASE.none,
+      scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: SCRUB.tight },
+    });
+  });
 
   return (
     <section
@@ -47,7 +54,12 @@ export default function PropertyHero({ location }: { location: Location }) {
     >
       {hasPhoto ? (
         <>
-          <div className="ph-plate absolute inset-0 -top-[6%] h-[112%]">
+          <RevealImage
+            style="expand"
+            immediate
+            scaleFrom={1.1}
+            className="ph-plate absolute inset-0 -top-[6%] h-[112%]"
+          >
             <Frame
               slug={location.heroImage as ImageSlug}
               className="h-full w-full"
@@ -56,7 +68,7 @@ export default function PropertyHero({ location }: { location: Location }) {
               priority
               position="50% 45%"
             />
-          </div>
+          </RevealImage>
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
@@ -86,11 +98,18 @@ export default function PropertyHero({ location }: { location: Location }) {
 
         <p className="ph-meta type-label">{placeOf(location)}</p>
 
-        <h1 className="type-display mt-4 text-[clamp(2.5rem,8vw,6rem)] text-chalk">
-          <span className="ph-line split-mask">
-            <span className="block">{location.shortName}</span>
-          </span>
-        </h1>
+        {/* The property's name is the largest statement on the page, so it
+            gets the cinematic weight rather than the content weight (§06). */}
+        <RevealText
+          as="h1"
+          mode="lines"
+          immediate
+          scale="cinema"
+          delay={0.1}
+          className="type-display mt-4 text-[clamp(2.5rem,8vw,6rem)] text-chalk"
+        >
+          {location.shortName}
+        </RevealText>
 
         <div className="mt-8 flex flex-col gap-6 border-t border-hairline pt-6 md:flex-row md:items-end md:justify-between md:gap-12">
           <address className="ph-meta not-italic text-bone">

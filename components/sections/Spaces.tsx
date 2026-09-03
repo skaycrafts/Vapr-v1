@@ -2,10 +2,11 @@
 
 import { useRef } from 'react';
 import Frame from '@/components/media/Frame';
+import RevealText from '@/motion/primitives/RevealText';
 import { SPACES } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
-import { EASE, SCRUB } from '@/motion/config';
+import { EASE, SCRUB, STAGGER } from '@/motion/config';
 import type { ImageSlug } from '@/lib/media';
 
 /**
@@ -60,35 +61,67 @@ export default function Spaces() {
       },
     });
 
+    /**
+     * One unit of timeline per room, and the two layers are scheduled on
+     * deliberately different rules.
+     *
+     * The photographs *cross*: each arrival is pulled a quarter of a unit
+     * early so it is already coming up as the one in front goes, and the stage
+     * is never empty. That overlap is what makes this feel like walking
+     * through a building.
+     *
+     * The names do not cross — they cut. Type dissolving through type is not a
+     * dissolve, it is two sentences printed on top of each other: for a few
+     * hundred milliseconds every step neither one is readable, and on a phone,
+     * where the label sits directly under the photograph rather than beside
+     * it, it reads as a rendering fault.
+     *
+     * So the handoff is exact. The outgoing name travels up out of its mask
+     * over the fifth of a unit ending at i+1, and the incoming one starts from
+     * below at i+1 — no overlap, and no dead beat either, which is the other
+     * way to get this wrong. Uncovered rather than faded, the same as every
+     * other title on the site (§05, §06).
+     */
     plates.forEach((plate, i) => {
       const label = labels[i];
-      // One unit of timeline per room, with each arrival pulled a quarter of a
-      // unit early so it crosses the outgoing one.
-      const enter = i - 0.25;
+      const name = label?.querySelector<HTMLElement>('[data-swap] > *');
+      const rest = label ? Array.from(label.querySelectorAll<HTMLElement>('[data-fade]')) : [];
 
       if (i > 0) {
-        tl.fromTo(
-          plate,
-          { opacity: 0, scale: 1.07 },
-          { opacity: 1, scale: 1, duration: 0.7 },
-          enter
-        );
-        if (label) {
+        tl.fromTo(plate, { opacity: 0, scale: 1.07 }, { opacity: 1, scale: 1, duration: 0.7 }, i - 0.25);
+
+        // Begins on the exact beat the previous name finishes leaving.
+        if (name) {
           tl.fromTo(
-            label,
-            { opacity: 0, yPercent: 40 },
-            { opacity: 1, yPercent: 0, duration: 0.6 },
-            enter + 0.05
+            name,
+            // 130, not 112: `split-mask` bleeds 15% of the element's height
+            // past the overflow box so descenders are not sheared, and a name
+            // parked at 112% is still inside that bleed as a faint ghost.
+            { yPercent: 130 },
+            { yPercent: 0, duration: 0.42, ease: EASE.outLong },
+            i
+          );
+        }
+        if (rest.length) {
+          tl.fromTo(
+            rest,
+            { opacity: 0, y: 14 },
+            { opacity: 1, y: 0, duration: 0.4, stagger: STAGGER.items },
+            i + 0.06
           );
         }
       }
 
-      // Everything except the last room leaves as its successor arrives.
       if (i < plates.length - 1) {
-        const leave = i + 1 - 0.25;
-        tl.to(plate, { opacity: 0, scale: 0.985, duration: 0.7 }, leave);
-        if (label) {
-          tl.to(label, { opacity: 0, yPercent: -35, duration: 0.55 }, leave);
+        tl.to(plate, { opacity: 0, scale: 0.985, duration: 0.7 }, i + 0.75);
+
+        // Out through the top of the mask, landing exactly on i + 1, which is
+        // where the next name starts from below.
+        if (name) {
+          tl.to(name, { yPercent: -130, duration: 0.2, ease: EASE.inOut }, i + 0.8);
+        }
+        if (rest.length) {
+          tl.to(rest, { opacity: 0, y: -12, duration: 0.22 }, i + 0.76);
         }
       }
     });
@@ -107,12 +140,21 @@ export default function Spaces() {
     >
       <div
         ref={stage}
-        className="gutter py-20 group-data-[scene=on]:flex group-data-[scene=on]:h-[100svh] group-data-[scene=on]:flex-col group-data-[scene=on]:justify-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:py-0 md:py-32"
+        // The pinned stage is exactly one viewport tall, so its padding is the
+        // only thing holding the composition off the edges of the screen. With
+        // `py-0` the title sat at y=0 — underneath the fixed navigation — and
+        // the photograph ran to the last pixel at the foot. The top value
+        // clears the navigation at both sizes.
+        className="gutter py-20 group-data-[scene=on]:flex group-data-[scene=on]:h-[100svh] group-data-[scene=on]:flex-col group-data-[scene=on]:justify-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:pb-10 group-data-[scene=on]:pt-24 md:py-32 md:group-data-[scene=on]:pb-14 md:group-data-[scene=on]:pt-28"
       >
         <header className="flex flex-wrap items-end justify-between gap-6 border-b border-hairline pb-8 group-data-[scene=on]:border-none group-data-[scene=on]:pb-6">
-          <h2 className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk">
+          <RevealText
+            as="h2"
+            mode="lines"
+            className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+          >
             The rest of it
-          </h2>
+          </RevealText>
           <p className="max-w-[34ch] text-mist">Six shared rooms, and what each one is for.</p>
         </header>
 
@@ -136,16 +178,21 @@ export default function Spaces() {
               </div>
 
               <div className="space-label mt-5 group-data-[scene=on]:mt-0 md:group-data-[scene=on]:col-span-5">
-                <div className="flex items-baseline gap-4">
+                <div data-fade className="flex items-baseline gap-4">
                   <span className="tabular type-label">{String(i + 1).padStart(2, '0')}</span>
                   <span className="h-px flex-1 bg-hairline" />
                 </div>
 
-                <h3 className="type-display mt-4 text-[clamp(1.75rem,3.6vw,2.75rem)] leading-none text-chalk">
-                  {space.name}
+                <h3
+                  data-swap
+                  className="split-mask mt-4 text-[clamp(1.75rem,3.6vw,2.75rem)] leading-none"
+                >
+                  <span className="type-display block text-chalk">{space.name}</span>
                 </h3>
 
-                <p className="mt-4 max-w-[32ch] text-mist">{space.line}</p>
+                <p data-fade className="mt-4 max-w-[32ch] text-mist">
+                  {space.line}
+                </p>
               </div>
             </li>
           ))}

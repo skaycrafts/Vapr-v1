@@ -186,7 +186,10 @@ export default function Hero() {
           </h1>
 
           <div className="flex shrink-0 items-end justify-between gap-10 md:flex-col md:items-end md:gap-6">
-            <div className="hero-meta text-right">
+            {/* Right-aligned only where it is actually on the right. On a
+                phone this block sits at the left of a justify-between row, and
+                ragging it right left the two lines floating against nothing. */}
+            <div className="hero-meta md:text-right">
               <p className="type-label">{HERO.place}</p>
               <p className="mt-1 text-sm text-mist">
                 {LOCATIONS.map((l) => l.area).join(' · ')}

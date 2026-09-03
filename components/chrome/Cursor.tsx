@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { gsap } from '@/lib/gsap';
+import { useCapability } from '@/motion/capability';
 import { damp } from '@/lib/utils';
 
 /**
@@ -18,11 +20,13 @@ export default function Cursor() {
   const root = useRef<HTMLDivElement>(null);
   const ring = useRef<HTMLSpanElement>(null);
   const label = useRef<HTMLSpanElement>(null);
+  // Read once, centrally, and live: this used to run its own pair of
+  // `matchMedia` calls at mount, which meant a visitor who turned reduced
+  // motion on kept the trailing ring until they reloaded.
+  const { pointerMotion } = useCapability();
 
   useEffect(() => {
-    const fine = window.matchMedia('(pointer: fine)');
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (!fine.matches || reduce.matches) return;
+    if (!pointerMotion) return;
 
     const wrap = root.current;
     const disc = ring.current;
@@ -36,8 +40,6 @@ export default function Cursor() {
     let size = 1;
     let targetSize = 1;
     let shown = false;
-    let frame = 0;
-    let last = performance.now();
 
     const onMove = (e: PointerEvent) => {
       pointer.x = e.clientX;
@@ -62,30 +64,31 @@ export default function Cursor() {
       wrap.style.opacity = '0';
     };
 
-    const tick = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.1);
-      last = now;
+    // Driven by the GSAP ticker rather than a private `requestAnimationFrame`.
+    // Lenis, every scrubbed timeline and this ring now share one clock, so the
+    // cursor can never land a frame ahead of the page it is pointing at.
+    const tick = () => {
+      const dt = gsap.ticker.deltaRatio(60) / 60;
       pos.x = damp(pos.x, pointer.x, 0.24, dt);
       pos.y = damp(pos.y, pointer.y, 0.24, dt);
       size = damp(size, targetSize, 0.2, dt);
       wrap.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
       disc.style.transform = `translate(-50%, -50%) scale(${size})`;
-      frame = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
+    gsap.ticker.add(tick);
 
     window.addEventListener('pointermove', onMove, { passive: true });
     document.addEventListener('pointerleave', hide);
     window.addEventListener('blur', hide);
 
     return () => {
-      cancelAnimationFrame(frame);
+      gsap.ticker.remove(tick);
       window.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerleave', hide);
       window.removeEventListener('blur', hide);
       delete document.documentElement.dataset.cursorMode;
     };
-  }, []);
+  }, [pointerMotion]);
 
   return (
     <div

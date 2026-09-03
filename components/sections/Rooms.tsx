@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import Emblem from '@/components/brand/Emblem';
+import RevealText from '@/motion/primitives/RevealText';
 import { LOCATIONS, STAY } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
@@ -118,16 +119,20 @@ export default function Rooms() {
         <div
           className={cn(
             'room-intro gutter flex flex-col justify-end py-16',
-            'group-data-[scene=on]:h-full group-data-[scene=on]:w-[82vw] group-data-[scene=on]:shrink-0 group-data-[scene=on]:justify-center group-data-[scene=on]:py-0',
-            'md:group-data-[scene=on]:w-[34vw]'
+            'group-data-[scene=on]:h-full group-data-[scene=on]:w-[82vw] group-data-[scene=on]:shrink-0 group-data-[scene=on]:justify-center group-data-[scene=on]:pb-10 group-data-[scene=on]:pt-24',
+            'md:group-data-[scene=on]:w-[34vw] md:group-data-[scene=on]:py-0'
           )}
         >
           <p className="type-label">The rooms</p>
-          <h2 className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk">
+          <RevealText
+            as="h2"
+            mode="lines"
+            className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk"
+          >
             One room,
             <br />
             done properly.
-          </h2>
+          </RevealText>
           <p className="mt-6 max-w-[32ch] text-mist">
             Neither hotel makes you pick between five tiers of the same bed. There is one
             category at each, and this is what is in it.
@@ -142,8 +147,13 @@ export default function Rooms() {
             key={loc.slug}
             className={cn(
               'room-panel gutter flex flex-col gap-8 border-t border-hairline py-14',
-              'group-data-[scene=on]:h-full group-data-[scene=on]:w-[90vw] group-data-[scene=on]:shrink-0 group-data-[scene=on]:justify-center group-data-[scene=on]:gap-6 group-data-[scene=on]:border-l group-data-[scene=on]:border-t-0 group-data-[scene=on]:py-0',
-              'md:group-data-[scene=on]:w-[80vw] md:group-data-[scene=on]:items-center md:group-data-[scene=on]:gap-12',
+              // `py-0` here was a desktop decision: on a wide screen the panel
+              // is two short columns with room to spare, but on a phone it is
+              // a photograph stacked on a specification and the two together
+              // fill the stage — so there was nothing left for `justify-center`
+              // to centre, and the frame ran up under the fixed navigation.
+              'group-data-[scene=on]:h-full group-data-[scene=on]:w-[90vw] group-data-[scene=on]:shrink-0 group-data-[scene=on]:justify-center group-data-[scene=on]:gap-6 group-data-[scene=on]:border-l group-data-[scene=on]:border-t-0 group-data-[scene=on]:pb-10 group-data-[scene=on]:pt-24',
+              'md:group-data-[scene=on]:w-[80vw] md:group-data-[scene=on]:items-center md:group-data-[scene=on]:gap-12 md:group-data-[scene=on]:py-0',
               // Alternating only where the panel is actually two columns.
               i % 2 === 0
                 ? 'md:group-data-[scene=on]:flex-row'

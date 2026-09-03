@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, MessageCircle, Phone } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import Glass from '@/components/ui/Glass';
+import RevealText from '@/motion/primitives/RevealText';
 import { LOCATIONS, RESERVE, SITE, STAY, needsVerification } from '@/lib/content';
 import { cn } from '@/lib/utils';
 import { gsap } from '@/lib/gsap';
@@ -55,7 +56,10 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
    * before it can be typed into.
    */
   useMotionEffect(root, () => {
-    gsap.from('.reserve-copy > *', {
+    // Everything under the title, which now carries its own line mask.
+    // Everything under the title, which now carries its own line mask and
+    // must not be faded on top of it.
+    gsap.from('.reserve-copy [data-lede]', {
       y: 22,
       opacity: 0,
       duration: CONTENT.slow,
@@ -96,12 +100,25 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
       id="reserve"
       className="relative overflow-hidden bg-void py-20 md:py-28"
     >
+      {/*
+        The photograph used to sit at 30% under a scrim that was 62% black
+        across its whole middle. The two together left a dark smudge that was
+        neither a readable room nor a clean field — and, since <Glass> only
+        earns its cost when there is something behind it to bend, the panel on
+        the right was refracting nothing.
+
+        So the art direction is directional now rather than uniform: the frame
+        is bright enough to read, a vertical scrim still lands the section into
+        black at both edges, and a horizontal one keeps the left column — which
+        carries type straight on the photograph — on a dark ground. What is
+        left lit is the right-hand side, which is exactly where the glass sits.
+      */}
       <Frame
         slug="room-b-light"
         className="reserve-plate absolute inset-0 h-full w-full"
         ratio="fill"
         sizes="100vw"
-        imgClassName="opacity-30"
+        imgClassName="opacity-55"
         position="50% 60%"
       />
       <div
@@ -109,16 +126,33 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, var(--color-void) 0%, color-mix(in oklab, var(--color-void) 62%, transparent) 38%, var(--color-void) 100%)',
+            'linear-gradient(to bottom, var(--color-void) 0%, color-mix(in oklab, var(--color-void) 42%, transparent) 30%, color-mix(in oklab, var(--color-void) 46%, transparent) 68%, var(--color-void) 100%)',
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to right, color-mix(in oklab, var(--color-void) 88%, transparent) 0%, color-mix(in oklab, var(--color-void) 70%, transparent) 34%, transparent 62%)',
         }}
       />
 
       <div className="gutter relative grid gap-12 md:grid-cols-12 md:items-center md:gap-10">
         <div className="reserve-copy md:col-span-5">
-          <h2 className="type-display text-[clamp(2.5rem,6vw,5rem)] text-chalk">{RESERVE.title}</h2>
-          <p className="mt-5 max-w-[34ch] text-lg text-mist">{RESERVE.body}</p>
+          <RevealText
+            as="h2"
+            mode="lines"
+            scale="cinema"
+            className="type-display text-[clamp(2.5rem,6vw,5rem)] text-chalk"
+          >
+            {RESERVE.title}
+          </RevealText>
+          <p data-lede className="mt-5 max-w-[34ch] text-lg text-mist">
+            {RESERVE.body}
+          </p>
 
-          <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
+          <dl data-lede className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
             <div>
               <dt className="type-label">From</dt>
               <dd className="tabular mt-1 text-xl text-chalk">
@@ -134,7 +168,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             </div>
           </dl>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <div data-lede className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
             <a
               href={phoneHref}
               className="inline-flex items-center gap-2 text-mist transition-colors hover:text-chalk"

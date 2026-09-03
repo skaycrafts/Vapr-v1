@@ -60,8 +60,8 @@ const NOISE_PLACEMENT_CSS = `
   #chennai[data-scene='on'] .chennai-noise {
     position: absolute;
 
-    /* Half the title's height. Mirrors its own clamp(3rem, 16vw, 12rem). */
-    --half: min(8vw, 96px);
+    /* Half the title's height. Mirrors its own clamp(3rem, 16vw, 18rem). */
+    --half: min(8vw, 144px);
 
     /* The title does not hold still — it drifts up by 8% of its height as the
        noise arrives, so it walks into anything parked above it. That travel
@@ -252,7 +252,16 @@ export default function Chennai() {
         ref={stage}
         className="gutter mx-auto flex max-w-6xl flex-col items-center gap-12 py-24 text-center group-data-[scene=on]:grid group-data-[scene=on]:h-[100svh] group-data-[scene=on]:max-w-6xl group-data-[scene=on]:gap-0 group-data-[scene=on]:place-items-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:py-0"
       >
-        <h2 className="chennai-title type-display text-[clamp(3rem,16vw,12rem)] leading-none tracking-[-0.03em] text-chalk group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1">
+        {/*
+          The ceiling was 12rem, which is a fixed 192px however wide the
+          screen is — so on a 1440 display the word filled less than half the
+          frame, and on anything larger it shrank as a proportion until it was
+          a medium-sized word alone in an empty field. The whole movement is
+          "the city, named, very large"; 16vw is the size that actually fills
+          the frame, and the cap is now high enough that the vw term is the one
+          doing the work at every ordinary desktop size.
+        */}
+        <h2 className="chennai-title type-display text-[clamp(3rem,16vw,18rem)] leading-none tracking-[-0.03em] text-chalk group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1">
           {CHENNAI.city}
         </h2>
 
@@ -270,7 +279,7 @@ export default function Chennai() {
               // each word to the title's centre line so nothing lands on it.
               className="chennai-noise"
             >
-              <span className="type-display block text-[clamp(2rem,7vw,5.5rem)] leading-none text-chalk group-data-[scene=on]:text-left">
+              <span className="type-display block text-[clamp(2rem,7vw,7rem)] leading-none text-chalk group-data-[scene=on]:text-left">
                 {item.word}
               </span>
               <span className="type-label mt-2 block group-data-[scene=on]:text-left">
