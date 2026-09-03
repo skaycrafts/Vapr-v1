@@ -37,21 +37,56 @@ export default function Glass({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // Refraction is GPU work; the module already caps itself, but skip it
-    // entirely for anyone who asked for less motion and heavy effects.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const handle = liquidGlass(el, {
-      scale,
-      chroma,
-      blur,
-      saturate: 1.25,
-      mapBlur: 14,
-      border: 0.08,
-      radius: radius ?? null,
-      fallbackBlur: 14,
-    });
-    return () => handle.destroy();
+    /**
+     * Refraction is the expensive half of this component: each instance
+     * rasterises its own displacement map to a canvas, hangs an SVG filter off
+     * it, and asks the compositor to run that filter over everything behind it
+     * on every frame the panel moves.
+     *
+     * Two cases skip it and keep only the material — the tint, the rim
+     * highlight and the shadow, which is what actually reads as glass:
+     *
+     *  reduced motion — heavy effects are part of what that preference means;
+     *  narrow screens — several refracting panes over a scrolling page is
+     *    real GPU work on a phone, and at that size the displacement is too
+     *    small to see. Paying for an effect nobody can perceive is the
+     *    definition of a bad trade.
+     *
+     * Re-evaluated on change rather than read once, so rotating a tablet
+     * across the breakpoint does the right thing.
+     */
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const wide = window.matchMedia('(min-width: 768px)');
+
+    let handle: { destroy: () => void } | null = null;
+
+    const apply = () => {
+      handle?.destroy();
+      handle = null;
+      if (reduce.matches || !wide.matches) return;
+
+      handle = liquidGlass(el, {
+        scale,
+        chroma,
+        blur,
+        saturate: 1.25,
+        mapBlur: 14,
+        border: 0.08,
+        radius: radius ?? null,
+        fallbackBlur: 14,
+      });
+    };
+
+    apply();
+    reduce.addEventListener('change', apply);
+    wide.addEventListener('change', apply);
+
+    return () => {
+      reduce.removeEventListener('change', apply);
+      wide.removeEventListener('change', apply);
+      handle?.destroy();
+    };
   }, [scale, chroma, blur, radius]);
 
   return (

@@ -8,18 +8,33 @@ import Emblem from '@/components/brand/Emblem';
 import { LOCATIONS, STAY } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
-import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
+import { EASE, SCRUB } from '@/motion/config';
 import { cn } from '@/lib/utils';
 import type { ImageSlug } from '@/lib/media';
 
 /**
- * One room category per property, side by side. On a wide screen the section
- * pins and the track translates, so vertical scroll reads as moving between
- * the two. Narrow screens get the same panels stacked, which is the honest
- * layout for a thumb.
+ * One room category per property, moved through sideways.
  *
- * Guindy has not been photographed yet, so its panel is typographic. That
- * state is designed rather than empty — it should not read as a failed image.
+ * The section pins and the track translates, so vertical scroll reads as
+ * moving between the two rooms — on a phone as much as on a desktop. The
+ * panels are proportioned differently at each size (a phone gets one panel
+ * nearly full-bleed with the photograph above the specification; a wide screen
+ * gets them side by side) but the mechanism is the same, so the site does not
+ * have two different ideas about what this section is.
+ *
+ * ── On the two layouts ──────────────────────────────────────────────────
+ * The horizontal track only exists when the scene is actually running.
+ * `data-scene` is set by the motion effect, which runs only when the device
+ * has agreed to motion — so a visitor with scripting off, or one who asked for
+ * reduced motion, gets an ordinary vertical column instead.
+ *
+ * That matters more than it looks: a horizontal track with no script to drive
+ * it is not merely unanimated, it is unreachable. `overflow-x: clip` on the
+ * body would silently swallow every panel past the first. This was already
+ * true on desktop before the track moved to mobile.
+ *
+ * Guindy has not been photographed yet, so its panel carries a disclosure.
+ * That state is designed rather than empty — it should not read as a failure.
  */
 export default function Rooms() {
   const root = useRef<HTMLElement>(null);
@@ -30,160 +45,83 @@ export default function Rooms() {
     const rail = track.current;
     if (!el || !rail) return;
 
-    // Reduced motion is already handled by the hook, so this only has to
-    // answer the width question. Both branches get real choreography — a
-    // thumb gets the panels stacked, but stacked is not the same as still.
-    const mm = gsap.matchMedia();
+    // Switches the column into the horizontal track. Set here rather than in
+    // the markup so the layout cannot engage without the timeline that makes
+    // it navigable.
+    el.dataset.scene = 'on';
 
-    mm.add(
-      { horizontal: '(min-width: 768px)', stacked: '(max-width: 767px)' },
-      (context) => {
-        const { stacked } = context.conditions as { stacked: boolean };
-        if (!stacked) return;
+    // Measured in a function so a resize — or a phone's address bar sliding
+    // away — recomputes it rather than pinning to a width since changed.
+    const distance = () => rail.scrollWidth - window.innerWidth;
 
-        // The vertical counterpart of the horizontal track: the same curtain
-        // reveal and counter-scale the rest of the site uses, arriving one
-        // panel at a time. Scroll-jacking a phone sideways to show two rooms
-        // would cost more than it returns, so the language is kept and the
-        // mechanism is not.
-        gsap.from('.room-intro > *', {
-          y: 20,
-          opacity: 0,
-          duration: CONTENT.slow,
-          ease: EASE.out,
-          stagger: STAGGER.items,
-          scrollTrigger: { trigger: '.room-intro', start: 'top 82%', once: true },
-        });
+    const tween = gsap.to(rail, {
+      x: () => -distance(),
+      ease: EASE.none,
+      scrollTrigger: {
+        trigger: el,
+        start: 'top top',
+        end: () => `+=${distance()}`,
+        pin: true,
+        scrub: SCRUB.weighted,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
 
-        gsap.utils.toArray<HTMLElement>('.room-panel').forEach((panel) => {
-          const plate = panel.querySelector<HTMLElement>('.room-plate');
-          const img = plate?.querySelector('img');
-          const copy = panel.querySelectorAll('[data-room-copy] > *');
-
-          const tl = gsap.timeline({
-            scrollTrigger: { trigger: panel, start: 'top 78%', once: true },
-          });
-
-          if (plate) {
-            tl.fromTo(
-              plate,
-              { clipPath: 'inset(100% 0% 0% 0%)' },
-              { clipPath: 'inset(0% 0% 0% 0%)', duration: CINEMA.base, ease: EASE.inOutHeavy },
-              0
-            );
-          }
-
-          // Settles back to the 1.08 the plate rests at, not to 1 — the crop
-          // is deliberate and the reveal must not quietly undo it.
-          if (img) {
-            tl.fromTo(
-              img,
-              { scale: 1.18 },
-              { scale: 1.08, duration: CINEMA.epic, ease: EASE.outLong },
-              0
-            );
-          }
-
-          if (copy.length) {
-            tl.from(
-              copy,
-              {
-                y: 18,
-                opacity: 0,
-                duration: CONTENT.slow,
-                ease: EASE.out,
-                stagger: STAGGER.items,
-              },
-              0.25
-            );
-          }
-
-          // A little drift as the panel passes, so it is not inert once it
-          // has arrived.
-          if (img) {
-            gsap.fromTo(
-              img,
-              { yPercent: -4 },
-              {
-                yPercent: 4,
-                ease: EASE.none,
-                scrollTrigger: {
-                  trigger: panel,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: SCRUB.tight,
-                },
-              }
-            );
-          }
-        });
-      }
-    );
-
-    mm.add({ horizontal: '(min-width: 768px)' }, (context) => {
-      const { horizontal } = context.conditions as { horizontal: boolean };
-      if (!horizontal) return;
-
-      const distance = () => rail.scrollWidth - window.innerWidth;
-
-      const tween = gsap.to(rail, {
-        x: () => -distance(),
-        ease: EASE.none,
-        scrollTrigger: {
-          trigger: el,
-          start: 'top top',
-          // Measured in a function so a resize recomputes it rather than
-          // pinning to a width the visitor has since changed.
-          end: () => `+=${distance()}`,
-          pin: true,
-          scrub: SCRUB.weighted,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Parallax inside a horizontal track: `containerAnimation` tells
-      // ScrollTrigger to measure against the track's travel rather than the
-      // page's, which is the only way this reads correctly.
-      gsap.utils.toArray<HTMLElement>('.room-plate').forEach((plate) => {
-        const img = plate.querySelector('img');
-        if (!img) return;
-        gsap.fromTo(
-          img,
-          { xPercent: -7 },
-          {
-            xPercent: 7,
-            ease: EASE.none,
-            scrollTrigger: {
-              trigger: plate,
-              containerAnimation: tween,
-              start: 'left right',
-              end: 'right left',
-              scrub: SCRUB.tight,
-            },
-          }
-        );
-      });
-
-      return () => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      };
+    // Parallax inside a horizontal track: `containerAnimation` tells
+    // ScrollTrigger to measure against the track's travel rather than the
+    // page's, which is the only way this reads correctly.
+    gsap.utils.toArray<HTMLElement>('.room-plate').forEach((plate) => {
+      const img = plate.querySelector('img');
+      if (!img) return;
+      gsap.fromTo(
+        img,
+        { xPercent: -7 },
+        {
+          xPercent: 7,
+          ease: EASE.none,
+          scrollTrigger: {
+            trigger: plate,
+            containerAnimation: tween,
+            start: 'left right',
+            end: 'right left',
+            scrub: SCRUB.tight,
+          },
+        }
+      );
     });
 
     // The track's width depends on imagery that may still be decoding.
     refreshScrollTriggers();
 
-    return () => mm.revert();
+    return () => {
+      delete el.dataset.scene;
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
   });
 
   return (
-    <section ref={root} id="rooms" className="relative bg-void">
+    // `overflow-hidden` below is load-bearing, not tidiness. The track is
+    // wider than the screen by design, and on a phone an unclipped overflow
+    // widens the layout viewport itself — `innerWidth` then reports the
+    // track's own width, the travel computes to `scrollWidth - innerWidth`
+    // = 0, and the gallery pins without ever moving.
+    <section ref={root} id="rooms" className="group relative overflow-hidden bg-void">
       <div
         ref={track}
-        className="flex flex-col md:h-[100svh] md:flex-row md:flex-nowrap md:will-change-transform"
+        className={cn(
+          'flex flex-col',
+          'group-data-[scene=on]:h-[100svh] group-data-[scene=on]:flex-row group-data-[scene=on]:flex-nowrap group-data-[scene=on]:will-change-transform'
+        )}
       >
-        <div className="room-intro gutter flex shrink-0 flex-col justify-end py-16 md:h-full md:w-[34vw] md:justify-center md:py-0">
+        <div
+          className={cn(
+            'room-intro gutter flex flex-col justify-end py-16',
+            'group-data-[scene=on]:h-full group-data-[scene=on]:w-[82vw] group-data-[scene=on]:shrink-0 group-data-[scene=on]:justify-center group-data-[scene=on]:py-0',
+            'md:group-data-[scene=on]:w-[34vw]'
+          )}
+        >
           <p className="type-label">The rooms</p>
           <h2 className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk">
             One room,
@@ -203,15 +141,28 @@ export default function Rooms() {
           <article
             key={loc.slug}
             className={cn(
-              'room-panel gutter flex shrink-0 flex-col gap-8 border-t border-hairline py-14 md:h-full md:w-[80vw] md:items-center md:gap-12 md:border-l md:border-t-0 md:py-0',
-              i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+              'room-panel gutter flex flex-col gap-8 border-t border-hairline py-14',
+              'group-data-[scene=on]:h-full group-data-[scene=on]:w-[90vw] group-data-[scene=on]:shrink-0 group-data-[scene=on]:justify-center group-data-[scene=on]:gap-6 group-data-[scene=on]:border-l group-data-[scene=on]:border-t-0 group-data-[scene=on]:py-0',
+              'md:group-data-[scene=on]:w-[80vw] md:group-data-[scene=on]:items-center md:group-data-[scene=on]:gap-12',
+              // Alternating only where the panel is actually two columns.
+              i % 2 === 0
+                ? 'md:group-data-[scene=on]:flex-row'
+                : 'md:group-data-[scene=on]:flex-row-reverse'
             )}
           >
-            <div className="room-plate aspect-[4/3] w-full overflow-hidden md:aspect-auto md:h-[62vh] md:w-[54%]">
+            <div
+              className={cn(
+                'room-plate aspect-[4/3] w-full overflow-hidden',
+                // On a phone the panel is one column, so the photograph takes a
+                // fixed slice of the height and the specification gets the rest.
+                'group-data-[scene=on]:aspect-auto group-data-[scene=on]:h-[32vh] group-data-[scene=on]:shrink-0',
+                'md:group-data-[scene=on]:h-[62vh] md:group-data-[scene=on]:w-[54%]'
+              )}
+            >
               {loc.images.length ? (
                 <Frame
                   slug={loc.images[0] as ImageSlug}
-                  sizes="(min-width: 768px) 44vw, 100vw"
+                  sizes="(min-width: 768px) 44vw, 90vw"
                   ratio="fill"
                   className="h-full w-full"
                   imgClassName="scale-[1.08]"
@@ -227,14 +178,17 @@ export default function Rooms() {
               )}
             </div>
 
-            <div data-room-copy className="md:w-[46%]">
+            <div
+              data-room-copy
+              className="min-w-0 md:group-data-[scene=on]:w-[46%]"
+            >
               <div className="flex items-baseline gap-4">
                 <span className="tabular type-label">{String(i + 1).padStart(2, '0')}</span>
                 <span className="h-px flex-1 bg-hairline" />
                 <span className="type-label">{loc.area}</span>
               </div>
 
-              <h3 className="type-display mt-5 text-[clamp(2rem,4vw,3.25rem)] text-chalk">
+              <h3 className="type-display mt-4 text-[clamp(2rem,4vw,3.25rem)] text-chalk md:mt-5">
                 {loc.room.name}
               </h3>
               <p className="mt-2 text-mist">
@@ -246,21 +200,21 @@ export default function Rooms() {
                 </p>
               ) : null}
 
-              <dl className="mt-8 md:mt-9">
+              <dl className="mt-5 md:mt-9">
                 {[
                   { label: 'Bed', value: loc.room.bed },
                   { label: 'Sleeps', value: loc.room.sleeps },
                 ].map((row) => (
                   <div
                     key={row.label}
-                    className="flex items-baseline justify-between gap-6 border-t border-hairline py-3"
+                    className="flex items-baseline justify-between gap-6 border-t border-hairline py-2.5 md:py-3"
                   >
                     <dt className="type-label">{row.label}</dt>
                     <dd className="text-right text-sm text-bone">{row.value}</dd>
                   </div>
                 ))}
-                <div className="border-t border-hairline py-3.5">
-                  <dt className="type-label mb-2">In the room</dt>
+                <div className="border-t border-hairline py-3">
+                  <dt className="type-label mb-1.5">In the room</dt>
                   <dd className="text-sm leading-relaxed text-bone">
                     {loc.room.inclusions.join(' · ')}
                   </dd>
@@ -270,7 +224,7 @@ export default function Rooms() {
               <Link
                 href={`/${loc.slug}`}
                 data-cursor="Look inside"
-                className="mt-8 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-chalk transition-colors duration-300 hover:border-chalk"
+                className="mt-5 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-chalk transition-colors duration-300 hover:border-chalk md:mt-8"
               >
                 Everything about {loc.shortName}
                 <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden />

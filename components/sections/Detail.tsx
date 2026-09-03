@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { Check, Minus } from 'lucide-react';
 import Frame from '@/components/media/Frame';
+import Glass from '@/components/ui/Glass';
 import RevealText from '@/motion/primitives/RevealText';
 import RevealImage from '@/motion/primitives/RevealImage';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
@@ -70,55 +71,79 @@ export default function Detail() {
           <p className="max-w-[40ch] text-mist">{DETAIL.intro}</p>
         </header>
 
-        <div className="detail-sheet grid gap-x-12 gap-y-12 pt-10 md:grid-cols-2 md:pt-14">
-          <div>
-            <h3 className="type-label mb-2">Included at both</h3>
+        {/*
+          Four panes: what both hotels give you, what neither does, and then
+          each property's own list. Set as glass rather than as rules on a flat
+          field so the specification reads as four separate answers instead of
+          one long column a guest has to parse.
+
+          One box per question, and the boxes stay the same shape whatever
+          length the list inside them happens to be.
+        */}
+        <div className="detail-sheet grid gap-3 pt-10 sm:grid-cols-2 md:pt-14 xl:grid-cols-4">
+          <Glass className="rounded-2xl p-6 md:p-7" radius={16} scale={-58}>
+            <h3 className="type-label mb-4">Included at both</h3>
             <ul>
               {STAY.included.map((item) => (
                 <li
                   key={item}
-                  className="detail-row flex items-baseline gap-4 border-t border-hairline py-3.5 last:border-b"
+                  className="detail-row flex items-baseline gap-3 border-t border-hairline py-3 first:border-t-0 first:pt-0"
                 >
-                  <Check size={14} strokeWidth={1.75} aria-hidden className="shrink-0 translate-y-0.5 text-chalk" />
-                  <span className="text-bone">{item}</span>
+                  <Check
+                    size={14}
+                    strokeWidth={1.75}
+                    aria-hidden
+                    className="shrink-0 translate-y-0.5 text-chalk"
+                  />
+                  <span className="text-sm text-bone">{item}</span>
                 </li>
               ))}
             </ul>
+          </Glass>
 
-            <h3 className="type-label mb-2 mt-10">Not here, at either</h3>
+          <Glass className="rounded-2xl p-6 md:p-7" radius={16} scale={-58}>
+            <h3 className="type-label mb-4">Not here, at either</h3>
             <ul>
               {STAY.notAvailable.map((item) => (
                 <li
                   key={item}
-                  className="detail-row flex items-baseline gap-4 border-t border-hairline py-3.5 last:border-b"
+                  className="detail-row flex items-baseline gap-3 border-t border-hairline py-3 first:border-t-0 first:pt-0"
                 >
-                  <Minus size={14} strokeWidth={1.75} aria-hidden className="shrink-0 translate-y-0.5 text-ash" />
-                  <span className="text-smoke">{item}</span>
+                  <Minus
+                    size={14}
+                    strokeWidth={1.75}
+                    aria-hidden
+                    className="shrink-0 translate-y-0.5 text-ash"
+                  />
+                  <span className="text-sm text-smoke">{item}</span>
                 </li>
               ))}
             </ul>
-            <p className="detail-row mt-4 max-w-[44ch] text-sm text-smoke">
+            <p className="detail-row mt-4 border-t border-hairline pt-4 text-xs leading-relaxed text-smoke">
               {STAY.earlyCheckIn}
             </p>
-          </div>
+          </Glass>
 
-          <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
-            {LOCATIONS.map((loc) => (
-              <div key={loc.slug}>
-                <h3 className="type-label mb-2">{loc.shortName}</h3>
-                <ul>
-                  {loc.facilities.map((item) => (
-                    <li
-                      key={item}
-                      className="detail-row border-t border-hairline py-3 text-sm text-bone last:border-b"
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          {LOCATIONS.map((loc) => (
+            <Glass
+              key={loc.slug}
+              className="rounded-2xl p-6 md:p-7"
+              radius={16}
+              scale={-58}
+            >
+              <h3 className="type-label mb-4">{loc.shortName}</h3>
+              <ul>
+                {loc.facilities.map((item) => (
+                  <li
+                    key={item}
+                    className="detail-row border-t border-hairline py-3 text-sm text-bone first:border-t-0 first:pt-0"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Glass>
+          ))}
         </div>
       </div>
 
