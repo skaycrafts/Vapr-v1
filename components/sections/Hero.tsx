@@ -2,12 +2,12 @@
 
 import { useRef } from 'react';
 import Emblem from '@/components/brand/Emblem';
-import { HERO, LOCATIONS, SITE } from '@/lib/content';
+import { HERO, SITE } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
 import { ENTRY, useEntry } from '@/motion/entry';
-import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
+import { CINEMA, CONTENT, EASE, SCRUB } from '@/motion/config';
 
 const LINES = HERO.statement.split('\n');
 
@@ -50,11 +50,6 @@ export default function Hero() {
           '.hero-line-2 > span',
           { yPercent: 118, duration: CINEMA.fast },
           at(ENTRY.headline) + 0.2
-        )
-        .from(
-          '.hero-meta',
-          { opacity: 0, y: 14, duration: CINEMA.fast, stagger: STAGGER.items },
-          at(ENTRY.nav)
         )
         .from('.hero-cue', { opacity: 0, duration: 0.8 }, at(ENTRY.cue));
 
@@ -171,17 +166,13 @@ export default function Hero() {
             </span>
           </h1>
 
-          <div className="flex shrink-0 items-end justify-between gap-10 md:flex-col md:items-end md:gap-6">
-            {/* Right-aligned only where it is actually on the right. On a
-                phone this block sits at the left of a justify-between row, and
-                ragging it right left the two lines floating against nothing. */}
-            <div className="hero-meta md:text-right">
-              <p className="type-label">{HERO.place}</p>
-              <p className="mt-1 text-sm text-mist">
-                {LOCATIONS.map((l) => l.area).join(' · ')}
-              </p>
-            </div>
-
+          {/* The two addresses used to sit above this, as an eyebrow and a
+              line of areas. They have gone: the hero already names the city
+              over the rule, and the section directly beneath it is the
+              property chooser, which says both names at the size they deserve.
+              Saying them here as well made the frame's one quiet corner into a
+              second caption. */}
+          <div className="flex shrink-0 items-end justify-end">
             <a
               href="#chennai"
               className="hero-cue group flex items-center gap-3 text-mist transition-colors duration-300 hover:text-chalk"

@@ -13,7 +13,6 @@ import { gsap } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
-import { ENTRY, useEntry } from '@/motion/entry';
 import { CINEMA, EASE, MICRO, STAGGER } from '@/motion/config';
 
 /**
@@ -36,10 +35,10 @@ export default function Nav() {
   const root = useRef<HTMLElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
   const [hidden, setHidden] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { animate } = useCapability();
-  const { started } = useEntry();
   const { scrollTo, stop, start } = useScroll();
 
   const lastY = useRef(0);
@@ -49,41 +48,72 @@ export default function Nav() {
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
-   * Retract. Reads the native scroll position, which Lenis keeps authoritative
-   * — it smooths the scroll, it does not virtualise it.
+   * Two rules on one listener.
+   *
+   * Retract, as before: the bar leaves on the way down and returns on the way
+   * up. It reads the native scroll position, which Lenis keeps authoritative —
+   * it smooths the scroll, it does not virtualise it.
+   *
+   * And the new one: the bar does not exist over the opening section at all.
+   * It is measured against the first section on the page rather than against a
+   * fixed number of pixels, so it works for the homepage's full-height hero
+   * and a property page's shorter one without either being special-cased.
+   * Re-measured on resize, because a phone's address bar sliding away changes
+   * the answer.
    */
   useEffect(() => {
+    let heroBottom = window.innerHeight;
+
+    const measure = () => {
+      const hero = document.querySelector<HTMLElement>('main section');
+      // A little before the hero's own foot, so the bar is already in place by
+      // the time the next section has properly arrived.
+      heroBottom = hero ? hero.offsetTop + hero.offsetHeight - 96 : window.innerHeight;
+    };
+
     const onScroll = () => {
       const y = window.scrollY;
+      setPastHero(y >= heroBottom);
+
       const delta = y - lastY.current;
       if (Math.abs(delta) > 6) {
         lastY.current = y;
         if (holding.current) return;
-        setHidden(y > 260 && delta > 0);
+        /*
+         * The retract threshold is measured from the hero, not from a fixed
+         * 260px, and that is not a tidy-up — it is what lets the bar arrive at
+         * all.
+         *
+         * The two rules used to collide. Anyone scrolling down through the
+         * hero was already past 260px and still descending, so `hidden` was
+         * true long before the opacity gate opened: the bar crossed into view
+         * fully transparent *and* translated off the top, and only appeared if
+         * the visitor happened to scroll back up. A navigation that arrives
+         * after the hero has to survive the scroll that got it there.
+         *
+         * So retract cannot engage until 400px past the point the bar appears,
+         * which gives it a clear arrival and then hands it back to the
+         * ordinary leaves-on-the-way-down behaviour.
+         */
+        setHidden(y > heroBottom + 400 && delta > 0);
       }
     };
+
+    measure();
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', measure);
+    // Fonts and imagery both change the hero's height after first paint.
+    document.fonts?.ready.then(measure).catch(() => {});
+    window.addEventListener('load', measure);
+
     return () => {
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('load', measure);
       if (holdTimer.current) clearTimeout(holdTimer.current);
     };
   }, []);
-
-  /** Entrance — the bar settles in on the entry clock, not before. */
-  useMotionEffect(
-    root,
-    () => {
-      if (!started) return;
-      gsap.from(root.current, {
-        opacity: 0,
-        y: -10,
-        duration: CINEMA.fast,
-        ease: EASE.out,
-        delay: Math.max(0, ENTRY.nav - ENTRY.lift),
-      });
-    },
-    [started]
-  );
 
   /**
    * Morph. A single scrub across the first viewport rather than a class
@@ -178,8 +208,23 @@ export default function Nav() {
       <header
         ref={root}
         className={cn(
-          'fixed inset-x-0 top-0 z-[var(--z-nav)] transition-transform duration-500 ease-[var(--ease-out-quart)]',
-          hidden && !open && '-translate-y-[130%]'
+          'fixed inset-x-0 top-0 z-[var(--z-nav)] transition-[transform,opacity] duration-500 ease-[var(--ease-out-quart)]',
+          hidden && !open && '-translate-y-[130%]',
+          /*
+           * Held back over the opening section — the mark and the links both.
+           * The hero is a single composition now and the bar was sitting on
+           * top of it; it arrives when the hero has gone.
+           *
+           * Opacity and pointer-events rather than `visibility` or unmounting,
+           * so the links stay in the tab order and in the accessibility tree.
+           * `focus-within` then brings the bar back the instant a keyboard
+           * reaches it, which is what stops this from being a navigation that
+           * sighted keyboard users cannot see themselves entering. A screen
+           * reader was never going to be troubled by it either way.
+           */
+          !pastHero &&
+            !open &&
+            'pointer-events-none opacity-0 focus-within:pointer-events-auto focus-within:opacity-100'
         )}
       >
         {/* The contrast layer. A gradient rather than a filled bar: it gives
