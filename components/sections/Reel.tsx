@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import RevealImage from '@/motion/primitives/RevealImage';
 import RevealText from '@/motion/primitives/RevealText';
+import { cn } from '@/lib/utils';
 import { video, VIDEOS, type VideoSlug } from '@/lib/media';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
@@ -96,13 +97,27 @@ export default function Reel() {
         <p className="type-label">Shot on a phone, on ordinary days</p>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-4 md:gap-6">
+      {/*
+        Three 9:16 clips. Stacked one per row on a phone that was 1851px of
+        scrolling — 2.2 screens — for three pieces of supporting footage, which
+        is more of the visitor's patience than supporting footage is allowed to
+        spend. A phone gets the first clip at full width and the other two
+        side by side beneath it: the same three clips, roughly half the height,
+        and a composition rather than a column.
+      */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:gap-6">
         {CLIPS.map((clip, i) => {
           const meta = video(clip.slug);
           return (
             <figure
               key={clip.slug}
-              className={i === 1 ? 'reel-column sm:mt-[clamp(2rem,6vw,5rem)]' : 'reel-column'}
+              className={cn(
+                'reel-column',
+                // The lead clip spans the phone's full width; on a wide screen
+                // all three are equal columns and the middle one drops.
+                i === 0 && 'col-span-2 sm:col-span-1',
+                i === 1 && 'sm:mt-[clamp(2rem,6vw,5rem)]'
+              )}
             >
               {/* Every other photograph on the site is uncovered by a mask;
                   the footage was the one thing that simply appeared. `curtain`

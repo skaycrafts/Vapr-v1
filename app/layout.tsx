@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Archivo } from 'next/font/google';
-import { LOCATIONS, SITE, needsVerification } from '@/lib/content';
+import { CONTACT, LOCATIONS, SITE } from '@/lib/content';
 import SiteShell from '@/components/chrome/SiteShell';
 import Footer from '@/components/sections/Footer';
 import './globals.css';
@@ -13,6 +13,12 @@ import './globals.css';
 const bodoni = Bodoni_Moda({
   subsets: ['latin'],
   axes: ['opsz'],
+  // The italic is loaded for exactly one line — the second half of the hero
+  // statement. A Didone italic against its own roman is the sharpest contrast
+  // the family offers, and it is the difference between a headline that is
+  // set and one that is spoken. Used once, on purpose; a site that italicises
+  // freely has no emphasis left to spend.
+  style: ['normal', 'italic'],
   variable: '--font-bodoni',
   display: 'swap',
 });
@@ -73,8 +79,10 @@ const jsonLd = {
   alternateName: SITE.name,
   description: SITE.description,
   url: SITE.url,
-  telephone: needsVerification.phone,
-  email: needsVerification.email,
+  // Emitted only when configured. Structured data asserting a telephone
+  // number of zeroes is a machine-readable lie, and search engines keep it.
+  ...(CONTACT.phone ? { telephone: CONTACT.phone } : {}),
+  ...(CONTACT.email ? { email: CONTACT.email } : {}),
   areaServed: SITE.city,
   subOrganization: LOCATIONS.map((l) => ({
     '@type': 'Hotel',

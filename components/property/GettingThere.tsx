@@ -132,7 +132,7 @@ export default function GettingThere({ location }: { location: Location }) {
             href={mapsHref(location)}
             target="_blank"
             rel="noreferrer noopener"
-            data-cursor="Open map"
+            data-cursor="Open"
             className="mt-7 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-chalk transition-colors duration-300 hover:border-chalk"
           >
             Open in Maps

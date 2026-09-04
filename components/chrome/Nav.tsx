@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import Emblem from '@/components/brand/Emblem';
 import Glass from '@/components/ui/Glass';
-import { CTA, NAV, needsVerification } from '@/lib/content';
+import Magnetic from '@/motion/primitives/Magnetic';
+import { CONTACT, CTA, NAV } from '@/lib/content';
 import { cn } from '@/lib/utils';
 import { gsap } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
@@ -194,7 +195,7 @@ export default function Nav() {
         />
 
         <div className="gutter relative flex items-center justify-between py-5 md:py-7">
-          <Link href="/" data-cursor="Home" className="group flex items-center gap-3 text-chalk">
+          <Link href="/" data-cursor="Open" className="group flex items-center gap-3 text-chalk">
             {/* The mark held still and the wordmark's tracking opens a
                 fraction — the same restraint the rest of the site's hover
                 states keep (§21). It used to rotate 90°, which is a
@@ -221,14 +222,19 @@ export default function Nav() {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href={CTA.href}
-                onClick={handle(CTA.href)}
-                data-cursor="Open"
-                className="ml-1 rounded-full bg-chalk px-5 py-2 text-sm font-medium text-void transition-[background-color,transform] duration-300 hover:bg-bone active:scale-[0.97]"
-              >
-                {CTA.label}
-              </Link>
+              {/* The one magnetic control on the site. It marks the single
+                  thing the page is asking anyone to do; used twice it would
+                  mark nothing. */}
+              <Magnetic className="ml-1">
+                <Link
+                  href={CTA.href}
+                  onClick={handle(CTA.href)}
+                  data-cursor="Open"
+                  className="block rounded-full bg-chalk px-5 py-2 text-sm font-medium text-void transition-[background-color] duration-300 hover:bg-bone active:scale-[0.97]"
+                >
+                  {CTA.label}
+                </Link>
+              </Magnetic>
             </Glass>
           </nav>
 
@@ -275,9 +281,13 @@ export default function Nav() {
           </nav>
 
           <div className="flex items-center justify-between py-8">
-            <a href={needsVerification.phoneHref} className="text-sm text-mist">
-              {needsVerification.phone}
-            </a>
+            {CONTACT.phoneHref ? (
+              <a href={CONTACT.phoneHref} className="text-sm text-mist">
+                {CONTACT.phone}
+              </a>
+            ) : (
+              <span className="text-sm text-ash">{CONTACT.unset}</span>
+            )}
             <Emblem variant="simple" className="w-10 text-ash" />
           </div>
         </div>

@@ -165,7 +165,21 @@
 /* ════════════════════════════════════════════════════════════════════
    utilities
    ════════════════════════════════════════════════════════════════════ */
+/**
+ * The page's measure.
+ *
+ * Padding alone is not enough past about 1900px: the twelve-column grids keep
+ * stretching, and a heading in column 1 ends up a foot away from the paragraph
+ * in column 8 with nothing between them. The line lengths stay fine — those
+ * are capped in `ch` — but the composition comes apart.
+ *
+ * So the content is capped and centred, and full-bleed photography is
+ * unaffected because it is positioned against its own section rather than
+ * against this.
+ */
 @utility gutter {
+  max-width: 120rem;
+  margin-inline: auto;
   padding-inline: clamp(1.25rem, 0.7rem + 2.6vw, 4.5rem);
 }
 

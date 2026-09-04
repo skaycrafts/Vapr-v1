@@ -3,13 +3,13 @@
 import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Frame from '@/components/media/Frame';
-import { HERO, LOCATIONS } from '@/lib/content';
+import { HERO, LOCATIONS, SITE } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
 import { ENTRY, useEntry } from '@/motion/entry';
-import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
+import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
 
 // Lazily loaded and never server-rendered: the shader must not sit on the
 // critical path, and the photograph underneath is what carries the LCP (§28).
@@ -53,15 +53,25 @@ export default function Hero() {
 
       const tl = gsap.timeline({ defaults: { ease: EASE.outLong } });
 
-      tl.from(
-        '.hero-line > span',
-        { yPercent: 118, duration: CINEMA.fast, stagger: STAGGER.lines },
-        at(ENTRY.headline)
-      )
+      tl
+        // The city, first and smallest. The seal has just said VAPR; this
+        // says where, before anything says what.
+        .from('.hero-place', { opacity: 0, duration: CONTENT.slow }, at(ENTRY.headline) - 0.22)
         .from(
           '.hero-rule',
           { scaleX: 0, duration: CINEMA.base, ease: EASE.inOutHeavy },
-          at(ENTRY.headline)
+          at(ENTRY.headline) - 0.1
+        )
+        // The two halves of the sentence arrive as two beats, not as one
+        // staggered pair. `STAGGER.lines` is 0.08s — fast enough that the
+        // reader sees a single block settle. A fifth of a second apart is
+        // long enough to read as "a quiet floor" … "above a loud street",
+        // which is the whole joke of the line and was being thrown away.
+        .from('.hero-line-1 > span', { yPercent: 118, duration: CINEMA.fast }, at(ENTRY.headline))
+        .from(
+          '.hero-line-2 > span',
+          { yPercent: 118, duration: CINEMA.fast },
+          at(ENTRY.headline) + 0.2
         )
         .from(
           '.hero-meta',
@@ -172,17 +182,27 @@ export default function Hero() {
       <div className="hero-veil pointer-events-none absolute inset-0 bg-void opacity-0" aria-hidden />
 
       <div className="hero-copy gutter absolute inset-x-0 bottom-0 pb-9 md:pb-12">
+        <p className="hero-place type-label mb-4 text-chalk/80">{SITE.city}</p>
+
         <div className="hero-rule mb-7 h-px w-full origin-left bg-hairline-strong md:mb-9" />
 
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-16">
+          {/*
+            One sentence, two voices. The roman states the fact and the italic
+            answers it — the contrast the display family already contains, and
+            the only place on the site it is spent. Both halves still rise out
+            of their own clipping mask, a fifth of a second apart, so the line
+            arrives the way it reads.
+          */}
           <h1 className="type-display max-w-[16ch] text-[clamp(2.25rem,6.4vw,5.25rem)] text-chalk">
-            {LINES.map((line, i) => (
-              <span key={line} className="hero-line split-mask">
-                <span className="block" style={{ willChange: i === 0 ? 'transform' : undefined }}>
-                  {line}
-                </span>
+            <span className="hero-line-1 split-mask">
+              <span className="block" style={{ willChange: 'transform' }}>
+                {LINES[0]}
               </span>
-            ))}
+            </span>
+            <span className="hero-line-2 split-mask">
+              <span className="block italic">{LINES[1]}</span>
+            </span>
           </h1>
 
           <div className="flex shrink-0 items-end justify-between gap-10 md:flex-col md:items-end md:gap-6">

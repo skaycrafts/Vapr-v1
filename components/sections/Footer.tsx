@@ -6,7 +6,7 @@ import { ArrowUpRight } from 'lucide-react';
 import Emblem from '@/components/brand/Emblem';
 import Frame from '@/components/media/Frame';
 import Parallax from '@/motion/primitives/Parallax';
-import { CTA, FOOTER, LOCATIONS, NAV, SITE, mapsHref, needsVerification } from '@/lib/content';
+import { CONTACT, CTA, FOOTER, LOCATIONS, NAV, SITE, mapsHref } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
@@ -175,18 +175,28 @@ export default function Footer() {
 
           <nav aria-label="Footer" className="footer-col md:col-span-3">
             <h2 className="type-label mb-4">Reach us</h2>
-            <a
-              href={needsVerification.phoneHref}
-              className="tabular block text-bone transition-colors hover:text-chalk"
-            >
-              {needsVerification.phone}
-            </a>
-            <a
-              href={`mailto:${needsVerification.email}`}
-              className="mt-1 block text-bone transition-colors hover:text-chalk"
-            >
-              {needsVerification.email}
-            </a>
+            {/* A dead `tel:` link is worse than an absent one: it looks
+                like a way to reach the hotel and is not. */}
+            {CONTACT.phoneHref ? (
+              <a
+                href={CONTACT.phoneHref}
+                className="tabular block text-bone transition-colors hover:text-chalk"
+              >
+                {CONTACT.phone}
+              </a>
+            ) : (
+              <p className="tabular block text-ash">Telephone — {CONTACT.unset.toLowerCase()}</p>
+            )}
+            {CONTACT.email ? (
+              <a
+                href={`mailto:${CONTACT.email}`}
+                className="mt-1 block text-bone transition-colors hover:text-chalk"
+              >
+                {CONTACT.email}
+              </a>
+            ) : (
+              <p className="mt-1 block text-ash">Email — {CONTACT.unset.toLowerCase()}</p>
+            )}
             <ul className="mt-5 space-y-1.5">
               {NAV.map((item) => (
                 <li key={item.href}>

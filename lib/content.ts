@@ -24,16 +24,53 @@ export const SITE = {
 } as const;
 
 /**
- * Not on either listing. Replace before launch — these are the only invented
- * values on the site.
+ * The details that are not on either Treebo listing, and therefore are not
+ * known to this repository.
+ *
+ * These used to be hard-coded stand-ins — `+91 00000 00000`, a `wa.me` link
+ * to a number of zeroes, `stay@vapr.example`, and a nightly rate of 3,200.
+ * Shipping those is worse than shipping nothing: a rate invented by a website
+ * is a price someone will arrive expecting, and `wa.me/910000000000` is a
+ * live URL that resolves to somebody, just not to this hotel.
+ *
+ * So they come from the environment, and when the environment is silent the
+ * site says so rather than making something up. Set any of these to turn the
+ * matching channel on:
+ *
+ *   NEXT_PUBLIC_VAPR_PHONE      +91 44 1234 5678
+ *   NEXT_PUBLIC_VAPR_WHATSAPP   919876543210        (digits only, with country code)
+ *   NEXT_PUBLIC_VAPR_EMAIL      stay@vapr.co.in
+ *   NEXT_PUBLIC_VAPR_RATE_FROM  3200                (INR per night)
+ *
+ * Everything degrades: with no WhatsApp the enquiry goes by email, with
+ * neither it is composed for the guest to copy, and the form never stops
+ * working.
  */
-export const needsVerification = {
-  phone: '+91 00000 00000',
-  phoneHref: 'tel:+910000000000',
-  whatsapp: 'https://wa.me/910000000000',
-  email: 'stay@vapr.example',
-  ratesFrom: 3200, // per night, INR
+const env = (key: string) => {
+  const raw = process.env[key];
+  const value = raw?.trim();
+  return value ? value : null;
+};
+
+const phoneRaw = env('NEXT_PUBLIC_VAPR_PHONE');
+const whatsappRaw = env('NEXT_PUBLIC_VAPR_WHATSAPP');
+const emailRaw = env('NEXT_PUBLIC_VAPR_EMAIL');
+const rateRaw = env('NEXT_PUBLIC_VAPR_RATE_FROM');
+const rateFrom = rateRaw && Number.isFinite(Number(rateRaw)) ? Number(rateRaw) : null;
+
+export const CONTACT = {
+  /** Display string, or null when nobody has configured one. */
+  phone: phoneRaw,
+  /** `tel:` href, digits only. Null whenever `phone` is. */
+  phoneHref: phoneRaw ? `tel:${phoneRaw.replace(/[^\d+]/g, '')}` : null,
+  /** wa.me base, or null. The enquiry text is appended at the call site. */
+  whatsapp: whatsappRaw ? `https://wa.me/${whatsappRaw.replace(/\D/g, '')}` : null,
+  email: emailRaw,
+  /** Per night, in INR. Null means the site shows no price at all. */
+  ratesFrom: rateFrom,
   currency: 'INR',
+  /** What to render where a channel is missing. Never a plausible-looking value. */
+  unset: 'Not yet configured',
 } as const;
 
 export type Landmark = { readonly place: string; readonly km: number };
@@ -240,7 +277,12 @@ export const CTA = { label: 'Enquire', href: '/#reserve' } as const;
 
 export const HERO = {
   wordmark: 'VAPR',
-  place: 'Two addresses in Chennai',
+  /**
+   * Trimmed from "Two addresses in Chennai": the hero now names the city on
+   * its own line above the statement, and saying Chennai twice in one frame
+   * is not emphasis, it is an edit nobody made.
+   */
+  place: 'Two addresses',
   statement: 'A quiet floor\nabove a loud street.',
   scrollCue: 'Scroll',
 } as const;
