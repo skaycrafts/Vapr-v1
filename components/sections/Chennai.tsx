@@ -291,9 +291,8 @@ export default function Chennai() {
 
         <div className="flex flex-col items-center group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1">
           <Emblem
-            variant="full"
-            aria-hidden
-            className="chennai-seal w-[min(22vw,7rem)] text-chalk"
+            sizes="(min-width: 768px) 112px, 22vw"
+            className="chennai-seal w-[min(22vw,7rem)]"
           />
 
           <p className="chennai-turn type-display mt-8 max-w-[18ch] text-[clamp(1.5rem,4vw,2.75rem)] leading-[1.15] text-chalk">

@@ -40,5 +40,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Ungraded source photography and video (not deployed)
-/media-source
+# Ungraded source photography and video (not deployed).
+#
+# Written as `/*` rather than `/media-source` so the exception below can work
+# at all: git does not descend into an ignored directory, so a negation for
+# something inside one is never even considered.
+/media-source/*
+# The identity master is the exception. It is 250kB, not gigabytes of raw
+# frames, and every asset in public/brand is derived from it by
+# scripts/build-brand.mjs — ignoring it would make the logo the one thing in
+# this repository that cannot be rebuilt from this repository.
+!/media-source/brand

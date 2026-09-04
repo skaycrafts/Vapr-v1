@@ -141,7 +141,7 @@ export default function Footer() {
       <div className="gutter overflow-hidden pt-16 md:pt-24">
         <div className="footer-cols grid gap-12 md:grid-cols-12 md:gap-10">
           <div className="footer-col md:col-span-3">
-            <Emblem variant="simple" className="footer-seal w-16 text-chalk" />
+            <Emblem sizes="76px" className="footer-seal w-19" />
             <p className="mt-6 max-w-[32ch] text-mist">{FOOTER.note}</p>
           </div>
 

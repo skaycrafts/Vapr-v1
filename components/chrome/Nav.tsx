@@ -196,14 +196,36 @@ export default function Nav() {
 
         <div className="gutter relative flex items-center justify-between py-5 md:py-7">
           <Link href="/" data-cursor="Open" className="group flex items-center gap-3 text-chalk">
-            {/* The mark held still and the wordmark's tracking opens a
-                fraction — the same restraint the rest of the site's hover
-                states keep (§21). It used to rotate 90°, which is a
-                decoration rather than a response. */}
-            <Emblem variant="simple" title="VAPR" className="w-8 md:w-9" />
-            <span className="type-display text-lg tracking-[0.32em] transition-[letter-spacing,color] duration-500 ease-[var(--ease-out-quart)] group-hover:tracking-[0.4em] md:text-xl">
-              VAPR
-            </span>
+            {/*
+              The emblem alone. It used to be a small mark beside the word
+              VAPR set in display type — but the seal carries its own wordmark
+              inside it, so the header was saying the name twice and showing
+              the identity once, badly.
+
+              Sized to be read as an insignia rather than a favicon: 44px on a
+              phone, 52px from tablet up. Large enough that the ring, the
+              diamond and the ornament resolve; small enough that it sits in
+              the bar rather than owning it. It holds still on hover — the
+              restraint the rest of the site's hover states keep (§21) — and
+              only lifts a little in opacity.
+            */}
+            {/*
+              Full opacity, deliberately. Rendered at 90% over the hero
+              photograph the hairlines dropped into the foliage behind them and
+              the mark read as a smudge rather than as a seal — the ink in this
+              artwork is 2% of its own area, so it has no contrast to spare.
+
+              48px on a phone, 56px from tablet up. Tested against the file at
+              3x: below about 44px the wordmark inside the ring stops resolving
+              and the ornament collapses into grey. This is the smallest the
+              mark can be set and still be read as one.
+            */}
+            <Emblem
+              title="VAPR"
+              priority
+              sizes="(min-width: 768px) 56px, 48px"
+              className="w-12 md:w-14"
+            />
           </Link>
 
           <nav aria-label="Primary" className="hidden md:block">
@@ -260,7 +282,9 @@ export default function Nav() {
       >
         <div className="gutter flex h-full flex-col">
           <div className="flex items-center justify-between py-5">
-            <span className="type-display text-lg tracking-[0.32em] text-chalk">VAPR</span>
+            {/* The overlay covers the header, so this is standing in for the
+                header's mark — it should be the mark. */}
+            <Emblem sizes="44px" className="w-11" />
             <button type="button" onClick={() => setOpen(false)} aria-label="Close menu">
               <X size={22} strokeWidth={1.25} className="text-chalk" aria-hidden />
             </button>
@@ -288,7 +312,7 @@ export default function Nav() {
             ) : (
               <span className="text-sm text-ash">{CONTACT.unset}</span>
             )}
-            <Emblem variant="simple" className="w-10 text-ash" />
+            <Emblem sizes="56px" className="w-14 opacity-45" />
           </div>
         </div>
       </div>

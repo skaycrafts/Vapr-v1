@@ -6,7 +6,7 @@ import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
 import { useScroll } from '@/motion/ScrollProvider';
 import { ENTRY, useEntry } from '@/motion/entry';
-import { EASE } from '@/motion/config';
+import { CINEMA, EASE } from '@/motion/config';
 
 /**
  * The first two seconds.
@@ -83,20 +83,6 @@ export default function Overture() {
         return;
       }
 
-      // Geometry only. `.emblem-line *` also matches the <g> wrappers, which
-      // draw nothing but still consume stagger slots.
-      const strokes = gsap.utils.toArray<SVGGeometryElement>(
-        '.emblem-line path, .emblem-line circle, .emblem-line line'
-      );
-
-      // Seed each path's dash from its own length so they draw at a
-      // comparable rate rather than snapping in together.
-      strokes.forEach((node) => {
-        const len = typeof node.getTotalLength === 'function' ? node.getTotalLength() : 0;
-        if (!len) return;
-        gsap.set(node, { strokeDasharray: len, strokeDashoffset: len });
-      });
-
       // Held until the tab is actually being looked at. The first two seconds
       // are the point of this sequence, and spending them on a tab opened in
       // the background — then showing a static page when the visitor finally
@@ -104,22 +90,26 @@ export default function Overture() {
       const tl = gsap.timeline({ onComplete: release, paused: document.hidden });
 
       tl
-        // The seal draws. Fast enough to be a gesture, not a performance.
-        .to(
-          strokes,
-          {
-            strokeDashoffset: 0,
-            duration: 0.85,
-            stagger: { each: 0.005, from: 'center' },
-            ease: EASE.outSoft,
-          },
+        /*
+         * The seal resolves.
+         *
+         * It used to draw itself, stroke by stroke, off `stroke-dashoffset` —
+         * which only works on path geometry, and the emblem is the supplied
+         * artwork now rather than a trace of it. That trick is gone, and the
+         * mark being the real one is worth more than the trick was.
+         *
+         * What replaces it is deliberately almost nothing: the emblem comes up
+         * out of a hair under full size over a second and a quarter, on the
+         * longest ease in the vocabulary. No spin, no shimmer, no draw. It
+         * settles, the way a stamped mark settles, and then it is simply
+         * there — which is the behaviour the rest of the site already promises
+         * of this mark.
+         */
+        .from(
+          '.overture-mark',
+          { opacity: 0, scale: 0.965, duration: CINEMA.base, ease: EASE.outLong },
           0
         )
-        // …and the name resolves inside it. A fade, not a rise: the wordmark
-        // sits within the seal now rather than under it, so there is no mask
-        // for it to climb out of — and the mark is the one thing on this site
-        // that is never allowed to perform.
-        .from('.emblem-word', { opacity: 0, duration: 0.6, ease: EASE.outSoft }, ENTRY.mark)
         // The lockup releases, and the field lifts away. `begin()` fires here
         // rather than at the end: the hero's own timeline starts while this
         // is still moving, so the two overlap instead of queueing.
@@ -199,7 +189,12 @@ export default function Overture() {
         twice and the actual logo never once.
       */}
       <div className="overture-lockup flex flex-col items-center">
-        <Emblem animated variant="full" className="overture-mark w-[min(46vw,17rem)] text-chalk" />
+        <Emblem
+          animated
+          priority
+          sizes="(min-width: 768px) 272px, 46vw"
+          className="overture-mark w-[min(46vw,17rem)]"
+        />
       </div>
     </div>
   );
