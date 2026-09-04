@@ -132,7 +132,7 @@ export default function PropertyRoom({ location }: { location: Location }) {
         </>
       ) : (
         <div className="pr-note mt-16 flex flex-col items-center gap-5 border border-hairline bg-pitch px-6 py-16 text-center md:mt-20">
-          <Emblem variant="mark" className="w-20 text-graphite md:w-24" />
+          <Emblem variant="full" className="w-20 text-graphite md:w-24" />
           <p className="max-w-[42ch] text-mist">
             {location.shortName} has not been photographed yet.
           </p>

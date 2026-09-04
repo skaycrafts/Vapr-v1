@@ -83,7 +83,7 @@ export default function PropertyHero({ location }: { location: Location }) {
           aria-hidden
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
-          <Emblem variant="mark" className="w-[min(62vmin,30rem)] text-chalk opacity-[0.07]" />
+          <Emblem variant="full" className="w-[min(62vmin,30rem)] text-chalk opacity-[0.07]" />
         </div>
       )}
 

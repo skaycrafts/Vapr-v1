@@ -256,7 +256,7 @@ function RoomChapter({ location, index }: { location: Location; index: number })
           </div>
         ) : (
           <div className="flex h-[46vh] w-full flex-col items-center justify-center gap-6 border border-hairline bg-pitch p-8 text-center group-data-[scene=on]:h-[68vh] md:group-data-[scene=on]:h-[70vh]">
-            <Emblem variant="mark" className="w-24 text-graphite md:w-32" />
+            <Emblem variant="full" className="w-24 text-graphite md:w-32" />
             <p className="max-w-[28ch] text-sm text-smoke">
               {location.shortName} is still being photographed. The specification is
               here, and the desk will send you pictures on request.

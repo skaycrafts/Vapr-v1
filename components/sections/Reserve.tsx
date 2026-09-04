@@ -105,6 +105,13 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
 
     // The photograph behind it drifts, so the panel reads as sitting over a
     // scene rather than on a flat backdrop.
+    //
+    // The trigger is the node, not `'#reserve'`. `useMotionEffect` runs inside
+    // a `gsap.context` scoped to this section, so a selector string is
+    // resolved *within* it — and `#reserve` is the section itself, never one
+    // of its descendants. ScrollTrigger found nothing, warned, and silently
+    // fell back to measuring the image instead of the section, which is close
+    // enough to right that it went unnoticed.
     gsap.fromTo(
       '.reserve-plate img',
       { yPercent: -4 },
@@ -112,7 +119,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
         yPercent: 4,
         ease: EASE.none,
         scrollTrigger: {
-          trigger: '#reserve',
+          trigger: root.current,
           start: 'top bottom',
           end: 'bottom top',
           scrub: SCRUB.tight,

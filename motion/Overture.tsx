@@ -115,12 +115,11 @@ export default function Overture() {
           },
           0
         )
-        // The wordmark rises beneath it.
-        .from(
-          '.overture-word > span',
-          { yPercent: 115, duration: 0.7, ease: EASE.outLong },
-          ENTRY.mark
-        )
+        // …and the name resolves inside it. A fade, not a rise: the wordmark
+        // sits within the seal now rather than under it, so there is no mask
+        // for it to climb out of — and the mark is the one thing on this site
+        // that is never allowed to perform.
+        .from('.emblem-word', { opacity: 0, duration: 0.6, ease: EASE.outSoft }, ENTRY.mark)
         // The lockup releases, and the field lifts away. `begin()` fires here
         // rather than at the end: the hero's own timeline starts while this
         // is still moving, so the two overlap instead of queueing.
@@ -190,20 +189,17 @@ export default function Overture() {
       aria-live="polite"
       aria-label="Loading"
     >
-      <div className="overture-lockup flex flex-col items-center">
-        <Emblem animated variant="mark" className="overture-mark w-[min(34vw,12rem)] text-chalk" />
+      {/*
+        The whole logo, and nothing beside it.
 
-        <div className="overture-word split-mask mt-7 md:mt-9">
-          {/*
-            Letter-spacing is applied after the final R too, so the box carries
-            one trailing space the glyphs do not. Centring the box would push
-            the visible word half a space left of the seal above it; an equal
-            indent on the left restores true optical centring.
-          */}
-          <span className="type-display block pl-[0.42em] text-[clamp(1.5rem,4.4vw,2.6rem)] leading-[1.15] tracking-[0.42em] text-chalk">
-            VAPR
-          </span>
-        </div>
+        This used to be a lockup we assembled: the seal with its wordmark
+        removed, and VAPR set again underneath in tracked-out display type.
+        That is a perfectly good arrangement of two things — but the mark
+        already contains its own name, so the page opened by showing the word
+        twice and the actual logo never once.
+      */}
+      <div className="overture-lockup flex flex-col items-center">
+        <Emblem animated variant="full" className="overture-mark w-[min(46vw,17rem)] text-chalk" />
       </div>
     </div>
   );
