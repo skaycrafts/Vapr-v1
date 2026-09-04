@@ -34,70 +34,46 @@ import { CINEMA, EASE, MICRO, STAGGER } from '@/motion/config';
 export default function Nav() {
   const root = useRef<HTMLElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
-  const [hidden, setHidden] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { animate } = useCapability();
   const { scrollTo, stop, start } = useScroll();
 
-  const lastY = useRef(0);
-  // Suspends the retract rule: a scroll the navigation started itself should
-  // not make the navigation disappear.
-  const holding = useRef(false);
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   /**
-   * Two rules on one listener.
+   * The bar is not on the opening frame. It arrives once the scroll cue has
+   * gone, and then it stays.
    *
-   * Retract, as before: the bar leaves on the way down and returns on the way
-   * up. It reads the native scroll position, which Lenis keeps authoritative —
-   * it smooths the scroll, it does not virtualise it.
+   * ── Why one rule and not two ────────────────────────────────────────────
+   * There used to be a retract as well: the bar left on the way down and came
+   * back on the way up. Held against a hero it cannot appear over, the two
+   * rules cancelled — anyone scrolling down through the hero was still
+   * descending at the moment the gate opened, so the bar arrived and retracted
+   * on the same gesture and was only ever seen by someone who happened to
+   * scroll back up. Widening the retract threshold papered over it. Removing
+   * the retract answers it: the bar has one state change in its life, which is
+   * also what the reference this was modelled on does.
    *
-   * And the new one: the bar does not exist over the opening section at all.
-   * It is measured against the first section on the page rather than against a
-   * fixed number of pixels, so it works for the homepage's full-height hero
-   * and a property page's shorter one without either being special-cased.
-   * Re-measured on resize, because a phone's address bar sliding away changes
-   * the answer.
+   * ── Where it arrives ────────────────────────────────────────────────────
+   * At 78% of the opening section. The hero's copy — the sentence, the rule,
+   * the cue — is scrubbed to nothing by 70% of its own height, so this lands
+   * just after the word SCROLL has faded rather than on top of it, and there
+   * is a beat of empty frame between the two. Measured against the section
+   * rather than a pixel count, so the homepage's full-height hero and a
+   * property page's shorter one both work, and re-measured whenever the fonts
+   * or the viewport change the answer.
    */
   useEffect(() => {
-    let heroBottom = window.innerHeight;
+    let revealAt = window.innerHeight * 0.78;
 
     const measure = () => {
       const hero = document.querySelector<HTMLElement>('main section');
-      // A little before the hero's own foot, so the bar is already in place by
-      // the time the next section has properly arrived.
-      heroBottom = hero ? hero.offsetTop + hero.offsetHeight - 96 : window.innerHeight;
+      revealAt = hero
+        ? hero.offsetTop + hero.offsetHeight * 0.78
+        : window.innerHeight * 0.78;
     };
 
-    const onScroll = () => {
-      const y = window.scrollY;
-      setPastHero(y >= heroBottom);
-
-      const delta = y - lastY.current;
-      if (Math.abs(delta) > 6) {
-        lastY.current = y;
-        if (holding.current) return;
-        /*
-         * The retract threshold is measured from the hero, not from a fixed
-         * 260px, and that is not a tidy-up — it is what lets the bar arrive at
-         * all.
-         *
-         * The two rules used to collide. Anyone scrolling down through the
-         * hero was already past 260px and still descending, so `hidden` was
-         * true long before the opacity gate opened: the bar crossed into view
-         * fully transparent *and* translated off the top, and only appeared if
-         * the visitor happened to scroll back up. A navigation that arrives
-         * after the hero has to survive the scroll that got it there.
-         *
-         * So retract cannot engage until 400px past the point the bar appears,
-         * which gives it a clear arrival and then hands it back to the
-         * ordinary leaves-on-the-way-down behaviour.
-         */
-        setHidden(y > heroBottom + 400 && delta > 0);
-      }
-    };
+    const onScroll = () => setRevealed(window.scrollY >= revealAt);
 
     measure();
     onScroll();
@@ -111,7 +87,6 @@ export default function Nav() {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', measure);
       window.removeEventListener('load', measure);
-      if (holdTimer.current) clearTimeout(holdTimer.current);
     };
   }, []);
 
@@ -186,13 +161,6 @@ export default function Nav() {
 
     event.preventDefault();
     setOpen(false);
-    setHidden(false);
-    holding.current = true;
-    if (holdTimer.current) clearTimeout(holdTimer.current);
-    holdTimer.current = setTimeout(() => {
-      holding.current = false;
-    }, 1700);
-
     scrollTo(target);
   };
 
@@ -208,23 +176,23 @@ export default function Nav() {
       <header
         ref={root}
         className={cn(
-          'fixed inset-x-0 top-0 z-[var(--z-nav)] transition-[transform,opacity] duration-500 ease-[var(--ease-out-quart)]',
-          hidden && !open && '-translate-y-[130%]',
+          'fixed inset-x-0 top-0 z-[var(--z-nav)] transition-transform duration-700 ease-[var(--ease-out-quart)]',
           /*
-           * Held back over the opening section — the mark and the links both.
-           * The hero is a single composition now and the bar was sitting on
-           * top of it; it arrives when the hero has gone.
+           * Slid up out of the frame rather than faded out.
            *
-           * Opacity and pointer-events rather than `visibility` or unmounting,
-           * so the links stay in the tab order and in the accessibility tree.
-           * `focus-within` then brings the bar back the instant a keyboard
-           * reaches it, which is what stops this from being a navigation that
-           * sighted keyboard users cannot see themselves entering. A screen
-           * reader was never going to be troubled by it either way.
+           * A bar that fades is a bar that is present and dim; one that is
+           * parked above the top edge and comes down has somewhere to arrive
+           * from, which is the whole gesture. It is also what the reference
+           * does — opacity stays at 1 throughout and only the transform moves.
+           *
+           * Transform rather than `visibility` or unmounting keeps the links
+           * in the tab order and in the accessibility tree, and `focus-within`
+           * brings the bar down the instant a keyboard reaches it — otherwise
+           * this is navigation a sighted keyboard user can enter but not see.
            */
-          !pastHero &&
+          !revealed &&
             !open &&
-            'pointer-events-none opacity-0 focus-within:pointer-events-auto focus-within:opacity-100'
+            'pointer-events-none -translate-y-full focus-within:pointer-events-auto focus-within:translate-y-0'
         )}
       >
         {/* The contrast layer. A gradient rather than a filled bar: it gives
