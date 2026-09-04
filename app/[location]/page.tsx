@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import PropertyHero from '@/components/property/PropertyHero';
 import PropertyRoom from '@/components/property/PropertyRoom';
 import GettingThere from '@/components/property/GettingThere';
+import Spaces from '@/components/sections/Spaces';
 import Reserve from '@/components/sections/Reserve';
 import { LOCATIONS, SITE, STAY, locationBySlug, placeOf } from '@/lib/content';
 
@@ -81,8 +82,25 @@ export default async function LocationPage({ params }: { params: Promise<Params>
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/*
+        The property, end to end: the building, its one room, the rooms
+        everybody shares, how to get there, and the enquiry.
+
+        The room and the shared spaces used to be generic homepage sections —
+        "The rooms" and "The rest of it" — which meant a visitor met Maple and
+        the Meeting Room before the page had established which of the two
+        hotels either belonged to. They live here now, where the answer to
+        "which building is this?" is already on the screen.
+      */}
       <PropertyHero location={location} />
       <PropertyRoom location={location} />
+      <Spaces
+        note={
+          location.imagesArePlaceholder
+            ? `${location.shortName}'s shared rooms are still being photographed. The frames here are from Ashok Nagar, finished to the same standard.`
+            : undefined
+        }
+      />
       <GettingThere location={location} />
       <Reserve defaultSlug={location.slug} />
     </>

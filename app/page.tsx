@@ -1,17 +1,31 @@
 import Hero from '@/components/sections/Hero';
 import Locations from '@/components/sections/Locations';
 import Chennai from '@/components/sections/Chennai';
-import Rooms from '@/components/sections/Rooms';
-import Spaces from '@/components/sections/Spaces';
 import Reel from '@/components/sections/Reel';
 import Detail from '@/components/sections/Detail';
 import Reserve from '@/components/sections/Reserve';
 import Chapter from '@/motion/primitives/Chapter';
 
 /**
- * The order is the story: who we are, which one, the city, the room, the rest
- * of the building, the hotel in use, the specification, and then the one thing
- * left to do.
+ * The homepage is the brand and the choice; the buildings are their own pages.
+ *
+ * ── What moved, and why ──────────────────────────────────────────────────
+ * It used to carry two generic sections between Chennai and the reel: "The
+ * rooms", which ran Maple and Deluxe past in a horizontal track, and "The rest
+ * of it", which walked through the six shared rooms. Both have gone to the
+ * property pages.
+ *
+ * They were in the wrong place rather than badly made. Maple belongs to Ashok
+ * Nagar and Deluxe belongs to Guindy; the Meeting Room is a room in a specific
+ * building. Presented on the homepage they asked a visitor to hold two
+ * hotels' worth of specification in their head before the page had settled
+ * which one they were looking at — and then the property pages repeated most
+ * of it anyway. Now the homepage answers "who are you" and "which one", and
+ * each property answers everything else.
+ *
+ * Nothing was deleted. `components/sections/Rooms.tsx` is unimported but kept:
+ * the room content it renders now lives in `PropertyRoom`, and the horizontal
+ * track is there if the group ever wants a rooms page of its own.
  *
  * ── On which sections are wrapped ────────────────────────────────────────
  * `<Chapter>` gives a section a departure — it drifts up and dims as it
@@ -19,13 +33,11 @@ import Chapter from '@/motion/primitives/Chapter';
  * join is hidden inside the movement rather than being a butt cut.
  *
  * It is applied to the sections that scroll past normally, and deliberately
- * NOT to Chennai, Rooms or Spaces. Those three are pinned, and ScrollTrigger
- * pins with `position: fixed` — which resolves against the nearest
- * *transformed* ancestor rather than the viewport. Wrapping a pinned section
- * in an element that carries a transform does not merely look wrong, it
- * detaches the pin from the viewport entirely and the scene slides away
- * mid-scroll. The three pinned scenes already own their own entrances and
- * exits, so they lose nothing by being left alone.
+ * NOT to Chennai. Chennai is pinned, and ScrollTrigger pins with
+ * `position: fixed` — which resolves against the nearest *transformed*
+ * ancestor rather than the viewport. Wrapping a pinned section in an element
+ * that carries a transform does not merely look wrong, it detaches the pin
+ * from the viewport entirely and the scene slides away mid-scroll.
  *
  * Hero is excluded for the same reason in reverse: it has always run its own
  * departure, timed against the entry sequence.
@@ -36,7 +48,8 @@ export default function Home() {
       <Hero />
 
       {/* Directly under the hero: a two-property group has to answer "which
-          one?" before it answers anything else. */}
+          one?" before it answers anything else. Each side of this now leads
+          somewhere that holds the whole property. */}
       <Chapter as="div">
         <Locations />
       </Chapter>
@@ -44,8 +57,6 @@ export default function Home() {
       {/* Pinned. The chapter carries the sentence the manifesto used to hold,
           and sits in the same slot — the hero's scroll cue points here. */}
       <Chennai />
-      <Rooms />
-      <Spaces />
 
       <Chapter as="div">
         <Reel />

@@ -26,8 +26,14 @@ import type { ImageSlug } from '@/lib/media';
  * its name and its sentence beneath. The pinned composition is applied by the
  * effect, so a visitor who never gets the timeline never gets a stack of six
  * images piled on one another either.
+ *
+ * It moved off the homepage and into each property. The six rooms are shared
+ * facilities of a specific building, not a fact about the group — reading
+ * about them on a page that had not yet said which hotel you were looking at
+ * was the wrong place to meet them. `note` carries the disclosure for a
+ * property whose own shared rooms have not been photographed yet.
  */
-export default function Spaces() {
+export default function Spaces({ note }: { note?: string } = {}) {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
 
@@ -155,7 +161,13 @@ export default function Spaces() {
           >
             The rest of it
           </RevealText>
-          <p className="max-w-[34ch] text-mist">Six shared rooms, and what each one is for.</p>
+          <div className="max-w-[38ch]">
+            <p className="text-mist">Six shared rooms, and what each one is for.</p>
+            {/* Where the photographs are not of the building you are reading
+                about, the page says so rather than letting the pictures
+                imply otherwise. */}
+            {note ? <p className="mt-2 text-xs text-smoke">{note}</p> : null}
+          </div>
         </header>
 
         {/*

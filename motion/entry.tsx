@@ -13,19 +13,29 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
  * To coordinate across component boundaries, the overture broadcasts the
  * moment the field *starts* lifting. Everything downstream schedules itself
  * against that instant using the offsets below.
+ *
+ * The clock got longer when the overture gained a counter: 1 → 100 has to be
+ * legible as it runs, and a count that finishes in half a second is a flicker,
+ * not a count. Everything after `lift` is unchanged in *relative* terms — the
+ * headline still arrives 0.3s after the field starts moving — because every
+ * downstream section schedules against `lift` rather than against zero.
  */
 
 export const ENTRY = {
   /** The mark resolves. */
-  mark: 0.3,
-  /** The field begins to lift; the photograph is revealed behind it. */
-  lift: 0.55,
+  mark: 0.2,
+  /** The count begins, and the rule under it starts to fill. */
+  count: 0.35,
+  /** How long 1 → 100 takes. */
+  countFor: 1.7,
+  /** The field begins to lift. */
+  lift: 2.15,
   /** The headline rises. Overlaps the lift on purpose. */
-  headline: 0.85,
+  headline: 2.45,
   /** Navigation settles in. */
-  nav: 1.2,
+  nav: 2.8,
   /** The scroll indicator, last — it invites the next action. */
-  cue: 1.55,
+  cue: 3.15,
 } as const;
 
 type EntryState = {

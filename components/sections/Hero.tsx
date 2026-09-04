@@ -1,42 +1,20 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
-import Frame from '@/components/media/Frame';
+import { useRef } from 'react';
+import Emblem from '@/components/brand/Emblem';
 import { HERO, LOCATIONS, SITE } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
-import { useCapability } from '@/motion/capability';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
 import { ENTRY, useEntry } from '@/motion/entry';
 import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
 
-// Lazily loaded and never server-rendered: the shader must not sit on the
-// critical path, and the photograph underneath is what carries the LCP (§28).
-const HeroCanvas = dynamic(() => import('@/components/webgl/HeroCanvas'), { ssr: false });
-
-/**
- * The stills the shader dissolves between. Pinned to the 1600 rendition so the
- * first one is usually already in cache from the base `<Frame>` underneath.
- */
-const SEQUENCE = [
-  '/media/img/facade-dusk-1600.avif',
-  '/media/img/lift-stone-1600.avif',
-  '/media/img/sky-cutout-1600.avif',
-];
-
 const LINES = HERO.statement.split('\n');
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
-  const { animate, ready } = useCapability();
   const { started } = useEntry();
   const { scrollTo } = useScroll();
-  // Set if the GPU drops the context or a texture fails; the photograph
-  // underneath is already on screen, so the canvas simply stops painting.
-  const [shaderFailed, setShaderFailed] = useState(false);
-
-  const webgl = ready && animate && !shaderFailed;
 
   /**
    * Entry. Scheduled against the moment the overture's field begins to lift,
@@ -88,32 +66,31 @@ export default function Hero() {
   );
 
   /**
-   * The photograph settles out of a slight over-scale across the first
-   * viewport, then drifts against the scroll. Both are deliberately below the
-   * threshold of notice: if the visitor sees the image moving, it is too much.
-   *
-   * Only applied when the shader is absent — the canvas runs the equivalent
-   * settle in its own `uIntro` uniform, and doing both double-scales the frame.
+   * The mark settles out of a hair under full size as the entrance hands over,
+   * and then drifts a little against the scroll — the same treatment the
+   * photograph used to get, applied to the thing that replaced it.
    */
   useMotionEffect(
     root,
     () => {
       const el = root.current;
-      if (!el || webgl) return;
+      if (!el || !started) return;
 
-      gsap.fromTo(
-        '.hero-plate',
-        { scale: 1.05 },
-        { scale: 1, duration: CINEMA.epic * 1.6, ease: EASE.outLong }
-      );
+      gsap.from('.hero-mark', {
+        opacity: 0,
+        scale: 0.94,
+        duration: CINEMA.epic,
+        ease: EASE.outLong,
+        delay: Math.max(0, ENTRY.headline - ENTRY.lift),
+      });
 
-      gsap.to('.hero-plate', {
-        yPercent: 8,
+      gsap.to('.hero-mark', {
+        yPercent: 10,
         ease: EASE.none,
         scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: SCRUB.tight },
       });
     },
-    [webgl]
+    [started]
   );
 
   /**
@@ -123,12 +100,6 @@ export default function Hero() {
   useMotionEffect(root, () => {
     const el = root.current;
     if (!el) return;
-
-    gsap.to('.hero-veil', {
-      opacity: 1,
-      ease: EASE.none,
-      scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: SCRUB.tight },
-    });
 
     gsap.to('.hero-copy', {
       yPercent: -32,
@@ -152,34 +123,29 @@ export default function Hero() {
       id="top"
       className="relative h-[100svh] min-h-[34rem] w-full overflow-hidden bg-void"
     >
-      {/* The photograph is the floor, not the fallback: it always renders, and
-          carries the LCP. The shader layers on top and is free to fail. */}
-      <Frame
-        slug="facade-dusk"
-        className="hero-plate absolute inset-0 h-full w-full"
-        ratio="fill"
-        crossOrigin="anonymous"
-        sizes="100vw"
-        priority
-        position="50% 42%"
-      />
+      {/*
+        The mark, where the building used to be.
 
-      {webgl ? (
-        <div className="absolute inset-0">
-          <HeroCanvas sources={SEQUENCE} intro={started} onFail={() => setShaderFailed(true)} />
-        </div>
-      ) : null}
+        The hero was a full-bleed photograph of the Ashok Nagar facade with a
+        WebGL layer dissolving between three stills on top of it. Both are
+        gone: the opening is typographic now, and the emblem is the only thing
+        in the upper two-thirds of the frame.
 
-      {/* Legibility scrim — heavier at the foot, where the copy sits. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(to bottom, color-mix(in oklab, var(--color-void) 46%, transparent) 0%, transparent 26%, transparent 48%, color-mix(in oklab, var(--color-void) 82%, transparent) 100%)',
-        }}
-      />
-      <div className="hero-veil pointer-events-none absolute inset-0 bg-void opacity-0" aria-hidden />
+        It sits above the copy rather than behind it — no scrim, because there
+        is nothing to scrim. The type is on plain void and reads at the same
+        contrast as the rest of the site.
+
+        Placed a little above centre in the space left over the copy block, so
+        the composition is weighted the way the page reads: mark, rule,
+        sentence, addresses.
+      */}
+      <div className="pointer-events-none absolute inset-x-0 top-[9svh] flex h-[50svh] items-center justify-center md:top-[10svh] md:h-[46svh]">
+        <Emblem
+          priority
+          sizes="(min-width: 768px) 380px, 62vw"
+          className="hero-mark w-[min(62vw,23.75rem)]"
+        />
+      </div>
 
       <div className="hero-copy gutter absolute inset-x-0 bottom-0 pb-9 md:pb-12">
         <p className="hero-place type-label mb-4 text-chalk/80">{SITE.city}</p>
@@ -228,7 +194,18 @@ export default function Hero() {
               {/* A rail that fills as the hero is consumed, rather than a
                   looping arrow that keeps asking after you have answered. */}
               <span aria-hidden className="relative block h-10 w-px overflow-hidden bg-hairline">
-                <span className="hero-cue-fill absolute inset-x-0 top-0 h-full origin-top scale-y-0 bg-chalk" />
+                {/*
+                  Tailwind's `scale-*` utilities compile to the standalone CSS
+                  `scale` property in v4, which multiplies against `transform`
+                  rather than replacing it. GSAP animates `transform`, so a
+                  `scale-y-0` class here pinned the rendered size at zero
+                  forever: this rail has never actually filled. The rest state
+                  is an inline transform now, on the same property GSAP drives.
+                */}
+                <span
+                  className="hero-cue-fill absolute inset-x-0 top-0 h-full origin-top bg-chalk"
+                  style={{ transform: 'scaleY(0)' }}
+                />
               </span>
             </a>
           </div>

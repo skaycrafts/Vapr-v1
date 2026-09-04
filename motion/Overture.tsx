@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Emblem from '@/components/brand/Emblem';
+import { SITE } from '@/lib/content';
 import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
 import { useScroll } from '@/motion/ScrollProvider';
@@ -71,11 +72,22 @@ export default function Overture() {
     // Timers created by the branches below, cleared on unmount.
     const timers: number[] = [];
 
+    // Read once, outside the timeline: `onUpdate` runs on every frame of the
+    // count and has no business doing a DOM query each time.
+    const count = el.querySelector<HTMLElement>('.overture-count');
+    const rule = el.querySelector<HTMLElement>('.overture-rule');
+    const progress = { n: 1 };
+
     const ctx = gsap.context(() => {
       // Reduced motion: no draw, no lift, and no dependency on the ticker
       // either — a plain timer, so the overlay clears even if the tab was
       // never looked at.
       if (!animate) {
+        // No count. A number ticking to a hundred is precisely the kind of
+        // motion this preference exists to switch off — so the readout shows
+        // its finished state and the overlay simply clears.
+        if (count) count.textContent = '100';
+        if (rule) rule.style.transform = 'scaleX(1)';
         begin();
         el.style.transition = 'opacity 300ms linear';
         el.style.opacity = '0';
@@ -109,6 +121,39 @@ export default function Overture() {
           '.overture-mark',
           { opacity: 0, scale: 0.965, duration: CINEMA.base, ease: EASE.outLong },
           0
+        )
+        .from('.overture-meter, .overture-rule', { opacity: 0, duration: 0.5 }, ENTRY.mark)
+        /*
+         * One value, two readouts.
+         *
+         * `progress.n` runs 1 → 100 and its `onUpdate` writes both the number
+         * and the rule's scale on the same frame, so they cannot drift — not
+         * on a slow device, not when the tab is backgrounded mid-count, and
+         * not when an impatient visitor presses a key and the timeline is
+         * seeked straight to its end.
+         *
+         * `power1.inOut` rather than a linear ramp: a loader that runs at a
+         * dead constant rate reads as a progress bar, and one that decelerates
+         * into its last few numbers reads as something arriving. It is the
+         * gentlest ease in the vocabulary — anything heavier and the count
+         * visibly stalls in the nineties, which is the exact tell of a fake
+         * loader.
+         */
+        .to(
+          progress,
+          {
+            n: 100,
+            duration: ENTRY.countFor,
+            ease: 'power1.inOut',
+            onUpdate: () => {
+              const value = Math.round(progress.n);
+              if (count && count.textContent !== String(value)) {
+                count.textContent = String(value);
+              }
+              if (rule) rule.style.transform = `scaleX(${progress.n / 100})`;
+            },
+          },
+          ENTRY.count
         )
         // The lockup releases, and the field lifts away. `begin()` fires here
         // rather than at the end: the hero's own timeline starts while this
@@ -195,6 +240,47 @@ export default function Overture() {
           sizes="(min-width: 768px) 272px, 46vw"
           className="overture-mark w-[min(46vw,17rem)]"
         />
+      </div>
+
+      {/*
+        The count, and the rule it fills.
+
+        Both are driven by one tweened value rather than by two tweens of the
+        same duration — see the timeline above. Two tweens would be
+        synchronised only for as long as nothing interrupted them; one value
+        cannot drift from itself, including when an impatient visitor seeks
+        the timeline to the end.
+
+        The number is set in the display face at a size that makes it the
+        second-largest thing on the screen after the mark, and `tabular`
+        so the digits do not jostle as they run. It is hidden from assistive
+        technology: the overlay already announces itself as loading, and a
+        live region counting to a hundred is not information, it is noise.
+      */}
+      <div className="gutter absolute inset-x-0 bottom-0 pb-8 md:pb-12">
+        <div className="overture-meter flex items-end justify-between gap-6">
+          <span
+            aria-hidden
+            className="overture-count tabular type-display block text-[clamp(3rem,11vw,7rem)] leading-[0.85] text-chalk"
+          >
+            1
+          </span>
+          <span aria-hidden className="type-label pb-2">
+            {SITE.city}
+          </span>
+        </div>
+
+        <span aria-hidden className="mt-5 block h-px w-full bg-hairline md:mt-7">
+          {/* Not `scale-x-0`: Tailwind v4 compiles that to the standalone
+              `scale` property, which multiplies against the `transform` GSAP
+              writes on every frame of the count — the fill measured 0px wide
+              for the whole sequence while the number ran perfectly. The rest
+              state is set on the property that is actually animated. */}
+          <span
+            className="overture-rule block h-px w-full origin-left bg-chalk"
+            style={{ transform: 'scaleX(0)' }}
+          />
+        </span>
       </div>
     </div>
   );

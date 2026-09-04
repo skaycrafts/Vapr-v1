@@ -266,10 +266,20 @@ export const locationBySlug = (slug: string) => LOCATIONS.find((l) => l.slug ===
 export const placeOf = (l: Location) =>
   l.area === l.shortName ? SITE.city : `${l.area}, ${SITE.city}`;
 
+/**
+ * "The rooms" used to sit here, pointing at `/#rooms` on the homepage. That
+ * section moved into the two property pages, so the anchor stopped resolving
+ * and the link became a no-op that reloaded the homepage and scrolled
+ * nowhere.
+ *
+ * It is not repointed because there is no longer one destination to point at:
+ * Maple is Ashok Nagar's room and Deluxe is Guindy's, and both properties are
+ * already the two entries above. Sending "The rooms" to either one would
+ * quietly pick a favourite.
+ */
 export const NAV = [
   { label: 'Ashok Nagar', href: '/ashok-nagar' },
   { label: 'Guindy', href: '/guindy' },
-  { label: 'The rooms', href: '/#rooms' },
 ] as const;
 
 /** The one call to action; kept out of NAV so it is not repeated as a link. */
