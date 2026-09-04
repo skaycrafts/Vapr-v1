@@ -126,6 +126,13 @@ export const STAY = {
     'Branded toiletries — shampoo, comb, dental kit, shaving kit, moisturiser, handwash, loofah, shower cap',
   ],
   /** Stated as unavailable at both. Saying so is more useful than silence. */
+  /**
+   * No longer rendered anywhere. The specification sheet used to carry a
+   * "Not here, at either" pane listing these; it was taken off the page.
+   * Kept because it is true and it came off the listings, not because
+   * anything reads it — delete it if it is still unused when you next pass
+   * through here.
+   */
   notAvailable: ['Laundry service', 'Swimming pool', 'Gym'],
   earlyCheckIn:
     'Early check-in depends on what is free that morning. Give the desk a day’s notice and they will try.',

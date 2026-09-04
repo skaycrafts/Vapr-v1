@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
-import { Check, Minus } from 'lucide-react';
+import { Check } from 'lucide-react';
 import Frame from '@/components/media/Frame';
+import Glass from '@/components/ui/Glass';
 import RevealText from '@/motion/primitives/RevealText';
 import RevealImage from '@/motion/primitives/RevealImage';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
@@ -71,26 +72,31 @@ export default function Detail() {
         </header>
 
         {/*
-          Four columns: what both hotels give you, what neither does, and then
-          each property's own list.
+          Three panes: what both hotels give you, and then each property's own
+          list.
 
-          These used to be four <Glass> panes. Glass is a real refracting
-          surface — it earns its cost by bending whatever is behind it, which
-          is why the site spends it on the navigation and the reserve panel,
-          both of which float over photography. Here the ground is flat black.
-          There is nothing to refract, so all four rendered as grey rounded
-          rectangles with a 2%-white fill: the most generic component on the
-          site, sitting in the section that is otherwise the most
-          typographically disciplined.
+          ── On the glass ────────────────────────────────────────────────────
+          These are `<Glass>` again. I had taken it off on the grounds that
+          refraction over a flat black ground has nothing to bend, so what
+          survives is the material dressing — the tint, the rim highlight, the
+          cast shadow — and not the optics the component exists for. That is
+          still true, and it is a preference rather than a defect: the dressing
+          is what reads as a panel here, and the panel is what was asked for.
 
-          A rule and a label separate four answers perfectly well, and it is
-          the language the rest of the page is already written in.
+          The one thing worth knowing is that this is where the effect is
+          cheapest to lose. If these ever want the real bend, the section needs
+          something behind them to bend — the reserve panel gets it from the
+          photograph it floats over.
+
+          ── On what is missing ──────────────────────────────────────────────
+          There used to be a fourth pane, "Not here, at either", listing the
+          laundry, the pool and the gym. It has gone. The early check-in note
+          that lived at the foot of it has gone with it, but not from the site:
+          both property pages still carry it under their own check-in times.
         */}
-        <div className="detail-sheet grid gap-x-10 gap-y-12 pt-10 sm:grid-cols-2 md:pt-14 xl:grid-cols-4 xl:gap-x-12">
-          <section>
-            <h3 className="type-label mb-4 border-t border-hairline-strong pt-4">
-              Included at both
-            </h3>
+        <div className="detail-sheet grid gap-3 pt-10 sm:grid-cols-2 md:pt-14 xl:grid-cols-3">
+          <Glass className="rounded-2xl p-6 md:p-7" radius={16} scale={-58}>
+            <h3 className="type-label mb-4">Included at both</h3>
             <ul>
               {STAY.included.map((item) => (
                 <li
@@ -107,38 +113,11 @@ export default function Detail() {
                 </li>
               ))}
             </ul>
-          </section>
-
-          <section>
-            <h3 className="type-label mb-4 border-t border-hairline-strong pt-4">
-              Not here, at either
-            </h3>
-            <ul>
-              {STAY.notAvailable.map((item) => (
-                <li
-                  key={item}
-                  className="detail-row flex items-baseline gap-3 border-t border-hairline py-3 first:border-t-0 first:pt-0"
-                >
-                  <Minus
-                    size={14}
-                    strokeWidth={1.75}
-                    aria-hidden
-                    className="shrink-0 translate-y-0.5 text-ash"
-                  />
-                  <span className="text-sm text-smoke">{item}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="detail-row mt-4 border-t border-hairline pt-4 text-xs leading-relaxed text-smoke">
-              {STAY.earlyCheckIn}
-            </p>
-          </section>
+          </Glass>
 
           {LOCATIONS.map((loc) => (
-            <section key={loc.slug}>
-              <h3 className="type-label mb-4 border-t border-hairline-strong pt-4">
-                {loc.shortName}
-              </h3>
+            <Glass key={loc.slug} className="rounded-2xl p-6 md:p-7" radius={16} scale={-58}>
+              <h3 className="type-label mb-4">{loc.shortName}</h3>
               <ul>
                 {loc.facilities.map((item) => (
                   <li
@@ -149,7 +128,7 @@ export default function Detail() {
                   </li>
                 ))}
               </ul>
-            </section>
+            </Glass>
           ))}
         </div>
       </div>
