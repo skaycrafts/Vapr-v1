@@ -1,13 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Emblem from '@/components/brand/Emblem';
 import { SITE } from '@/lib/content';
 import { gsap, useIsoLayoutEffect } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
 import { useScroll } from '@/motion/ScrollProvider';
 import { ENTRY, useEntry } from '@/motion/entry';
-import { CINEMA, EASE } from '@/motion/config';
+import { EASE } from '@/motion/config';
 
 /**
  * The first two seconds.
@@ -76,7 +75,36 @@ export default function Overture() {
     // count and has no business doing a DOM query each time.
     const count = el.querySelector<HTMLElement>('.overture-count');
     const rule = el.querySelector<HTMLElement>('.overture-rule');
+    const letters = Array.from(el.querySelectorAll<HTMLElement>('.overture-letter'));
+    const shown = letters.map(() => false);
     const progress = { n: 1 };
+
+    /**
+     * V at 25, A at 50, P at 75, R at 100 — the word is spelled by the load.
+     *
+     * Driven from the counter's own `onUpdate` rather than scheduled beside it
+     * on the timeline. Two parallel tracks would agree only for as long as
+     * nothing disturbed them; reading the same value the number reads means a
+     * letter cannot appear at 24 or 26, by construction.
+     *
+     * Every letter still owed is revealed on each pass, not just the one that
+     * has this instant crossed. That is what makes the skip correct: a visitor
+     * who presses a key seeks the timeline to its end, `onUpdate` fires once
+     * at 100, and all four arrive together rather than three being silently
+     * skipped and only R appearing.
+     */
+    const MILESTONES = [25, 50, 75, 100];
+    const revealLetters = (value: number) => {
+      letters.forEach((letter, i) => {
+        if (shown[i] || value < MILESTONES[i]) return;
+        shown[i] = true;
+        gsap.fromTo(
+          letter,
+          { opacity: 0, yPercent: 32 },
+          { opacity: 1, yPercent: 0, duration: 0.5, ease: EASE.outLong }
+        );
+      });
+    };
 
     const ctx = gsap.context(() => {
       // Reduced motion: no draw, no lift, and no dependency on the ticker
@@ -88,6 +116,9 @@ export default function Overture() {
         // its finished state and the overlay simply clears.
         if (count) count.textContent = '100';
         if (rule) rule.style.transform = 'scaleX(1)';
+        letters.forEach((letter) => {
+          letter.style.opacity = '1';
+        });
         begin();
         el.style.transition = 'opacity 300ms linear';
         el.style.opacity = '0';
@@ -103,25 +134,14 @@ export default function Overture() {
 
       tl
         /*
-         * The seal resolves.
+         * Nothing arrives on its own clock here any more.
          *
-         * It used to draw itself, stroke by stroke, off `stroke-dashoffset` —
-         * which only works on path geometry, and the emblem is the supplied
-         * artwork now rather than a trace of it. That trick is gone, and the
-         * mark being the real one is worth more than the trick was.
-         *
-         * What replaces it is deliberately almost nothing: the emblem comes up
-         * out of a hair under full size over a second and a quarter, on the
-         * longest ease in the vocabulary. No spin, no shimmer, no draw. It
-         * settles, the way a stamped mark settles, and then it is simply
-         * there — which is the behaviour the rest of the site already promises
-         * of this mark.
+         * The emblem used to resolve out of a hair under full size and hold
+         * the centre of the field. It has been taken out of the splash — the
+         * mark still opens the site everywhere else, but the loading screen is
+         * now only the three things that describe loading: a number, a rule,
+         * and the word being spelled as it fills.
          */
-        .from(
-          '.overture-mark',
-          { opacity: 0, scale: 0.965, duration: CINEMA.base, ease: EASE.outLong },
-          0
-        )
         .from('.overture-meter, .overture-rule', { opacity: 0, duration: 0.5 }, ENTRY.mark)
         /*
          * One value, two readouts.
@@ -147,6 +167,7 @@ export default function Overture() {
             ease: 'power1.inOut',
             onUpdate: () => {
               const value = Math.round(progress.n);
+              revealLetters(value);
               if (count && count.textContent !== String(value)) {
                 count.textContent = String(value);
               }
@@ -225,21 +246,31 @@ export default function Overture() {
       aria-label="Loading"
     >
       {/*
-        The whole logo, and nothing beside it.
+        The word, spelled by the load.
 
-        This used to be a lockup we assembled: the seal with its wordmark
-        removed, and VAPR set again underneath in tracked-out display type.
-        That is a perfectly good arrangement of two things — but the mark
-        already contains its own name, so the page opened by showing the word
-        twice and the actual logo never once.
+        The emblem used to hold this space. It is gone from the splash — and
+        only from the splash; the mark still opens the navigation, the footer,
+        Chennai's closing beat and the property pages. A loading screen that
+        shows the finished identity before anything has loaded is announcing an
+        arrival that has not happened. Four letters filling in as the number
+        climbs says the same thing and means it.
+
+        All four slots are rendered from the start and hidden with opacity, so
+        the letters appear where they will finally sit. The alternative —
+        rendering only what has been revealed — re-centres the group on every
+        milestone, and a word that jumps sideways four times is the opposite of
+        what was asked for.
       */}
-      <div className="overture-lockup flex flex-col items-center">
-        <Emblem
-          animated
-          priority
-          sizes="(min-width: 768px) 272px, 46vw"
-          className="overture-mark w-[min(46vw,17rem)]"
-        />
+      <div className="overture-lockup flex items-center justify-center" aria-hidden>
+        {['V', 'A', 'P', 'R'].map((letter) => (
+          <span
+            key={letter}
+            className="overture-letter type-display block text-[clamp(3.25rem,13vw,9rem)] leading-[0.9] tracking-[0.12em] text-chalk"
+            style={{ opacity: 0 }}
+          >
+            {letter}
+          </span>
+        ))}
       </div>
 
       {/*
@@ -251,8 +282,7 @@ export default function Overture() {
         cannot drift from itself, including when an impatient visitor seeks
         the timeline to the end.
 
-        The number is set in the display face at a size that makes it the
-        second-largest thing on the screen after the mark, and `tabular`
+        The number is set in the display face, and `tabular`
         so the digits do not jostle as they run. It is hidden from assistive
         technology: the overlay already announces itself as loading, and a
         live region counting to a hundred is not information, it is noise.
