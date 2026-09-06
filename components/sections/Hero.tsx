@@ -15,23 +15,40 @@ const LINES = HERO.statement.split('\n');
 /**
  * The reveal clip, and how it is made to sit exactly on top of the emblem.
  *
- * `scripts/build-brand.mjs` crops the supplied animation to a 720x720 square
- * about the mark's own centre, and in the resolved frame the emblem measures
- * 510px across that box — 70.833%. The static `Emblem` fills its box edge to
- * edge, because the artwork is trimmed to its ink. So for the clip's last
- * frame to land ON the emblem rather than near it, the clip is drawn at
- * 1/0.70833 of the mark's width and pulled back by half the difference on
+ * `scripts/build-brand.mjs` re-frames the supplied animation into an 852x852
+ * square about the mark's own centre, and in the resolved frame the emblem
+ * measures 676x679 across that box — 79.5%. The static `Emblem` fills its box
+ * edge to edge, because the artwork is trimmed to its ink. So for the clip's
+ * last frame to land ON the emblem rather than near it, the clip is drawn at
+ * 1/0.79519 of the mark's width and pulled back by half the difference on
  * both axes.
  *
- * Deriving those numbers from the measurement rather than typing 141% is the
- * point: re-cut the clip with a different crop and this is the line to change.
+ * The fraction is the mean of the two axes: the clip's emblem is 0.4% taller
+ * than it is wide, so splitting the difference leaves either axis out by half
+ * of that rather than one of them out by all of it. At the size this renders,
+ * that is well under a pixel.
+ *
+ * Deriving these from the measurement rather than typing 126% is the point:
+ * re-frame the clip and this is the line to change.
  */
-const EMBLEM_IN_CLIP = 0.70833;
+const EMBLEM_IN_CLIP = 0.79519;
 const CLIP_BOX = 100 / EMBLEM_IN_CLIP;
 const CLIP_INSET = (CLIP_BOX - 100) / 2;
 
-/** The built clip runs 7.63s. The guard is that, with room for a slow start. */
-const REVEAL_GUARD_MS = 11_000;
+/** The built clip runs 8.0s. The guard is that, with room for a slow start. */
+const REVEAL_GUARD_MS = 11_500;
+/**
+ * How long the clip gets to produce its first frame before the mark gives up
+ * and shows the artwork.
+ *
+ * This is the one that catches a broken file. `error` does not fire on a
+ * <video> whose <source> children fail — it fires on the last <source>, and
+ * the element itself just goes quiet with NETWORK_NO_SOURCE. Waiting on the
+ * end-of-clip guard for that meant eleven seconds of an empty frame. Watching
+ * for the first `playing` instead covers a 404, a codec the device cannot
+ * decode, and a connection too slow to be worth waiting on, with one rule.
+ */
+const REVEAL_START_MS = 3_000;
 /** Long enough to read as a settle rather than a swap. */
 const REVEAL_SETTLE = 0.9;
 
@@ -94,19 +111,22 @@ export default function Hero() {
    * Two things occupy the mark's box: the supplied reveal animation, and the
    * emblem itself. The clip plays once, then dissolves into the still.
    *
-   * It is not a flourish that the still gets the last word. The clip is a
-   * redrawing of the mark — its wavy rules come back as stepped zigzags, its
-   * rosettes as blocks, and VAPR in a heavier face than the artwork's Didone.
-   * Something has to hold the frame for the rest of the visit, and it should
-   * be the logo rather than an approximation of it. So the clip does the
-   * arriving and `Emblem` does the staying, at a size and centre measured to
-   * match so the handover is a settle rather than a swap.
+   * The still gets the last word for two smaller reasons than it once did.
+   * The clip draws the real mark — measured against the artwork it is a near
+   * match, every rule, rosette and fan where the logo puts them — but it is
+   * h264 line art, and it resolves to a grey some way short of the chalk the
+   * rest of the page is set in. `Emblem` is Lanczos-resampled from the 2157px
+   * master and is the same white as the type. So the clip does the arriving
+   * and the artwork does the staying, at a size and centre measured to match,
+   * and the handover reads as the mark coming into focus.
    *
    * Every path out of the clip ends in the same place. It finishes; or the
-   * browser refuses to autoplay it; or it fails to load; or the visitor
-   * scrolls past before it is done; or `useMotionEffect` never runs it at all
-   * because the visitor asked for reduced motion. In all five the artwork is
-   * what is on screen, and `settle` is idempotent so they may race.
+   * browser refuses to autoplay it; or the file is missing, undecodable, or
+   * simply too slow to be worth waiting on; or the visitor scrolls past
+   * before it is done; or `useMotionEffect` never runs it at all because the
+   * visitor asked for reduced motion. In every one the artwork is what is on
+   * screen, and `settle` is idempotent so they may race — which they do, a
+   * failed load firing both the start watchdog and `play()`'s rejection.
    */
   useMotionEffect(
     root,
@@ -157,6 +177,14 @@ export default function Hero() {
       // arrives minutes late, or not at all. The mark must not wait on it.
       const guard = window.setTimeout(settle, REVEAL_GUARD_MS);
 
+      // And nothing at all may be coming. Cancelled the moment a frame lands.
+      let startGuard = window.setTimeout(settle, REVEAL_START_MS);
+      const onPlaying = () => {
+        window.clearTimeout(startGuard);
+        startGuard = 0;
+      };
+      clip.addEventListener('playing', onPlaying, { once: true });
+
       // Past the fold the clip is decoding frames nobody is looking at, and
       // coming back to a half-drawn emblem would read as a fault rather than
       // as an entrance. It is an arrival; it does not get a second showing.
@@ -169,7 +197,9 @@ export default function Hero() {
       return () => {
         clip.removeEventListener('ended', settle);
         clip.removeEventListener('error', settle);
+        clip.removeEventListener('playing', onPlaying);
         window.clearTimeout(guard);
+        window.clearTimeout(startGuard);
         leave.kill();
       };
     },
@@ -222,8 +252,27 @@ export default function Hero() {
         the composition is weighted the way the page reads: mark, rule,
         sentence, addresses.
       */}
+      {/*
+        ── Why the mark is capped against viewport height ───────────────────
+        The slot below was sized for the emblem. The reveal clip is 1.257x the
+        emblem — its own frame carries the sweep that draws the ring, which is
+        wider and a good deal taller than the mark it resolves into — so the
+        clip hangs about 49px past the slot at full size and, on a short
+        window, reached down through the rule and across the copy.
+
+        The third term in the width closes that. It is the largest mark whose
+        clip still clears the rule, solved from the layout: the mark's centre
+        sits at 33svh (34svh before md), the clip's half-height is 0.629 of the
+        mark's width, and the rule sits about 229px above the foot of the frame
+        on desktop and 193px on mobile — leaving a 16px gap on top. Measured
+        against `max(100svh, 34rem)` rather than the viewport alone because
+        that is the section's real height once `min-h` takes over.
+
+        It binds only when the window is genuinely short: above about 750px of
+        viewport height the 23.75rem cap still wins and nothing moves.
+      */}
       <div className="pointer-events-none absolute inset-x-0 top-[9svh] flex h-[50svh] items-center justify-center md:top-[10svh] md:h-[46svh]">
-        <div className="hero-mark relative aspect-square w-[min(62vw,23.75rem)]">
+        <div className="hero-mark relative aspect-square w-[min(62vw,23.75rem,calc(1.0496*max(100svh,34rem)-330px))] md:w-[min(62vw,23.75rem,calc(1.0656*max(100svh,34rem)-389px))]">
           <Emblem
             priority
             sizes="(min-width: 768px) 380px, 62vw"
@@ -273,7 +322,7 @@ export default function Hero() {
       <div className="hero-copy gutter absolute inset-x-0 bottom-0 pb-9 md:pb-12">
         <p className="hero-place type-label mb-4 text-chalk/80">{SITE.city}</p>
 
-        <div className="hero-rule mb-7 h-px w-full origin-left bg-hairline-strong md:mb-9" />
+        <div className="hero-rule mb-4 h-px w-full origin-left bg-hairline-strong md:mb-5" />
 
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-16">
           {/*

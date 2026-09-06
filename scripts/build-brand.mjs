@@ -98,41 +98,48 @@ async function inkBox(input) {
 
 /**
  * ── The reveal clip ─────────────────────────────────────────────────────
- * The supplied animation is 1280x720, ten seconds, 9.9 Mbps with an audio
- * track it does not need. Three things are done to it, and nothing else:
+ * The supplied animation is 720x1280 — a 9:16 portrait frame, eight seconds,
+ * 7.9 Mbps with an audio track it does not need. It draws the emblem on in a
+ * single continuous movement: no cuts, no scale jumps, nothing to edit around.
  *
- *  1. CROP to the square the mark actually occupies. The emblem is centred on
- *     (637, 361) and never exceeds 596px across in the kept material, so a
- *     720x720 crop about that centre loses nothing and gives the hero a box
- *     whose geometry is knowable: the resolved emblem is 511/720 = 70.97% of
- *     it, dead centre. That constant is what lets the hero size the clip so
- *     its final frame lands exactly on top of the static emblem.
+ * So this does two things to it, and neither touches a frame's content.
  *
- *  2. CUT the zoom. At 5.49s the animation hard-cuts to a push-in roughly
- *     twice the scale, holds it to 7.40s, then hard-cuts back. Two jump cuts
- *     in a site with no others — but the reason it goes is geometric, not a
- *     matter of taste: sized so the resolved emblem matches the hero mark,
- *     that beat renders about 850px tall in a 414px slot and crosses the
- *     headline at every desktop width. The ornament is identically complete
- *     either side of the cut, so the two halves join on a 0.45s dissolve —
- *     needed because the ornament rotates continuously and a hard splice
- *     would pop both the scale and the rotation phase.
+ *  1. RE-FRAME it to a square about the mark's own centre. The hero has a
+ *     square slot, and the clip arrives in a portrait one with the ring
+ *     inscribed to the full 720 of frame width and the composition sitting
+ *     high. Measured off the clip rather than guessed: every lit pixel across
+ *     all 48 sampled frames falls inside x 0..719 and y 242..1032, and the
+ *     resolved emblem is 676x682 centred on (352.5, 614.5). A square of 840
+ *     about that centre is the smallest that holds all of it — the binding
+ *     reach is 417.5px, down to the foot of the ring. Hence a pad rather than
+ *     a crop on the horizontal: the frame is narrower than the square it needs
+ *     to become, and the extra is flat black either side.
  *
- *  3. STRIP the audio, which is 128 kb/s of nothing a muted hero can use.
+ *     Centred on the RESOLVED emblem, not on the union of the movement. What
+ *     has to land exactly is the last frame, because that is the one the still
+ *     artwork dissolves in on top of.
  *
- * No frame is recoloured, retimed or redrawn.
+ *  2. STRIP the audio, which is 128 kb/s of nothing a muted hero can use.
+ *
+ * Nothing is recoloured, retimed, scaled or redrawn. The square is padded,
+ * never resampled, so the artwork leaves at the resolution it arrived.
  *
  * Two codecs because this is white line art on black: h264 smears hairlines
  * into mosquito noise at the bitrates VP9 holds them at, and every browser
  * that can decode the webm prefers it.
  */
 const REVEAL = {
-  /** Frame-accurate at 24fps: the last frame before the push-in, and the first after it. */
-  cutIn: 5.4917,
-  cutOut: 7.4167,
-  dissolve: 0.45,
-  /** Square crop about the emblem's own centre, measured off the resolved frame. */
-  crop: { size: 720, left: 277, top: 0 },
+  /**
+   * The square the mark is re-framed into, and where the source sits in it.
+   *
+   * 852 rather than the 836 the measurement strictly demands: at the tight
+   * size the foot of the ring lands on the last row of the box on one frame,
+   * and a clip whose artwork is tangent to its own edge is one re-encode away
+   * from being clipped by it. The extra 16px buys 8px of margin all round.
+   */
+  box: 852,
+  padLeft: 74,
+  cropTop: 188,
 };
 
 async function buildReveal() {
@@ -141,31 +148,27 @@ async function buildReveal() {
     return;
   }
 
-  const { size, left, top } = REVEAL.crop;
-  // xfade consumes `dissolve` seconds from the tail of the first segment, so
-  // the offset is pulled back by exactly that much to keep the cut point.
-  const graph = [
-    `[0:v]crop=${size}:${size}:${left}:${top},setsar=1,split=2[a][b]`,
-    `[a]trim=0:${REVEAL.cutIn},setpts=PTS-STARTPTS[s1]`,
-    `[b]trim=${REVEAL.cutOut},setpts=PTS-STARTPTS[s2]`,
-    `[s1][s2]xfade=transition=fade:duration=${REVEAL.dissolve}:offset=${(REVEAL.cutIn - REVEAL.dissolve).toFixed(4)},format=yuv420p[v]`,
-  ].join(';');
+  const { box, padLeft, cropTop } = REVEAL;
+  // Pad the portrait frame out to the square's width first, then take the
+  // square out of it. Doing it in this order keeps every operation integer and
+  // lossless: no scale filter ever touches the artwork.
+  const vf = `pad=${box}:ih:${padLeft}:0:black,crop=${box}:${box}:0:${cropTop},setsar=1`;
 
   const mp4 = path.join(OUT, 'vapr-logo-reveal.mp4');
   const webm = path.join(OUT, 'vapr-logo-reveal.webm');
 
   await run(ffmpegPath, ['-y', '-loglevel', 'error', '-i', REVEAL_SRC,
-    '-filter_complex', graph, '-map', '[v]', '-an',
+    '-vf', vf, '-an',
     '-c:v', 'libx264', '-crf', '23', '-preset', 'veryslow', '-tune', 'animation',
     '-pix_fmt', 'yuv420p', '-movflags', '+faststart', mp4]);
 
-  // Transcoded from the mp4 rather than re-running the graph: identical frames
-  // in both files, so the two codecs can never drift out of sync.
+  // Transcoded from the mp4 rather than re-running the filter: identical
+  // frames in both files, so the two codecs can never drift out of sync.
   await run(ffmpegPath, ['-y', '-loglevel', 'error', '-i', mp4,
     '-c:v', 'libvpx-vp9', '-crf', '36', '-b:v', '0', '-row-mt', '1', '-an', webm]);
 
   console.log(
-    `  reveal    mp4 ${(fs.statSync(mp4).size / 1024).toFixed(0)}kB  webm ${(fs.statSync(webm).size / 1024).toFixed(0)}kB`
+    `  reveal    ${box}x${box}  mp4 ${(fs.statSync(mp4).size / 1024).toFixed(0)}kB  webm ${(fs.statSync(webm).size / 1024).toFixed(0)}kB`
   );
 }
 
