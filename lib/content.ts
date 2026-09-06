@@ -191,10 +191,11 @@ export const LOCATIONS: readonly Location[] = [
       'room-b-wide',
       'room-a-bath',
     ],
-    heroImage: 'facade-dusk',
-    // The hero photograph is this building; the panel shows it from the
-    // street instead, so the two are not the same frame twice.
-    panelImage: 'facade-street',
+    heroImage: 'ashok-nagar-exterior',
+    // The property's own frame carries both the hero and the panel now, so
+    // the street view goes back to being one of the gallery images rather
+    // than standing in for the building.
+    panelImage: 'ashok-nagar-exterior',
   },
   {
     slug: 'guindy',
@@ -260,7 +261,13 @@ export const LOCATIONS: readonly Location[] = [
       'detail-curtain',
     ],
     imagesArePlaceholder: true,
-    heroImage: 'facade-canopy',
+    // Guindy's own building at last. `imagesArePlaceholder` still stands and
+    // still drives the disclosures — the *rooms* here are Ashok Nagar's — but
+    // the exterior is no longer among them, and `facade-canopy` was a
+    // photograph of the other hotel standing in for this one with nothing on
+    // the page saying so.
+    heroImage: 'guindy-exterior',
+    panelImage: 'guindy-exterior',
   },
 ];
 

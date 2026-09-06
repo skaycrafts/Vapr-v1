@@ -10,6 +10,13 @@ export const IMAGES = [
   { slug: 'facade-canopy',    src: 'fascade/JWS03212-HDR.jpg',   alt: 'Rain trees arching over the building front on 46th Street', crop: { height: 0.68 } },
   { slug: 'facade-street',    src: 'fascade/JWS03177-HDR.jpg',   alt: 'The building seen from the street corner, Ashok Nagar', crop: { height: 0.70 } },
   { slug: 'facade-side',      src: 'fascade/JWS03402-HDR.jpg',   alt: 'Side elevation under the tree canopy', crop: { height: 0.70 } },
+
+  // Supplied separately from the shoot, and the only frames of each building
+  // taken from above. Uncropped: the franchise signage on the Ashok Nagar
+  // elevation is left in place at the client's instruction, against the note
+  // at the top of this file.
+  { slug: 'ashok-nagar-exterior', src: 'fascade/ashok-nagar-exterior.png', alt: 'The Ashok Nagar building at dusk, lit, seen from above the street corner' },
+  { slug: 'guindy-exterior',      src: 'fascade/guindy-exterior.png',      alt: 'The Ekkatuthangal building at dusk, its rooms lit behind full-height glass' },
   { slug: 'sky-cutout',       src: 'june/CAT09525.jpg',          alt: 'Monsoon cloud seen through the roof terrace cutout' },
   { slug: 'parking-bay',      src: 'parking/JWS03714-HDR.jpg',   alt: 'Covered parking bay beneath the building' },
 

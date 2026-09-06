@@ -315,12 +315,19 @@ export default function Locations() {
                   <p data-fade className="mt-3 max-w-[42ch] text-lg leading-relaxed text-mist">
                     {loc.blurb}
                   </p>
-                  {loc.imagesArePlaceholder ? (
-                    <p data-fade className="mt-3 max-w-[44ch] text-xs text-smoke">
-                      {loc.shortName} is still being photographed. The frames here are
-                      from Ashok Nagar, finished to the same standard.
-                    </p>
-                  ) : null}
+                  {/*
+                    The disclosure that used to sit here has gone, and its
+                    removal is the point rather than a tidy-up. This panel
+                    shows one photograph — the building — and that photograph
+                    is now genuinely Guindy's. Saying "the frames here are from
+                    Ashok Nagar" under a picture of Ekkatuthangal would have
+                    been the same error the note existed to prevent, pointed
+                    the other way.
+
+                    `imagesArePlaceholder` still stands and still carries the
+                    room and shared-space disclosures on the property page,
+                    because those photographs really are Ashok Nagar's.
+                  */}
                 </div>
 
                 {/* The two numbers that actually separate the properties, set

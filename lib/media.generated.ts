@@ -316,6 +316,22 @@ export const IMAGES = {
     "height": 6000,
     "aspect": 0.6667,
     "lqip": "data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAACwBACdASoUAB4APv1urE+rJqSiMAwBYB+JQBUeglXiTo3lTT4d6EdhFzwyXxiAAP0SYGpxoS+ogpL1PxIkNBzs/ezJlsA7XukrwjkFg59wrXGqpU69LVpoqSthAFPtp4FkV3ybsh9F4K1K4vsNygIN1UAAAA=="
+  },
+  "ashok-nagar-exterior": {
+    "slug": "ashok-nagar-exterior",
+    "alt": "The Ashok Nagar building at dusk, lit, seen from above the street corner",
+    "width": 1278,
+    "height": 1231,
+    "aspect": 1.0382,
+    "lqip": "data:image/webp;base64,UklGRmwAAABXRUJQVlA4IGAAAACwBACdASoUABMAPwlysVErpqSiqA1RcCEJaACzgA3zLvduTR72GBBgVn2u6dAgAP7r/yScHCTod3dQnYDkLN4dIDrSGfU+4zAcmg7K/dZgHt+iitc1RbuL8Y08/nUAAAA="
+  },
+  "guindy-exterior": {
+    "slug": "guindy-exterior",
+    "alt": "The Ekkatuthangal building at dusk, its rooms lit behind full-height glass",
+    "width": 1620,
+    "height": 971,
+    "aspect": 1.6684,
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoUAAwAPwlysVArpqSisAgBcCEJQBOgBDwtJmzzokLkYMAA/qlPZ9VtaRHJeQV8ZrNfmmv2PDR7hDIKXn2zOZ8eqZ3yCCA6KgAAAA=="
   }
 } as const satisfies Record<string, Rendition>;
 
