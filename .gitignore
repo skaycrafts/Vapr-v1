@@ -46,8 +46,10 @@ next-env.d.ts
 # at all: git does not descend into an ignored directory, so a negation for
 # something inside one is never even considered.
 /media-source/*
-# The identity master is the exception. It is 250kB, not gigabytes of raw
-# frames, and every asset in public/brand is derived from it by
-# scripts/build-brand.mjs — ignoring it would make the logo the one thing in
-# this repository that cannot be rebuilt from this repository.
+# The identity masters are the exception. Every asset in public/brand is
+# derived from them by scripts/build-brand.mjs — ignoring them would make the
+# logo the one thing in this repository that cannot be rebuilt from this
+# repository. That is 250kB for the emblem artwork and 12.4MB for the supplied
+# reveal animation, which is a real cost paid on every clone; it is accepted
+# because the alternative is a hero asset nobody can re-cut.
 !/media-source/brand

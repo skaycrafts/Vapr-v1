@@ -26,10 +26,16 @@
 import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import ffmpegPath from 'ffmpeg-static';
 
 const SRC = process.argv[2] ?? 'media-source/brand/vapr-emblem-source.png';
+const REVEAL_SRC = 'media-source/brand/vapr-logo-reveal.mp4';
 const OUT = 'public/brand';
 const ICON_DIR = 'app';
+
+const run = promisify(execFile);
 
 /**
  * A full ladder rather than three big steps.
@@ -88,6 +94,79 @@ async function inkBox(input) {
     width: Math.min(side, info.width),
     height: Math.min(side, info.height),
   };
+}
+
+/**
+ * ── The reveal clip ─────────────────────────────────────────────────────
+ * The supplied animation is 1280x720, ten seconds, 9.9 Mbps with an audio
+ * track it does not need. Three things are done to it, and nothing else:
+ *
+ *  1. CROP to the square the mark actually occupies. The emblem is centred on
+ *     (637, 361) and never exceeds 596px across in the kept material, so a
+ *     720x720 crop about that centre loses nothing and gives the hero a box
+ *     whose geometry is knowable: the resolved emblem is 511/720 = 70.97% of
+ *     it, dead centre. That constant is what lets the hero size the clip so
+ *     its final frame lands exactly on top of the static emblem.
+ *
+ *  2. CUT the zoom. At 5.49s the animation hard-cuts to a push-in roughly
+ *     twice the scale, holds it to 7.40s, then hard-cuts back. Two jump cuts
+ *     in a site with no others — but the reason it goes is geometric, not a
+ *     matter of taste: sized so the resolved emblem matches the hero mark,
+ *     that beat renders about 850px tall in a 414px slot and crosses the
+ *     headline at every desktop width. The ornament is identically complete
+ *     either side of the cut, so the two halves join on a 0.45s dissolve —
+ *     needed because the ornament rotates continuously and a hard splice
+ *     would pop both the scale and the rotation phase.
+ *
+ *  3. STRIP the audio, which is 128 kb/s of nothing a muted hero can use.
+ *
+ * No frame is recoloured, retimed or redrawn.
+ *
+ * Two codecs because this is white line art on black: h264 smears hairlines
+ * into mosquito noise at the bitrates VP9 holds them at, and every browser
+ * that can decode the webm prefers it.
+ */
+const REVEAL = {
+  /** Frame-accurate at 24fps: the last frame before the push-in, and the first after it. */
+  cutIn: 5.4917,
+  cutOut: 7.4167,
+  dissolve: 0.45,
+  /** Square crop about the emblem's own centre, measured off the resolved frame. */
+  crop: { size: 720, left: 277, top: 0 },
+};
+
+async function buildReveal() {
+  if (!fs.existsSync(REVEAL_SRC)) {
+    console.log(`  reveal    skipped — no ${REVEAL_SRC}`);
+    return;
+  }
+
+  const { size, left, top } = REVEAL.crop;
+  // xfade consumes `dissolve` seconds from the tail of the first segment, so
+  // the offset is pulled back by exactly that much to keep the cut point.
+  const graph = [
+    `[0:v]crop=${size}:${size}:${left}:${top},setsar=1,split=2[a][b]`,
+    `[a]trim=0:${REVEAL.cutIn},setpts=PTS-STARTPTS[s1]`,
+    `[b]trim=${REVEAL.cutOut},setpts=PTS-STARTPTS[s2]`,
+    `[s1][s2]xfade=transition=fade:duration=${REVEAL.dissolve}:offset=${(REVEAL.cutIn - REVEAL.dissolve).toFixed(4)},format=yuv420p[v]`,
+  ].join(';');
+
+  const mp4 = path.join(OUT, 'vapr-logo-reveal.mp4');
+  const webm = path.join(OUT, 'vapr-logo-reveal.webm');
+
+  await run(ffmpegPath, ['-y', '-loglevel', 'error', '-i', REVEAL_SRC,
+    '-filter_complex', graph, '-map', '[v]', '-an',
+    '-c:v', 'libx264', '-crf', '23', '-preset', 'veryslow', '-tune', 'animation',
+    '-pix_fmt', 'yuv420p', '-movflags', '+faststart', mp4]);
+
+  // Transcoded from the mp4 rather than re-running the graph: identical frames
+  // in both files, so the two codecs can never drift out of sync.
+  await run(ffmpegPath, ['-y', '-loglevel', 'error', '-i', mp4,
+    '-c:v', 'libvpx-vp9', '-crf', '36', '-b:v', '0', '-row-mt', '1', '-an', webm]);
+
+  console.log(
+    `  reveal    mp4 ${(fs.statSync(mp4).size / 1024).toFixed(0)}kB  webm ${(fs.statSync(webm).size / 1024).toFixed(0)}kB`
+  );
 }
 
 async function build() {
@@ -188,6 +267,8 @@ async function build() {
   console.log(
     `  favicons  app/icon.png (512)  app/apple-icon.png (180)  app/favicon.ico (${icoSizes.join('/')})`
   );
+
+  await buildReveal();
 }
 
 build().catch((e) => {
