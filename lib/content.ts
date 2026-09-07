@@ -46,16 +46,37 @@ export const SITE = {
  * neither it is composed for the guest to copy, and the form never stops
  * working.
  */
-const env = (key: string) => {
-  const raw = process.env[key];
+/**
+ * Written out one by one, and never through a helper that takes the name as
+ * an argument.
+ *
+ * `NEXT_PUBLIC_*` does not reach the browser by magic: the bundler finds the
+ * literal text `process.env.NEXT_PUBLIC_SOMETHING` in the source and replaces
+ * it with the value. That is a find-and-replace, not a lookup — so
+ * `process.env[key]`, however tidy, is invisible to it and nothing is
+ * substituted into the client bundle at all.
+ *
+ * This file was doing exactly that. On the server `process.env` is the real
+ * Node object, so the values were there and the HTML came out with the phone
+ * number, the email and the rate in it. In the browser `process.env` is an
+ * empty stub, so all four read back null and the same components rendered
+ * "Not yet configured" instead. React then found the two trees disagreeing,
+ * threw a hydration error, and the entry sequence never finished — the splash
+ * sat over the page and the site never became usable.
+ *
+ * None of which was visible while the variables were unset, because with
+ * nothing configured both sides agreed on null. It would have appeared the
+ * first time someone filled them in, which is the worst possible moment.
+ */
+const clean = (raw: string | undefined) => {
   const value = raw?.trim();
   return value ? value : null;
 };
 
-const phoneRaw = env('NEXT_PUBLIC_VAPR_PHONE');
-const whatsappRaw = env('NEXT_PUBLIC_VAPR_WHATSAPP');
-const emailRaw = env('NEXT_PUBLIC_VAPR_EMAIL');
-const rateRaw = env('NEXT_PUBLIC_VAPR_RATE_FROM');
+const phoneRaw = clean(process.env.NEXT_PUBLIC_VAPR_PHONE);
+const whatsappRaw = clean(process.env.NEXT_PUBLIC_VAPR_WHATSAPP);
+const emailRaw = clean(process.env.NEXT_PUBLIC_VAPR_EMAIL);
+const rateRaw = clean(process.env.NEXT_PUBLIC_VAPR_RATE_FROM);
 const rateFrom = rateRaw && Number.isFinite(Number(rateRaw)) ? Number(rateRaw) : null;
 
 export const CONTACT = {
