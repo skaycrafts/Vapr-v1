@@ -48,8 +48,9 @@ export default function Home() {
       <Hero />
 
       {/* Directly under the hero: a two-property group has to answer "which
-          one?" before it answers anything else. Each side of this now leads
-          somewhere that holds the whole property. */}
+          one?" before it answers anything else. It answers it and hands over
+          — the full-height property stage that used to sit here has gone, now
+          that both hotels have a page carrying every fact it showed. */}
       <Chapter as="div">
         <Locations />
       </Chapter>

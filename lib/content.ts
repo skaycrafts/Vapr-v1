@@ -335,12 +335,15 @@ export const HERO = {
 /** The section directly under the hero. */
 export const LOCATIONS_INTRO = {
   eyebrow: 'Two addresses',
-  title: 'There are two of us.',
-  body: [
-    'VAPR is two small hotels in Chennai. One on a residential street in Ashok Nagar, one in Ekkatuthangal a few minutes from the Guindy junction. They are about twenty minutes apart on a good day.',
-    'Same beds, same breakfast, same person at the desk who will have your name ready before you have found your ID. Pick whichever one is closer to wherever you have to be in the morning — and if you are not sure, write to us and we will tell you honestly which one suits.',
-  ],
-  prompt: 'Have a look at either:',
+  title: 'Two hotels. One VAPR.',
+  /**
+   * One sentence, and it is a string rather than the two paragraphs it
+   * replaced. The break after the dash is deliberate — the two place names
+   * are the heading of the thought and the rest is the answer to it — so it
+   * is rendered with `whitespace-pre-line`, the same way the hero sets its
+   * statement across two lines.
+   */
+  body: 'Ashok Nagar & Ekkatuthangal —\nsame comfort, same people, just closer to wherever you’re headed.',
 } as const;
 
 export const MANIFESTO = {
