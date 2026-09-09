@@ -312,13 +312,16 @@ export const placeOf = (l: Location) =>
  * already the two entries above. Sending "The rooms" to either one would
  * quietly pick a favourite.
  */
-export const NAV = [
-  { label: 'Ashok Nagar', href: '/ashok-nagar' },
-  { label: 'Guindy', href: '/guindy' },
-] as const;
-
-/** The one call to action; kept out of NAV so it is not repeated as a link. */
-export const CTA = { label: 'Enquire', href: '/#reserve' } as const;
+/**
+ * The header's only control.
+ *
+ * There was a NAV list beside it — Ashok Nagar and Guindy — and it has gone
+ * with the menu that held it. Neither property is stranded: the homepage
+ * opens on two buttons that go straight to them, and the footer lists both
+ * with their addresses. What the header does now is the one thing a hotel
+ * site's header is for.
+ */
+export const CTA = { label: 'Book now', href: '/#reserve' } as const;
 
 export const HERO = {
   wordmark: 'VAPR',

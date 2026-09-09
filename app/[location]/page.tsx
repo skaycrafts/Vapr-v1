@@ -5,6 +5,7 @@ import PropertyRoom from '@/components/property/PropertyRoom';
 import GettingThere from '@/components/property/GettingThere';
 import Spaces from '@/components/sections/Spaces';
 import Reserve from '@/components/sections/Reserve';
+import Detail from '@/components/sections/Detail';
 import { LOCATIONS, SITE, STAY, locationBySlug, placeOf } from '@/lib/content';
 
 type Params = { location: string };
@@ -101,6 +102,16 @@ export default async function LocationPage({ params }: { params: Promise<Params>
             : undefined
         }
       />
+      {/*
+        "What you get, either way" — the same sheet the homepage carries, and
+        deliberately the same one rather than a per-property cut of it. Its
+        first pane is what both hotels include, and the two after it are each
+        property's own fittings; showing only this property's column would
+        leave a guest who is choosing between the two unable to see what they
+        would be choosing against, which is the question this page exists to
+        settle. The title says "either way" and means it.
+      */}
+      <Detail />
       <GettingThere location={location} />
       <Reserve defaultSlug={location.slug} />
     </>

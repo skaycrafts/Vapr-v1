@@ -2,23 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
 import Emblem from '@/components/brand/Emblem';
-import Glass from '@/components/ui/Glass';
 import Magnetic from '@/motion/primitives/Magnetic';
-import { CONTACT, CTA, NAV } from '@/lib/content';
+import { CTA } from '@/lib/content';
 import { cn } from '@/lib/utils';
 import { gsap } from '@/lib/gsap';
-import { useCapability } from '@/motion/capability';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
-import { CINEMA, EASE, MICRO, STAGGER } from '@/motion/config';
+import { EASE } from '@/motion/config';
 
 /**
  * Deliberately not a full-width bar. The seal anchors the top-left corner and
- * the links ride in a glass pill on the right, so the photography runs edge to
- * edge underneath instead of being cropped by a header.
+ * one button sits on the right, so the photography runs edge to edge
+ * underneath instead of being cropped by a header.
  *
  * Two behaviours, and they are separate on purpose (§18):
  *
@@ -33,12 +29,8 @@ import { CINEMA, EASE, MICRO, STAGGER } from '@/motion/config';
  */
 export default function Nav() {
   const root = useRef<HTMLElement>(null);
-  const overlay = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const { animate } = useCapability();
-  const { scrollTo, stop, start } = useScroll();
+  const { scrollTo } = useScroll();
 
   /**
    * The bar is not on the opening frame. It arrives once the scroll cue has
@@ -112,55 +104,31 @@ export default function Nav() {
     );
   });
 
-  /** The overlay is a modal surface: lock the page and let Escape close it. */
-  useEffect(() => {
-    if (!open) return;
-    stop();
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      start();
-    };
-  }, [open, stop, start]);
-
-  /** Menu items arrive one after another rather than all at once (§25). */
-  useMotionEffect(
-    overlay,
-    ({ q }) => {
-      if (!open) return;
-      const items = q('.menu-item');
-      if (!items.length) return;
-
-      gsap
-        .timeline({ defaults: { ease: EASE.outLong } })
-        .from(overlay.current, { opacity: 0, duration: MICRO.base, ease: EASE.outSoft })
-        .from(items, { yPercent: 105, duration: CINEMA.fast, stagger: STAGGER.lines }, 0.05);
-    },
-    [open]
-  );
-
   /**
    * Links are real hrefs, so a route change is Next's job. Only a hash that
    * points at the page we are already on is intercepted, and then only to hand
    * it to the scroll provider for the glide.
    */
+  /**
+   * The enquiry is on three pages, not one.
+   *
+   * `CTA.href` is `/#reserve`, and matching the path before honouring the hash
+   * — which is what this used to do — meant a guest reading about Ashok Nagar
+   * who pressed Book now was thrown back to the homepage to fill in a form
+   * that page already had, losing the property the form would have known.
+   *
+   * So the hash wins wherever it resolves: if this page has a `#reserve`, that
+   * is the one you get. The href stays a real, correct URL for every page that
+   * does not — the footer's legal pages, a 404 — and Next navigates there.
+   */
   const handle = (href: string) => (event: React.MouseEvent) => {
-    const [path, hash] = href.split('#');
-    const samePage = (path || '/') === pathname;
-    if (!hash || !samePage) {
-      setOpen(false);
-      return; // let Next navigate
-    }
+    const hash = href.split('#')[1];
+    if (!hash) return;
 
     const target = document.getElementById(hash);
-    if (!target) {
-      setOpen(false);
-      return;
-    }
+    if (!target) return; // not on this page — let Next navigate
 
     event.preventDefault();
-    setOpen(false);
     scrollTo(target);
   };
 
@@ -191,7 +159,6 @@ export default function Nav() {
            * this is navigation a sighted keyboard user can enter but not see.
            */
           !revealed &&
-            !open &&
             'pointer-events-none -translate-y-full focus-within:pointer-events-auto focus-within:translate-y-0'
         )}
       >
@@ -241,100 +208,35 @@ export default function Nav() {
             />
           </Link>
 
-          <nav aria-label="Primary" className="hidden md:block">
-            <Glass className="flex items-center gap-1 rounded-full px-2 py-2" radius={999}>
-              {NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={handle(item.href)}
-                  aria-current={pathname === item.href ? 'page' : undefined}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-sm transition-colors duration-300 hover:text-chalk focus-visible:text-chalk',
-                    pathname === item.href ? 'text-chalk' : 'text-mist'
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              {/* The one magnetic control on the site. It marks the single
-                  thing the page is asking anyone to do; used twice it would
-                  mark nothing. */}
-              <Magnetic className="ml-1">
-                <Link
-                  href={CTA.href}
-                  onClick={handle(CTA.href)}
-                  data-cursor="Open"
-                  className="block rounded-full bg-chalk px-5 py-2 text-sm font-medium text-void transition-[background-color] duration-300 hover:bg-bone active:scale-[0.97]"
-                >
-                  {CTA.label}
-                </Link>
-              </Magnetic>
-            </Glass>
-          </nav>
+          {/*
+            One control, on every width.
 
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-expanded={open}
-            aria-controls="menu-overlay"
-            className="flex items-center gap-2 text-chalk md:hidden"
-          >
-            <span className="type-label text-chalk">Menu</span>
-            <Menu size={20} strokeWidth={1.25} aria-hidden />
-          </button>
+            There was a glass pill here holding two links and the enquiry
+            button, and a Menu button beside it that opened a full-screen
+            overlay on a phone. Both have gone. The pill existed to group
+            several things; with one thing in it, it was a border drawn round a
+            button. The overlay existed to hold the same two links a thumb
+            could not otherwise reach, and those links are on the homepage as
+            two large buttons and in the footer with their addresses.
+
+            What is left is the mark and the one thing the page is asking
+            anyone to do — which is also why the magnetic treatment still
+            belongs on it. It was the single magnetic control on the site when
+            it sat among other links, and it is more obviously that now.
+          */}
+          <Magnetic>
+            <Link
+              href={CTA.href}
+              onClick={handle(CTA.href)}
+              data-cursor="Open"
+              className="block rounded-full bg-chalk px-5 py-2.5 text-sm font-medium text-void transition-[background-color] duration-300 hover:bg-bone active:scale-[0.97] md:px-6"
+            >
+              {CTA.label}
+            </Link>
+          </Magnetic>
         </div>
       </header>
 
-      {/* Mobile overlay */}
-      <div
-        ref={overlay}
-        id="menu-overlay"
-        hidden={!open}
-        className="fixed inset-0 z-[var(--z-modal)] bg-void/97 md:hidden"
-      >
-        <div className="gutter flex h-full flex-col">
-          <div className="flex items-center justify-between py-5">
-            {/* The overlay covers the header, so this is standing in for the
-                header's mark — it should be the mark. */}
-            <Emblem sizes="44px" className="w-11" />
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu">
-              <X size={22} strokeWidth={1.25} className="text-chalk" aria-hidden />
-            </button>
-          </div>
-
-          <nav aria-label="Primary, mobile" className="flex flex-1 flex-col justify-center gap-1">
-            {[...NAV, CTA].map((item) => (
-              <span key={item.href} className="split-mask hairline-b">
-                <Link
-                  href={item.href}
-                  onClick={handle(item.href)}
-                  className="menu-item type-display block py-5 text-4xl text-chalk"
-                >
-                  {'label' in item ? item.label : ''}
-                </Link>
-              </span>
-            ))}
-          </nav>
-
-          <div className="flex items-center justify-between py-8">
-            {CONTACT.phoneHref ? (
-              <a href={CONTACT.phoneHref} className="text-sm text-mist">
-                {CONTACT.phone}
-              </a>
-            ) : (
-              <span className="text-sm text-ash">{CONTACT.unset}</span>
-            )}
-            <Emblem sizes="56px" className="w-14 opacity-45" />
-          </div>
-        </div>
-      </div>
-
-      {/* Without motion the overlay must still be usable the instant it opens;
-          the timeline above is what would otherwise reveal the items. */}
-      {!animate && open ? (
-        <style>{`.menu-item { transform: none !important; }`}</style>
-      ) : null}
     </>
   );
 }

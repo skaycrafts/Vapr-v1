@@ -6,7 +6,7 @@ import { ArrowUpRight } from 'lucide-react';
 import Emblem from '@/components/brand/Emblem';
 import Frame from '@/components/media/Frame';
 import Parallax from '@/motion/primitives/Parallax';
-import { CONTACT, CTA, FOOTER, LOCATIONS, NAV, SITE, mapsHref } from '@/lib/content';
+import { CONTACT, CTA, FOOTER, LOCATIONS, SITE, mapsHref } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
@@ -198,10 +198,18 @@ export default function Footer() {
               <p className="mt-1 block text-ash">Email — {CONTACT.unset.toLowerCase()}</p>
             )}
             <ul className="mt-5 space-y-1.5">
-              {NAV.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="text-bone transition-colors hover:text-chalk">
-                    {item.label}
+              {/* Straight off LOCATIONS now that NAV has gone. These were the
+                  same two links written a second time; with the header down to
+                  one button, this list and the homepage's two doors are how
+                  anyone reaches a property, so it should not be able to fall
+                  out of step with the properties themselves. */}
+              {LOCATIONS.map((loc) => (
+                <li key={loc.slug}>
+                  <Link
+                    href={`/${loc.slug}`}
+                    className="text-bone transition-colors hover:text-chalk"
+                  >
+                    {loc.shortName}
                   </Link>
                 </li>
               ))}

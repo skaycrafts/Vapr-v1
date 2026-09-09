@@ -332,6 +332,14 @@ export const IMAGES = {
     "height": 971,
     "aspect": 1.6684,
     "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoUAAwAPwlysVArpqSisAgBcCEJQBOgBDwtJmzzokLkYMAA/qlPZ9VtaRHJeQV8ZrNfmmv2PDR7hDIKXn2zOZ8eqZ3yCCA6KgAAAA=="
+  },
+  "facade-signed": {
+    "slug": "facade-signed",
+    "alt": "The Ashok Nagar building at dusk, framed by rain trees, its lit sign at the gate",
+    "width": 3848,
+    "height": 2565,
+    "aspect": 1.5002,
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAA0APwlwsVArpiSisAgBcCEJYwC/OCDaFCAGcVYJuAD+e7E+TaVF0x1JzvqCC5+yKX1yZS5sWXtkIT+VAAAA"
   }
 } as const satisfies Record<string, Rendition>;
 
