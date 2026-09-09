@@ -234,7 +234,7 @@ export default function Hero() {
     <section
       ref={root}
       id="top"
-      className="relative h-[100svh] min-h-[34rem] w-full overflow-hidden bg-void"
+      className="on-ink relative h-[100svh] min-h-[34rem] w-full overflow-hidden bg-paper"
     >
       {/*
         The mark, where the building used to be.
@@ -273,8 +273,11 @@ export default function Hero() {
       */}
       <div className="pointer-events-none absolute inset-x-0 top-[9svh] flex h-[50svh] items-center justify-center md:top-[10svh] md:h-[46svh]">
         <div className="hero-mark relative aspect-square w-[min(62vw,23.75rem,calc(1.0496*max(100svh,34rem)-330px))] md:w-[min(62vw,23.75rem,calc(1.0656*max(100svh,34rem)-389px))]">
+          {/* The white cut of the artwork. This section kept the black
+              ground, and the black cut would be a hole in it. */}
           <Emblem
             priority
+            tone="paper"
             sizes="(min-width: 768px) 380px, 62vw"
             className="hero-emblem absolute inset-0"
           />
@@ -285,14 +288,25 @@ export default function Hero() {
             not. Both are centred on the same point, so the last frame lands on
             the still rather than beside it.
 
-            No blend mode. The clip's ground is #000 and the site's void
-            resolves to rgb(2,2,2), so the square it occupies is two levels
-            off the page it sits on — below the threshold of a display, and
-            well below this file's own compression noise. Reaching for
-            `mix-blend-mode: screen` to erase a difference that small would
-            have put the whole mark inside an isolated group, where the
-            transform this element already carries decides whether the blend
-            can see the page at all.
+            No blend mode, and this is the reason the hero kept the black.
+
+            The clip is white line art on #000, and this section's ground
+            resolves to rgb(2,2,2) — two levels apart, below the threshold of
+            a display and well below the clip's own compression noise. So the
+            square it occupies simply is not visible.
+
+            On paper it was. Measured, the same square read 255,255,255
+            against a 250,250,249 page: five levels, and plainly there. The
+            fix needed the clip negated to black-on-white and composited with
+            `mix-blend-mode: multiply`, plus a rectangle of paper painted
+            behind it — because `mix-blend-mode` only sees backdrop painted
+            inside the nearest stacking context, and `.hero-mark` is one: it
+            carries a GSAP transform and an opacity for the entrance and the
+            parallax, so the clip had nothing to blend against and composited
+            as-is.
+
+            All of that worked and none of it is here, because keeping the
+            ground the clip was cut for costs nothing and needs none of it.
 
             `preload` is gated on capability so a visitor who asked for
             reduced motion — who will never see a frame of this — does not
@@ -320,7 +334,7 @@ export default function Hero() {
       </div>
 
       <div className="hero-copy gutter absolute inset-x-0 bottom-0 pb-9 md:pb-12">
-        <p className="hero-place type-label mb-4 text-chalk/80">{SITE.city}</p>
+        <p className="hero-place type-label mb-4 text-ink/80">{SITE.city}</p>
 
         <div className="hero-rule mb-4 h-px w-full origin-left bg-hairline-strong md:mb-5" />
 
@@ -332,7 +346,7 @@ export default function Hero() {
             of their own clipping mask, a fifth of a second apart, so the line
             arrives the way it reads.
           */}
-          <h1 className="type-display max-w-[16ch] text-[clamp(2.25rem,6.4vw,5.25rem)] text-chalk">
+          <h1 className="type-display max-w-[16ch] text-[clamp(2.25rem,6.4vw,5.25rem)] text-ink">
             <span className="hero-line-1 split-mask">
               <span className="block" style={{ willChange: 'transform' }}>
                 {LINES[0]}
@@ -352,7 +366,7 @@ export default function Hero() {
           <div className="flex shrink-0 items-end justify-end">
             <a
               href="#chennai"
-              className="hero-cue group flex items-center gap-3 text-mist transition-colors duration-300 hover:text-chalk"
+              className="hero-cue group flex items-center gap-3 text-mist transition-colors duration-300 hover:text-ink"
               onClick={(e) => {
                 e.preventDefault();
                 scrollTo('#chennai');
@@ -371,7 +385,7 @@ export default function Hero() {
                   is an inline transform now, on the same property GSAP drives.
                 */}
                 <span
-                  className="hero-cue-fill absolute inset-x-0 top-0 h-full origin-top bg-chalk"
+                  className="hero-cue-fill absolute inset-x-0 top-0 h-full origin-top bg-ink"
                   style={{ transform: 'scaleY(0)' }}
                 />
               </span>

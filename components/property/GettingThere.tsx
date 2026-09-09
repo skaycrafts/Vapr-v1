@@ -71,13 +71,13 @@ function RadialMap({ location }: { location: Location }) {
               strokeWidth={0.55}
               className="text-graphite"
             />
-            <circle cx={x} cy={y} r={2.6} fill="currentColor" className="text-chalk" />
+            <circle cx={x} cy={y} r={2.6} fill="currentColor" className="text-ink" />
           </g>
         );
       })}
 
-      <circle cx={110} cy={110} r={4.5} fill="none" stroke="currentColor" strokeWidth={1.2} className="text-chalk" />
-      <circle cx={110} cy={110} r={1.6} fill="currentColor" className="text-chalk" />
+      <circle cx={110} cy={110} r={4.5} fill="none" stroke="currentColor" strokeWidth={1.2} className="text-ink" />
+      <circle cx={110} cy={110} r={1.6} fill="currentColor" className="text-ink" />
     </svg>
   );
 }
@@ -112,13 +112,13 @@ export default function GettingThere({ location }: { location: Location }) {
   });
 
   return (
-    <section ref={root} id="getting-there" className="gutter relative bg-void py-20 md:py-28">
+    <section ref={root} id="getting-there" className="on-ink gutter relative bg-paper py-20 md:py-28">
       <div className="grid gap-12 md:grid-cols-12 md:gap-10">
         <div className="md:col-span-4">
           <RevealText
             as="h2"
             mode="lines"
-            className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+            className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
           >
             Getting there
           </RevealText>
@@ -133,7 +133,7 @@ export default function GettingThere({ location }: { location: Location }) {
             target="_blank"
             rel="noreferrer noopener"
             data-cursor="Open"
-            className="mt-7 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-chalk transition-colors duration-300 hover:border-chalk"
+            className="mt-7 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-ink transition-colors duration-300 hover:border-ink"
           >
             Open in Maps
             <ExternalLink size={14} strokeWidth={1.5} aria-hidden />

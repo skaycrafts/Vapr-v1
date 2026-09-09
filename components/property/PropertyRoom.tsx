@@ -49,7 +49,7 @@ export default function PropertyRoom({ location }: { location: Location }) {
   });
 
   return (
-    <section ref={root} id="room" className="gutter relative bg-void py-20 md:py-28">
+    <section ref={root} id="room" className="gutter relative bg-paper py-20 md:py-28">
       <div className="grid gap-12 md:grid-cols-12 md:gap-10">
         <div className="md:col-span-5">
           {location.note.map((para) => (
@@ -66,7 +66,7 @@ export default function PropertyRoom({ location }: { location: Location }) {
           <RevealText
             as="h2"
             mode="lines"
-            className="type-display mt-3 text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+            className="type-display mt-3 text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
           >
             {location.room.name}
           </RevealText>

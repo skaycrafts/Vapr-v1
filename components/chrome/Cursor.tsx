@@ -100,11 +100,11 @@ export default function Cursor() {
       <span
         ref={ring}
         data-state="idle"
-        className="absolute block size-[15px] rounded-full border border-chalk/80 transition-[background-color,border-color] duration-300 data-[state=label]:border-transparent data-[state=label]:bg-chalk"
+        className="absolute block size-[15px] rounded-full border border-ink/80 transition-[background-color,border-color] duration-300 data-[state=label]:border-transparent data-[state=label]:bg-ink"
       />
       <span
         ref={label}
-        className="absolute left-1/2 top-1/2 w-[68px] -translate-x-1/2 -translate-y-1/2 text-center text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-void opacity-0 transition-opacity duration-200"
+        className="absolute left-1/2 top-1/2 w-[68px] -translate-x-1/2 -translate-y-1/2 text-center text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-paper opacity-0 transition-opacity duration-200"
       />
     </div>
   );

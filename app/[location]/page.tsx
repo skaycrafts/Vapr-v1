@@ -111,7 +111,7 @@ export default async function LocationPage({ params }: { params: Promise<Params>
         would be choosing against, which is the question this page exists to
         settle. The title says "either way" and means it.
       */}
-      <Detail />
+      <Detail tone="paper" />
       <GettingThere location={location} />
       <Reserve defaultSlug={location.slug} />
     </>

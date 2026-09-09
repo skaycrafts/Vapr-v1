@@ -136,7 +136,7 @@ export default function Nav() {
     <>
       <a
         href="#main"
-        className="sr-only-focusable focus-visible:gutter focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[var(--z-modal)] focus-visible:m-0 focus-visible:h-auto focus-visible:w-auto focus-visible:overflow-visible focus-visible:whitespace-normal focus-visible:bg-chalk focus-visible:py-3 focus-visible:text-void focus-visible:[clip-path:none]"
+        className="sr-only-focusable focus-visible:gutter focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[var(--z-modal)] focus-visible:m-0 focus-visible:h-auto focus-visible:w-auto focus-visible:overflow-visible focus-visible:whitespace-normal focus-visible:bg-ink focus-visible:py-3 focus-visible:text-paper focus-visible:[clip-path:none]"
       >
         Skip to content
       </a>
@@ -170,12 +170,12 @@ export default function Nav() {
           className="nav-backdrop pointer-events-none absolute inset-x-0 top-0 h-[130%] opacity-0"
           style={{
             background:
-              'linear-gradient(to bottom, color-mix(in oklab, var(--color-void) 72%, transparent), transparent)',
+              'linear-gradient(to bottom, color-mix(in oklab, var(--color-paper) 72%, transparent), transparent)',
           }}
         />
 
         <div className="gutter relative flex items-center justify-between py-5 md:py-7">
-          <Link href="/" data-cursor="Open" className="group flex items-center gap-3 text-chalk">
+          <Link href="/" data-cursor="Open" className="group flex items-center gap-3 text-ink">
             {/*
               The emblem alone. It used to be a small mark beside the word
               VAPR set in display type — but the seal carries its own wordmark
@@ -229,7 +229,7 @@ export default function Nav() {
               href={CTA.href}
               onClick={handle(CTA.href)}
               data-cursor="Open"
-              className="block rounded-full bg-chalk px-5 py-2.5 text-sm font-medium text-void transition-[background-color] duration-300 hover:bg-bone active:scale-[0.97] md:px-6"
+              className="block rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper transition-[background-color] duration-300 hover:bg-bone active:scale-[0.97] md:px-6"
             >
               {CTA.label}
             </Link>

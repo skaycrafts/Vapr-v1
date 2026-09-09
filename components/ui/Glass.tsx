@@ -95,8 +95,8 @@ export default function Glass({
       className={cn(
         'relative isolate',
         // Material dressing. The rim highlight is what sells it as glass.
-        'bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-chalk)_9%,transparent),color-mix(in_oklab,var(--color-void)_34%,transparent))]',
-        'shadow-[0_18px_46px_-12px_rgba(0,0,0,0.66),inset_0_1px_0_0_color-mix(in_oklab,var(--color-chalk)_36%,transparent),inset_0_0_0_1px_color-mix(in_oklab,var(--color-chalk)_12%,transparent)]',
+        'bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-ink)_9%,transparent),color-mix(in_oklab,var(--color-paper)_34%,transparent))]',
+        'shadow-[0_18px_46px_-12px_rgba(0,0,0,0.66),inset_0_1px_0_0_color-mix(in_oklab,var(--color-ink)_36%,transparent),inset_0_0_0_1px_color-mix(in_oklab,var(--color-ink)_12%,transparent)]',
         'supports-[not_(backdrop-filter:blur(1px))]:bg-carbon/92',
         className
       )}

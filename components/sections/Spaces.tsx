@@ -142,7 +142,7 @@ export default function Spaces({ note }: { note?: string } = {}) {
       ref={root}
       id="spaces"
       aria-label="The shared rooms"
-      className="group relative bg-void"
+      className="on-ink group relative bg-paper"
     >
       <div
         ref={stage}
@@ -157,7 +157,7 @@ export default function Spaces({ note }: { note?: string } = {}) {
           <RevealText
             as="h2"
             mode="lines"
-            className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+            className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
           >
             The rest of it
           </RevealText>
@@ -199,7 +199,7 @@ export default function Spaces({ note }: { note?: string } = {}) {
                   data-swap
                   className="split-mask mt-4 text-[clamp(1.75rem,3.6vw,2.75rem)] leading-none"
                 >
-                  <span className="type-display block text-chalk">{space.name}</span>
+                  <span className="type-display block text-ink">{space.name}</span>
                 </h3>
 
                 <p data-fade className="mt-4 max-w-[32ch] text-mist">

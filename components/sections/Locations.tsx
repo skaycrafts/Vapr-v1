@@ -54,7 +54,7 @@ export default function Locations() {
       ref={root}
       id="locations"
       aria-labelledby="locations-title"
-      className="relative bg-void"
+      className="relative bg-paper"
     >
       <div className="gutter py-20 md:py-28">
         <div className="loc-copy grid gap-10 md:grid-cols-12 md:gap-10">
@@ -66,7 +66,7 @@ export default function Locations() {
               as="h2"
               id="locations-title"
               mode="lines"
-              className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk"
+              className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-ink"
             >
               {LOCATIONS_INTRO.title}
             </RevealText>
@@ -95,7 +95,7 @@ export default function Locations() {
                   key={loc.slug}
                   href={`/${loc.slug}`}
                   data-cursor="Explore"
-                  className="group inline-flex items-center gap-2.5 rounded-full border border-hairline-strong px-6 py-3 text-sm text-mist transition-colors duration-500 hover:border-chalk hover:bg-chalk hover:text-void"
+                  className="group inline-flex items-center gap-2.5 rounded-full border border-hairline-strong px-6 py-3 text-sm text-mist transition-colors duration-500 hover:border-ink hover:bg-ink hover:text-paper"
                 >
                   {loc.area}
                   <ArrowUpRight

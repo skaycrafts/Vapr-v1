@@ -50,7 +50,7 @@ export default function PropertyHero({ location }: { location: Location }) {
   return (
     <section
       ref={root}
-      className="relative flex min-h-[76svh] flex-col justify-end overflow-hidden bg-void pb-10 pt-28 md:min-h-[86svh] md:pb-14"
+      className="on-ink relative flex min-h-[76svh] flex-col justify-end overflow-hidden bg-paper pb-10 pt-28 md:min-h-[86svh] md:pb-14"
     >
       {hasPhoto ? (
         <>
@@ -74,7 +74,7 @@ export default function PropertyHero({ location }: { location: Location }) {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                'linear-gradient(to bottom, color-mix(in oklab, var(--color-void) 62%, transparent) 0%, transparent 22%, color-mix(in oklab, var(--color-void) 30%, transparent) 40%, color-mix(in oklab, var(--color-void) 74%, transparent) 62%, color-mix(in oklab, var(--color-void) 94%, transparent) 100%)',
+                'linear-gradient(to bottom, color-mix(in oklab, var(--color-paper) 62%, transparent) 0%, transparent 22%, color-mix(in oklab, var(--color-paper) 30%, transparent) 40%, color-mix(in oklab, var(--color-paper) 74%, transparent) 62%, color-mix(in oklab, var(--color-paper) 94%, transparent) 100%)',
             }}
           />
         </>
@@ -83,14 +83,14 @@ export default function PropertyHero({ location }: { location: Location }) {
           aria-hidden
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
-          <Emblem sizes="(min-width: 768px) 480px, 62vmin" className="w-[min(62vmin,30rem)] opacity-[0.07]" />
+          <Emblem tone="paper" sizes="(min-width: 768px) 480px, 62vmin" className="w-[min(62vmin,30rem)] opacity-[0.07]" />
         </div>
       )}
 
       <div className="gutter relative">
         <Link
           href="/"
-          className="ph-meta mb-8 inline-flex items-center gap-2 text-sm text-mist transition-colors hover:text-chalk md:mb-10"
+          className="ph-meta mb-8 inline-flex items-center gap-2 text-sm text-mist transition-colors hover:text-ink md:mb-10"
         >
           <ArrowLeft size={15} strokeWidth={1.5} aria-hidden />
           Both hotels
@@ -106,7 +106,7 @@ export default function PropertyHero({ location }: { location: Location }) {
           immediate
           scale="cinema"
           delay={0.1}
-          className="type-display mt-4 text-[clamp(2.5rem,8vw,6rem)] text-chalk"
+          className="type-display mt-4 text-[clamp(2.5rem,8vw,6rem)] text-ink"
         >
           {location.shortName}
         </RevealText>
@@ -122,8 +122,8 @@ export default function PropertyHero({ location }: { location: Location }) {
           <dl className="ph-meta flex flex-wrap items-end gap-x-10 gap-y-4">
             <div>
               <dt className="type-label">Guest rating</dt>
-              <dd className="mt-1 flex items-center gap-1.5 text-chalk">
-                <Star size={15} strokeWidth={1.5} aria-hidden className="fill-chalk" />
+              <dd className="mt-1 flex items-center gap-1.5 text-ink">
+                <Star size={15} strokeWidth={1.5} aria-hidden className="fill-ink" />
                 <span className="tabular text-xl">{location.rating.score.toFixed(1)}</span>
                 <span className="text-sm text-smoke">
                   from {location.rating.count} guests on Treebo
@@ -132,7 +132,7 @@ export default function PropertyHero({ location }: { location: Location }) {
             </div>
             <div>
               <dt className="type-label">Rooms</dt>
-              <dd className="tabular mt-1 text-xl text-chalk">{location.roomCount}</dd>
+              <dd className="tabular mt-1 text-xl text-ink">{location.roomCount}</dd>
             </div>
           </dl>
         </div>

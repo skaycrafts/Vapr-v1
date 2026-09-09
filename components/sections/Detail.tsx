@@ -7,6 +7,7 @@ import Glass from '@/components/ui/Glass';
 import RevealText from '@/motion/primitives/RevealText';
 import RevealImage from '@/motion/primitives/RevealImage';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
+import { cn } from '@/lib/utils';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
@@ -23,7 +24,14 @@ const CLOSE_UPS: ImageSlug[] = ['detail-number', 'detail-switch', 'detail-latch'
  * pool and a gym are unavailable, and saying so plainly is worth more than
  * letting someone discover it at check-in.
  */
-export default function Detail() {
+/**
+ * The one section that appears on three pages, so it is the one that has to
+ * be told which ground it is on: the homepage runs Reel (paper) → Detail →
+ * Reserve (paper), and a property page runs Spaces (ink) → Detail →
+ * GettingThere (ink). The same constant in both places would double a black
+ * on one and a white on the other.
+ */
+export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
   const root = useRef<HTMLElement>(null);
 
   useMotionEffect(root, () => {
@@ -56,7 +64,11 @@ export default function Detail() {
   });
 
   return (
-    <section ref={root} id="detail" className="relative overflow-hidden bg-void py-20 md:py-28">
+    <section
+      ref={root}
+      id="detail"
+      className={cn('relative overflow-hidden bg-paper py-20 md:py-28', tone === 'ink' && 'on-ink')}
+    >
       <div className="gutter">
         <header className="flex flex-col gap-6 border-b border-hairline pb-9 md:flex-row md:items-end md:justify-between">
           {/* A major section title, so it gets the line reveal rather than a
@@ -64,7 +76,7 @@ export default function Detail() {
           <RevealText
             as="h2"
             mode="lines"
-            className="type-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+            className="type-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
           >
             {DETAIL.title}
           </RevealText>
@@ -107,7 +119,7 @@ export default function Detail() {
                     size={14}
                     strokeWidth={1.75}
                     aria-hidden
-                    className="shrink-0 translate-y-0.5 text-chalk"
+                    className="shrink-0 translate-y-0.5 text-ink"
                   />
                   <span className="text-sm text-bone">{item}</span>
                 </li>

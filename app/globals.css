@@ -2,31 +2,63 @@
 
 /* ════════════════════════════════════════════════════════════════════
    VAPR — design tokens
-   A drenched-black surface. White carries the type. Grey is a minority
-   voice: hairlines, captions, disabled states. Never body copy.
-   Neutrals hold a 0.002–0.004 chroma toward 250° so large black fields
-   read as air rather than as a dead screen. It is below the just-
-   noticeable difference — the palette still reads as pure monochrome.
+
+   A paper surface. Near-black carries the type. Grey is a minority voice:
+   hairlines, captions, disabled states. Never body copy.
+
+   ── The inversion ─────────────────────────────────────────────────
+   This was a drenched-black site. The two grounds are taken off the
+   reference: paper #FCFCF9 and ink #0B0F10, both sampled off the design
+   rather than guessed — a hair of warmth in the paper, a hair of cool in
+   the ink, and nothing else. The chroma is below the just-noticeable
+   difference, so it still reads as monochrome; it is only there so that
+   large fields have a temperature instead of being a dead screen.
+
+   Black has not left, it has become a guest. The reference alternates
+   paper and ink section by section, and so does this: the pinned Chennai
+   scene, the reel and the footer keep the black the site was built in,
+   and everything else is on paper.
+
+   ── On the names ──────────────────────────────────────────────────
+   `void` and `chalk` are gone — they meant black and white, and both had
+   swapped ends. They are `paper` and `ink` now, which are roles rather
+   than colours and survive the next inversion. The greys kept their names
+   and changed their values: `mist`, `bone`, `smoke` and `ash` are dark on
+   paper now, at the contrast ratios their old values held on black.
    ════════════════════════════════════════════════════════════════════ */
 @theme {
   /* ── surface ──────────────────────────────────────────────────── */
-  --color-void: oklch(0.09 0 0);
-  --color-pitch: oklch(0.128 0.002 250);
-  --color-carbon: oklch(0.175 0.003 250);
-  --color-graphite: oklch(0.265 0.004 250);
+  --color-paper: oklch(0.985 0.002 95);    /* the page — #FCFCF9 */
+  --color-pitch: oklch(0.958 0.002 95);    /* recessed: image wells, inputs */
+  --color-carbon: oklch(0.925 0.003 95);   /* borders on a filled surface */
+  --color-graphite: oklch(0.84 0.004 250); /* the deepest non-text grey */
 
   /* ── grey (sparing) ───────────────────────────────────────────── */
-  --color-ash: oklch(0.44 0.004 250);      /* hairlines, rules — never text */
-  --color-smoke: oklch(0.635 0.004 250);   /* captions ≥14px — 6.3:1 on void */
+  --color-ash: oklch(0.70 0.004 250);      /* hairlines, rules — never text */
+  --color-smoke: oklch(0.545 0.006 250);   /* captions ≥14px */
 
   /* ── ink ──────────────────────────────────────────────────────── */
-  --color-mist: oklch(0.80 0.003 250);     /* body — 10.3:1 on void */
-  --color-bone: oklch(0.93 0.002 250);     /* emphasis — 15.4:1 */
-  --color-chalk: oklch(0.985 0 0);         /* headings, pure white */
+  --color-mist: oklch(0.415 0.006 250);    /* body */
+  --color-bone: oklch(0.275 0.006 250);    /* emphasis */
+  --color-ink: oklch(0.17 0.006 250);      /* headings — #0B0F10 */
 
   /* ── type ─────────────────────────────────────────────────────── */
-  --font-display: var(--font-bodoni), "Didot", "Bodoni MT", Georgia, serif;
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  /*
+   * Two voices, and the reference's whole typographic idea is how they are
+   * cast. The roman is a bold neo-grotesque and the emphasis inside it is a
+   * Didone italic — "tenir *eco* hotel". That is the reverse of what this
+   * site did, which set everything in the Didone and italicised one line of
+   * it; a Didone emphasising a Didone has nowhere to go.
+   *
+   * Inter Tight replaces Archivo. Archivo is a fine grotesque but a squarer,
+   * more technical one, and the reference's display face is a Helvetica-class
+   * neo-grotesque — rounder bowls, tighter apertures. Inter Tight is the
+   * closest of those that is free and variable. The cost is Archivo's width
+   * axis, which `type-wide` leaned on; that is set with weight and tracking
+   * now, which is what the reference does anyway.
+   */
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-bodoni), "Didot", "Bodoni MT", Georgia, serif;
 
   /* Fluid scale, 1.28 ratio. Display ceiling stays at 96px — the page
      should be composed, not shouting. */
@@ -59,9 +91,45 @@
 
 /* Semantic aliases — read as roles at the call site. */
 @theme {
-  --color-hairline: color-mix(in oklab, var(--color-chalk) 14%, transparent);
-  --color-hairline-strong: color-mix(in oklab, var(--color-chalk) 26%, transparent);
-  --color-glass: color-mix(in oklab, var(--color-chalk) 6%, transparent);
+  --color-hairline: color-mix(in oklab, var(--color-ink) 14%, transparent);
+  --color-hairline-strong: color-mix(in oklab, var(--color-ink) 26%, transparent);
+  --color-glass: color-mix(in oklab, var(--color-ink) 6%, transparent);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   A section that keeps the black.
+
+   The reference alternates paper and ink down the page, and this is how
+   that is done here: the section redefines the palette inside itself, so
+   everything under it keeps naming `text-ink`, `text-mist`, `bg-hairline`
+   and gets the right end of the scale without knowing which ground it is
+   standing on. One class, and a whole subtree inverts.
+
+   The values are the ones the site was built in — this palette is not new,
+   it is the old one, kept for the sections that still want it.
+
+   `hairline`, `hairline-strong` and `glass` have to be restated rather
+   than inherited. They are declared once on :root as a `color-mix` of
+   `--color-ink`, and a custom property is substituted at the point it is
+   declared, not at the point it is used — so redefining `--color-ink`
+   further down the tree does not re-run the mix.
+   ════════════════════════════════════════════════════════════════════ */
+.on-ink {
+  --color-paper: oklch(0.09 0 0);
+  --color-pitch: oklch(0.128 0.002 250);
+  --color-carbon: oklch(0.175 0.003 250);
+  --color-graphite: oklch(0.265 0.004 250);
+  --color-ash: oklch(0.44 0.004 250);
+  --color-smoke: oklch(0.635 0.004 250);
+  --color-mist: oklch(0.80 0.003 250);
+  --color-bone: oklch(0.93 0.002 250);
+  --color-ink: oklch(0.985 0 0);
+
+  --color-hairline: color-mix(in oklab, var(--color-ink) 14%, transparent);
+  --color-hairline-strong: color-mix(in oklab, var(--color-ink) 26%, transparent);
+  --color-glass: color-mix(in oklab, var(--color-ink) 6%, transparent);
+
+  color-scheme: dark;
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -78,12 +146,12 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: auto; /* Lenis owns scrolling */
-    background-color: var(--color-void);
+    background-color: var(--color-paper);
   }
 
   body {
     margin: 0;
-    background-color: var(--color-void);
+    background-color: var(--color-paper);
     color: var(--color-mist);
     font-family: var(--font-sans);
     font-size: var(--text-base);
@@ -110,7 +178,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    color: var(--color-chalk);
+    color: var(--color-ink);
     font-weight: 400;
     text-wrap: balance;
   }
@@ -140,12 +208,12 @@
   }
 
   ::selection {
-    background: var(--color-chalk);
-    color: var(--color-void);
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-chalk);
+    outline: 2px solid var(--color-ink);
     outline-offset: 3px;
     border-radius: 1px;
   }
@@ -153,10 +221,10 @@
   /* The scroll container is dark; make the native bar match rather than
      hiding it — a hidden scrollbar removes an affordance. */
   ::-webkit-scrollbar { width: 9px; }
-  ::-webkit-scrollbar-track { background: var(--color-void); }
+  ::-webkit-scrollbar-track { background: var(--color-paper); }
   ::-webkit-scrollbar-thumb {
     background: var(--color-graphite);
-    border: 3px solid var(--color-void);
+    border: 3px solid var(--color-paper);
     border-radius: 99px;
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-ash); }
@@ -183,17 +251,16 @@
   padding-inline: clamp(1.25rem, 0.7rem + 2.6vw, 4.5rem);
 }
 
-/* Wide industrial grotesque — Archivo's width axis is the contrast
-   partner to the Bodoni wordmark, standing in for a second family. */
+/* Was Archivo at width 118. Inter Tight has no width axis, so the weight
+   carries what the width used to. */
 @utility type-wide {
   font-family: var(--font-sans);
-  font-variation-settings: "wdth" 118;
-  letter-spacing: -0.015em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 @utility type-label {
   font-family: var(--font-sans);
-  font-variation-settings: "wdth" 100;
   font-size: var(--text-2xs);
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -201,11 +268,39 @@
   color: var(--color-smoke);
 }
 
+/*
+ * The headline voice: bold grotesque, set tight.
+ *
+ * `letter-spacing` is heavier than a body setting wants because this is only
+ * ever used large — at 4rem and up, -0.035em is what closes the gaps the
+ * reference closes. Line height under 1 is deliberate for the same reason:
+ * two lines of this should read as a block, not as two sentences.
+ */
 @utility type-display {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+}
+
+/*
+ * The one place the Didone still speaks, and the reason it is still loaded:
+ * an italic word set inside a grotesque headline. Any `<em>`, `<i>` or
+ * `.italic` inside display type becomes Bodoni italic automatically, so the
+ * device is applied by writing the emphasis rather than by remembering a
+ * class — and it can never be a sans italic by accident, which is the one
+ * outcome that would make the pairing look like a mistake.
+ *
+ * Optical size is pushed to the top of Bodoni's range: at headline sizes the
+ * high-contrast cut is the whole point, and the text-optimised master thickens
+ * the hairlines to survive small sizes it will never be set at.
+ */
+.type-display :is(em, i, .italic) {
+  font-family: var(--font-serif);
+  font-style: italic;
   font-weight: 400;
-  line-height: 0.95;
-  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 96;
+  letter-spacing: -0.01em;
 }
 
 @utility tabular {

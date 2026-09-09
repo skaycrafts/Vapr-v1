@@ -77,7 +77,7 @@ export default function Reel() {
     <section
       ref={root}
       aria-labelledby="reel-title"
-      className="gutter relative overflow-hidden bg-void py-20 md:py-28"
+      className="gutter relative overflow-hidden bg-paper py-20 md:py-28"
     >
       {/*
         This section used to carry its title only in an `aria-label`, so a
@@ -90,7 +90,7 @@ export default function Reel() {
           as="h2"
           id="reel-title"
           mode="lines"
-          className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-chalk"
+          className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
         >
           The hotel in use
         </RevealText>

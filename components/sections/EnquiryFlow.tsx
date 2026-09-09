@@ -272,8 +272,8 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
   };
 
   const field =
-    'w-full border-b border-hairline-strong bg-transparent py-2.5 text-lg text-bone transition-colors duration-300 placeholder:text-ash focus-visible:border-chalk [color-scheme:dark]';
-  const small = 'w-full border-b border-hairline-strong bg-transparent py-2 text-bone transition-colors duration-300 focus-visible:border-chalk [color-scheme:dark]';
+    'w-full border-b border-hairline-strong bg-transparent py-2.5 text-lg text-bone transition-colors duration-300 placeholder:text-smoke focus-visible:border-ink [color-scheme:dark]';
+  const small = 'w-full border-b border-hairline-strong bg-transparent py-2 text-bone transition-colors duration-300 focus-visible:border-ink [color-scheme:dark]';
 
   // ── The closing screen ──────────────────────────────────────────────────
   if (status === 'done') {
@@ -292,12 +292,12 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
         <div ref={panel}>
           <span
             aria-hidden
-            className="flex size-11 items-center justify-center rounded-full border border-chalk/40"
+            className="flex size-11 items-center justify-center rounded-full border border-ink/40"
           >
-            <Check size={18} strokeWidth={1.5} className="text-chalk" />
+            <Check size={18} strokeWidth={1.5} className="text-ink" />
           </span>
 
-          <h3 className="type-display mt-6 text-[clamp(1.6rem,3vw,2.25rem)] text-chalk">
+          <h3 className="type-display mt-6 text-[clamp(1.6rem,3vw,2.25rem)] text-ink">
             {heading}
           </h3>
           <p className="mt-3 max-w-[38ch] text-mist">{body}</p>
@@ -313,7 +313,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
             <button
               type="button"
               onClick={reset}
-              className="rounded-full border border-hairline-strong px-6 py-3 text-sm text-mist transition-colors duration-300 hover:border-chalk hover:text-chalk"
+              className="rounded-full border border-hairline-strong px-6 py-3 text-sm text-mist transition-colors duration-300 hover:border-ink hover:text-ink"
             >
               Start another
             </button>
@@ -321,7 +321,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
               <a
                 href={`/${location.slug}`}
                 data-cursor="Open"
-                className="inline-flex items-center gap-2 rounded-full bg-chalk px-6 py-3 text-sm font-medium text-void transition-colors duration-300 hover:bg-bone"
+                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-colors duration-300 hover:bg-bone"
               >
                 See {location.shortName}
                 <ArrowUpRight size={15} strokeWidth={1.75} aria-hidden />
@@ -344,11 +344,11 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
           <p className="type-label">
             Enquiry · {String(step + 1).padStart(2, '0')} / {String(STEPS.length).padStart(2, '0')}
           </p>
-          <p className="type-label text-ash">{current.id === 'name' ? 'About a minute' : ''}</p>
+          <p className="type-label text-smoke">{current.id === 'name' ? 'About a minute' : ''}</p>
         </div>
         <div className="mt-3 h-px w-full bg-hairline">
           <div
-            className="h-full origin-left bg-chalk transition-transform duration-500 ease-out"
+            className="h-full origin-left bg-ink transition-transform duration-500 ease-out"
             style={{ transform: `scaleX(${(step + 1) / STEPS.length})` }}
           />
         </div>
@@ -356,7 +356,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
 
       <div ref={stage} className="overflow-hidden">
         <div ref={panel}>
-          <h3 className="type-display text-[clamp(1.6rem,3vw,2.25rem)] leading-[1.1] text-chalk">
+          <h3 className="type-display text-[clamp(1.6rem,3vw,2.25rem)] leading-[1.1] text-ink">
             {current.question}
           </h3>
           <p className="mt-2 text-sm text-smoke">{current.hint}</p>
@@ -391,13 +391,13 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
                         className={cn(
                           'rounded-lg border px-4 py-3.5 text-left transition-colors duration-300',
                           active
-                            ? 'border-chalk bg-chalk text-void'
-                            : 'border-hairline-strong text-mist hover:border-chalk hover:text-chalk'
+                            ? 'border-ink bg-ink text-paper'
+                            : 'border-hairline-strong text-mist hover:border-ink hover:text-ink'
                         )}
                       >
                         <span className="block text-sm font-medium">{loc.shortName}</span>
                         <span
-                          className={cn('mt-0.5 block text-xs', active ? 'text-void/70' : 'text-smoke')}
+                          className={cn('mt-0.5 block text-xs', active ? 'text-paper/70' : 'text-smoke')}
                         >
                           {loc.room.name} · {loc.roomCount} rooms
                         </span>
@@ -411,15 +411,15 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
                     className={cn(
                       'rounded-lg border px-4 py-3.5 text-left transition-colors duration-300 sm:col-span-2',
                       slug === UNSURE
-                        ? 'border-chalk bg-chalk text-void'
-                        : 'border-hairline-strong text-mist hover:border-chalk hover:text-chalk'
+                        ? 'border-ink bg-ink text-paper'
+                        : 'border-hairline-strong text-mist hover:border-ink hover:text-ink'
                     )}
                   >
                     <span className="block text-sm font-medium">Not sure yet</span>
                     <span
                       className={cn(
                         'mt-0.5 block text-xs',
-                        slug === UNSURE ? 'text-void/70' : 'text-smoke'
+                        slug === UNSURE ? 'text-paper/70' : 'text-smoke'
                       )}
                     >
                       Tell us what you need and we will suggest one
@@ -533,7 +533,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
           <button
             type="button"
             onClick={() => go(step - 1)}
-            className="inline-flex items-center gap-2 rounded-full border border-hairline-strong px-5 py-3 text-sm text-mist transition-colors duration-300 hover:border-chalk hover:text-chalk"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline-strong px-5 py-3 text-sm text-mist transition-colors duration-300 hover:border-ink hover:text-ink"
           >
             <ArrowLeft size={15} strokeWidth={1.75} aria-hidden />
             Back
@@ -546,7 +546,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
           data-cursor={last ? 'Send' : undefined}
           className={cn(
             'flex flex-1 items-center justify-center gap-2 rounded-full py-3.5 font-medium transition-[background-color,opacity,transform] duration-300',
-            'bg-chalk text-void hover:bg-bone active:scale-[0.99]',
+            'bg-ink text-paper hover:bg-bone active:scale-[0.99]',
             'disabled:cursor-not-allowed disabled:opacity-35 disabled:active:scale-100'
           )}
         >

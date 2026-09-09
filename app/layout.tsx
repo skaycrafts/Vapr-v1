@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Bodoni_Moda, Archivo } from 'next/font/google';
+import { Bodoni_Moda, Inter_Tight } from 'next/font/google';
 import { CONTACT, LOCATIONS, SITE } from '@/lib/content';
 import SiteShell from '@/components/chrome/SiteShell';
 import Footer from '@/components/sections/Footer';
@@ -24,14 +24,19 @@ const bodoni = Bodoni_Moda({
 });
 
 /**
- * Archivo carries a width axis, which supplies the contrast a second family
- * usually would — wide for headings, normal for text — without pairing two
- * grotesques that are similar but not identical.
+ * The working face, and now the headline face too.
+ *
+ * Archivo was here, chosen for a width axis that stood in for a second
+ * family. The pairing is different now — a bold neo-grotesque carries the
+ * headlines and the Didone is reduced to italic emphasis inside them — and
+ * for that the roman has to be a Helvetica-class grotesque rather than a
+ * squarer industrial one. Inter Tight is the closest free variable face to
+ * it. Losing the width axis costs `type-wide`, which is set with weight and
+ * tracking now.
  */
-const archivo = Archivo({
+const interTight = Inter_Tight({
   subsets: ['latin'],
-  axes: ['wdth'],
-  variable: '--font-archivo',
+  variable: '--font-inter-tight',
   display: 'swap',
 });
 
@@ -101,7 +106,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${bodoni.variable} ${archivo.variable}`}>
+    <html lang="en-IN" className={`${bodoni.variable} ${interTight.variable}`}>
       <body>
         <script
           type="application/ld+json"

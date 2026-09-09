@@ -32,7 +32,7 @@ export default function FilmGrain() {
         className="pointer-events-none fixed inset-0 z-[var(--z-overlay)]"
         style={{
           background:
-            'radial-gradient(120% 90% at 50% 45%, transparent 42%, color-mix(in oklab, var(--color-void) 62%, transparent) 100%)',
+            'radial-gradient(120% 90% at 50% 45%, transparent 46%, color-mix(in oklab, var(--color-ink) 7%, transparent) 100%)',
         }}
       />
       <style>{`

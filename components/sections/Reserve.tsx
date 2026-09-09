@@ -3,7 +3,6 @@
 import { useRef } from 'react';
 import { ArrowUpRight, Phone } from 'lucide-react';
 import Frame from '@/components/media/Frame';
-import Glass from '@/components/ui/Glass';
 import EnquiryFlow from '@/components/sections/EnquiryFlow';
 import RevealText from '@/motion/primitives/RevealText';
 import { CONTACT, RESERVE, STAY } from '@/lib/content';
@@ -82,27 +81,29 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
     <section
       ref={root}
       id="reserve"
-      className="relative overflow-hidden bg-void py-20 md:py-28"
+      className="relative overflow-hidden bg-paper py-20 md:py-28"
     >
       {/*
-        The photograph used to sit at 30% under a scrim that was 62% black
-        across its whole middle. The two together left a dark smudge that was
-        neither a readable room nor a clean field — and, since <Glass> only
-        earns its cost when there is something behind it to bend, the panel on
-        the right was refracting nothing.
+        The scrims here were built to sink a photograph into black, and this
+        section is on paper now. Left alone they did the same job in the same
+        direction and bleached the frame to nearly nothing — a room you could
+        only just make out under a wash of white.
 
-        So the art direction is directional now rather than uniform: the frame
-        is bright enough to read, a vertical scrim still lands the section into
-        black at both edges, and a horizontal one keeps the left column — which
-        carries type straight on the photograph — on a dark ground. What is
-        left lit is the right-hand side, which is exactly where the glass sits.
+        So they are inverted in intent as well as in colour. The photograph
+        runs at full strength through the middle of the section, which is what
+        the reference does: the picture is the only colour in an otherwise
+        monochrome page, and dimming it throws away the one thing carrying any.
+        The vertical gradient now only lands the top and bottom edges into the
+        page so the section has no seam, and the horizontal one holds paper
+        across the left column — where type sits directly on the frame — and
+        releases it by 66%, which is where the glass panel begins.
       */}
       <Frame
         slug="room-b-light"
         className="reserve-plate absolute inset-0 h-full w-full"
         ratio="fill"
         sizes="100vw"
-        imgClassName="opacity-55"
+        imgClassName="opacity-90"
         position="50% 60%"
       />
       <div
@@ -110,7 +111,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, var(--color-void) 0%, color-mix(in oklab, var(--color-void) 42%, transparent) 30%, color-mix(in oklab, var(--color-void) 46%, transparent) 68%, var(--color-void) 100%)',
+            'linear-gradient(to bottom, var(--color-paper) 0%, color-mix(in oklab, var(--color-paper) 30%, transparent) 16%, transparent 46%, color-mix(in oklab, var(--color-paper) 34%, transparent) 84%, var(--color-paper) 100%)',
         }}
       />
       <div
@@ -118,7 +119,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to right, color-mix(in oklab, var(--color-void) 88%, transparent) 0%, color-mix(in oklab, var(--color-void) 70%, transparent) 34%, transparent 62%)',
+            'linear-gradient(to right, color-mix(in oklab, var(--color-paper) 96%, transparent) 0%, color-mix(in oklab, var(--color-paper) 92%, transparent) 30%, color-mix(in oklab, var(--color-paper) 55%, transparent) 48%, transparent 66%)',
         }}
       />
 
@@ -128,7 +129,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             as="h2"
             mode="lines"
             scale="cinema"
-            className="type-display text-[clamp(2.5rem,6vw,5rem)] text-chalk"
+            className="type-display text-[clamp(2.5rem,6vw,5rem)] text-ink"
           >
             {RESERVE.title}
           </RevealText>
@@ -142,7 +143,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             {ratesFrom !== null ? (
               <div>
                 <dt className="type-label">From</dt>
-                <dd className="tabular mt-1 text-xl text-chalk">
+                <dd className="tabular mt-1 text-xl text-ink">
                   {currency} {ratesFrom.toLocaleString('en-IN')}
                   <span className="ml-1 text-sm text-smoke">/ night</span>
                 </dd>
@@ -155,7 +156,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             )}
             <div>
               <dt className="type-label">Check in / out</dt>
-              <dd className="tabular mt-1 text-xl text-chalk">
+              <dd className="tabular mt-1 text-xl text-ink">
                 {STAY.checkIn} <span className="text-smoke">/</span> {STAY.checkOut}
               </dd>
             </div>
@@ -165,7 +166,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             {phoneHref ? (
               <a
                 href={phoneHref}
-                className="inline-flex items-center gap-2 text-mist transition-colors hover:text-chalk"
+                className="inline-flex items-center gap-2 text-mist transition-colors hover:text-ink"
               >
                 <Phone size={15} strokeWidth={1.5} aria-hidden />
                 <span className="tabular text-sm">{phone}</span>
@@ -174,14 +175,14 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             {email ? (
               <a
                 href={`mailto:${email}`}
-                className="inline-flex items-center gap-2 text-mist transition-colors hover:text-chalk"
+                className="inline-flex items-center gap-2 text-mist transition-colors hover:text-ink"
               >
                 <span className="text-sm">{email}</span>
                 <ArrowUpRight size={15} strokeWidth={1.5} aria-hidden />
               </a>
             ) : null}
             {!phoneHref && !email ? (
-              <p className="text-sm text-ash">
+              <p className="text-sm text-smoke">
                 Telephone and email are {CONTACT.unset.toLowerCase()}.
               </p>
             ) : null}
@@ -195,9 +196,23 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             not shunt the section — see `EnquiryFlow`, which also explains why
             the closing screen never claims the enquiry was sent.
           */}
-          <Glass className="rounded-2xl p-6 md:p-9" radius={16} scale={-64}>
+          {/*
+            A solid card, not glass.
+
+            <Glass> was right when this floated over a photograph on a black
+            page: the panel darkened what was behind it and the form sat on a
+            deep, even ground. On paper the same translucency puts pale type
+            and a hairline underline over a lit room — measured, the field
+            placeholder fell to about 1.6:1 — and no amount of tinting fixes a
+            panel you can see a bedspread through.
+
+            The reference does not use glass here either. Its floating panels
+            are opaque white with a soft edge, for the same reason: a form is
+            the one place on a page where legibility outranks material.
+          */}
+          <div className="rounded-2xl bg-paper p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_-12px_rgba(0,0,0,0.18)] ring-1 ring-hairline md:p-9">
             <EnquiryFlow defaultSlug={defaultSlug} />
-          </Glass>
+          </div>
         </div>
       </div>
     </section>

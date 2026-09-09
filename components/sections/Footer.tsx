@@ -60,11 +60,11 @@ export default function Footer() {
   });
 
   return (
-    <footer ref={root} className="relative border-t border-hairline bg-void">
+    <footer ref={root} className="on-ink relative bg-paper">
       <div className="gutter overflow-hidden pt-20 md:pt-28">
         <div className="footer-cols grid gap-12 md:grid-cols-12 md:gap-10">
           <div className="footer-col md:col-span-3">
-            <Emblem sizes="76px" className="footer-seal w-19" />
+            <Emblem tone="paper" sizes="76px" className="footer-seal w-19" />
             <p className="mt-6 max-w-[32ch] text-mist">{FOOTER.note}</p>
           </div>
 
@@ -81,14 +81,14 @@ export default function Footer() {
                 href={mapsHref(loc)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="mt-3 inline-block text-sm text-smoke underline underline-offset-4 transition-colors hover:text-chalk"
+                className="mt-3 inline-block text-sm text-smoke underline underline-offset-4 transition-colors hover:text-ink"
               >
                 Open in Maps
               </a>
               <p className="mt-3">
                 <Link
                   href={`/${loc.slug}`}
-                  className="text-bone transition-colors hover:text-chalk"
+                  className="text-bone transition-colors hover:text-ink"
                 >
                   About this one
                 </Link>
@@ -103,22 +103,22 @@ export default function Footer() {
             {CONTACT.phoneHref ? (
               <a
                 href={CONTACT.phoneHref}
-                className="tabular block text-bone transition-colors hover:text-chalk"
+                className="tabular block text-bone transition-colors hover:text-ink"
               >
                 {CONTACT.phone}
               </a>
             ) : (
-              <p className="tabular block text-ash">Telephone — {CONTACT.unset.toLowerCase()}</p>
+              <p className="tabular block text-smoke">Telephone — {CONTACT.unset.toLowerCase()}</p>
             )}
             {CONTACT.email ? (
               <a
                 href={`mailto:${CONTACT.email}`}
-                className="mt-1 block text-bone transition-colors hover:text-chalk"
+                className="mt-1 block text-bone transition-colors hover:text-ink"
               >
                 {CONTACT.email}
               </a>
             ) : (
-              <p className="mt-1 block text-ash">Email — {CONTACT.unset.toLowerCase()}</p>
+              <p className="mt-1 block text-smoke">Email — {CONTACT.unset.toLowerCase()}</p>
             )}
             <ul className="mt-5 space-y-1.5">
               {/* Straight off LOCATIONS now that NAV has gone. These were the
@@ -130,7 +130,7 @@ export default function Footer() {
                 <li key={loc.slug}>
                   <Link
                     href={`/${loc.slug}`}
-                    className="text-bone transition-colors hover:text-chalk"
+                    className="text-bone transition-colors hover:text-ink"
                   >
                     {loc.shortName}
                   </Link>
@@ -151,7 +151,7 @@ export default function Footer() {
           the other.
         */}
         <div className="footer-wordmark mt-16 overflow-hidden pb-[0.06em] md:mt-24" aria-hidden>
-          <span className="type-display block text-center text-[clamp(3.5rem,26vw,24rem)] leading-[1.02] tracking-[0.02em] text-chalk">
+          <span className="type-display block text-center text-[clamp(3.5rem,26vw,24rem)] leading-[1.02] tracking-[0.02em] text-ink">
             VAPR
           </span>
         </div>

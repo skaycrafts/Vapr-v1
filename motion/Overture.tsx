@@ -240,7 +240,7 @@ export default function Overture() {
     <div
       ref={root}
       data-overture
-      className="fixed inset-0 z-[var(--z-preloader)] flex items-center justify-center bg-void"
+      className="on-ink fixed inset-0 z-[var(--z-preloader)] flex items-center justify-center bg-paper"
       role="status"
       aria-live="polite"
       aria-label="Loading"
@@ -265,7 +265,7 @@ export default function Overture() {
         {['V', 'A', 'P', 'R'].map((letter) => (
           <span
             key={letter}
-            className="overture-letter type-display block text-[clamp(3.25rem,13vw,9rem)] leading-[0.9] tracking-[0.12em] text-chalk"
+            className="overture-letter type-display block text-[clamp(3.25rem,13vw,9rem)] leading-[0.9] tracking-[0.12em] text-ink"
             style={{ opacity: 0 }}
           >
             {letter}
@@ -291,7 +291,7 @@ export default function Overture() {
         <div className="overture-meter flex items-end justify-between gap-6">
           <span
             aria-hidden
-            className="overture-count tabular type-display block text-[clamp(3rem,11vw,7rem)] leading-[0.85] text-chalk"
+            className="overture-count tabular type-display block text-[clamp(3rem,11vw,7rem)] leading-[0.85] text-ink"
           >
             1
           </span>
@@ -307,7 +307,7 @@ export default function Overture() {
               for the whole sequence while the number ran perfectly. The rest
               state is set on the property that is actually animated. */}
           <span
-            className="overture-rule block h-px w-full origin-left bg-chalk"
+            className="overture-rule block h-px w-full origin-left bg-ink"
             style={{ transform: 'scaleX(0)' }}
           />
         </span>

@@ -245,7 +245,7 @@ export default function Chennai() {
       ref={root}
       id="chennai"
       aria-label="Chennai, and what VAPR is for"
-      className="group relative mt-[6vh] bg-void md:mt-[10vh]"
+      className="on-ink group relative mt-[6vh] bg-paper md:mt-[10vh]"
     >
       <style>{NOISE_PLACEMENT_CSS}</style>
       <div
@@ -261,7 +261,7 @@ export default function Chennai() {
           the frame, and the cap is now high enough that the vw term is the one
           doing the work at every ordinary desktop size.
         */}
-        <h2 className="chennai-title type-display text-[clamp(3rem,16vw,18rem)] leading-none tracking-[-0.03em] text-chalk group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1">
+        <h2 className="chennai-title type-display text-[clamp(3rem,16vw,18rem)] leading-none tracking-[-0.03em] text-ink group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1">
           {CHENNAI.city}
         </h2>
 
@@ -279,7 +279,7 @@ export default function Chennai() {
               // each word to the title's centre line so nothing lands on it.
               className="chennai-noise"
             >
-              <span className="type-display block text-[clamp(2rem,7vw,7rem)] leading-none text-chalk group-data-[scene=on]:text-left">
+              <span className="type-display block text-[clamp(2rem,7vw,7rem)] leading-none text-ink group-data-[scene=on]:text-left">
                 {item.word}
               </span>
               <span className="type-label mt-2 block group-data-[scene=on]:text-left">
@@ -291,11 +291,12 @@ export default function Chennai() {
 
         <div className="flex flex-col items-center group-data-[scene=on]:col-start-1 group-data-[scene=on]:row-start-1">
           <Emblem
+            tone="paper"
             sizes="(min-width: 768px) 112px, 22vw"
             className="chennai-seal w-[min(22vw,7rem)]"
           />
 
-          <p className="chennai-turn type-display mt-8 max-w-[18ch] text-[clamp(1.5rem,4vw,2.75rem)] leading-[1.15] text-chalk">
+          <p className="chennai-turn type-display mt-8 max-w-[18ch] text-[clamp(1.5rem,4vw,2.75rem)] leading-[1.15] text-ink">
             {CHENNAI.turn}
           </p>
 

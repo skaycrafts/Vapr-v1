@@ -29,7 +29,19 @@ import { cn } from '@/lib/utils';
  * is the mark.
  */
 
-const SRC = '/brand/vapr-emblem-light.png';
+/**
+ * Two inks, one artwork.
+ *
+ * `build-brand.mjs` cuts both from the same alpha channel, so these are the
+ * same drawing with the ink swapped rather than two files that might drift.
+ * The site is on paper now, so black is the default; the white one is still
+ * needed for the sections that kept the black ground — the footer, and the
+ * pinned scene.
+ */
+const INK = {
+  ink: { src: '/brand/vapr-emblem.png', stem: '/brand/vapr-emblem' },
+  paper: { src: '/brand/vapr-emblem-light.png', stem: '/brand/vapr-emblem-light' },
+} as const;
 
 /**
  * Every rendition, so the browser can nearly always draw a file at its real
@@ -38,10 +50,11 @@ const SRC = '/brand/vapr-emblem-light.png';
  * device pixel, and a browser's own downscale averages them into grey haze —
  * where each of these was resampled from the 2157px master with Lanczos.
  */
-const RENDITIONS = [48, 64, 96, 112, 144, 192, 256, 512]
-  .map((w) => `/brand/vapr-emblem-light-${w}.png ${w}w`)
-  .concat(`${SRC} 1024w`)
-  .join(', ');
+const renditions = (stem: string, src: string) =>
+  [48, 64, 96, 112, 144, 192, 256, 512]
+    .map((w) => `${stem}-${w}.png ${w}w`)
+    .concat(`${src} 1024w`)
+    .join(', ');
 
 export type EmblemProps = {
   className?: string;
@@ -58,6 +71,12 @@ export type EmblemProps = {
   animated?: boolean;
   /** Rendered width, so the browser can pick a rendition. */
   sizes?: string;
+  /**
+   * Which ink. `'ink'` is the black artwork for the paper ground and is what
+   * almost everything wants; `'paper'` is the white one, for the sections
+   * that kept the black.
+   */
+  tone?: keyof typeof INK;
 };
 
 export default function Emblem({
@@ -66,14 +85,17 @@ export default function Emblem({
   priority = false,
   animated = false,
   sizes = '160px',
+  tone = 'ink',
 }: EmblemProps) {
+  const { src, stem } = INK[tone];
+
   return (
     // A plain <img>: this is a fixed, hand-prepared asset with its own
     // renditions, not something next/image needs to derive at request time.
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={SRC}
-      srcSet={RENDITIONS}
+      src={src}
+      srcSet={renditions(stem, src)}
       sizes={sizes}
       width={1024}
       height={1024}

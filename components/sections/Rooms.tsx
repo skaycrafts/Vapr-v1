@@ -179,7 +179,7 @@ export default function Rooms() {
       ref={root}
       id="rooms"
       aria-labelledby="rooms-title"
-      className="group relative overflow-hidden bg-void"
+      className="group relative overflow-hidden bg-paper"
     >
       <div
         ref={track}
@@ -205,7 +205,7 @@ export default function Rooms() {
             as="h2"
             id="rooms-title"
             mode="lines"
-            className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-chalk"
+            className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-ink"
           >
             One room,
             <br />
@@ -284,7 +284,7 @@ function RoomChapter({ location, index }: { location: Location; index: number })
 
         <h3
           data-row
-          className="type-display mt-5 text-[clamp(2rem,4vw,3.25rem)] leading-none text-chalk"
+          className="type-display mt-5 text-[clamp(2rem,4vw,3.25rem)] leading-none text-ink"
         >
           {location.room.name}
         </h3>
@@ -323,7 +323,7 @@ function RoomChapter({ location, index }: { location: Location; index: number })
           data-row
           href={`/${location.slug}`}
           data-cursor="Explore"
-          className="mt-7 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-chalk transition-colors duration-300 hover:border-chalk"
+          className="mt-7 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-ink transition-colors duration-300 hover:border-ink"
         >
           Everything about {location.shortName}
           <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden />
