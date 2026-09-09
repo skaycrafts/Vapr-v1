@@ -4,7 +4,6 @@ import Chennai from '@/components/sections/Chennai';
 import Reel from '@/components/sections/Reel';
 import Detail from '@/components/sections/Detail';
 import Reserve from '@/components/sections/Reserve';
-import Arrival from '@/components/sections/Arrival';
 import Chapter from '@/motion/primitives/Chapter';
 
 /**
@@ -66,11 +65,6 @@ export default function Home() {
       <Chapter as="div">
         <Detail />
       </Chapter>
-
-      {/* A silent frame of the building, and then the enquiry. It is not in a
-          <Chapter>: the departure exists to hide the join between two blocks
-          of type, and this one already fades into black at both edges. */}
-      <Arrival />
 
       {/* The last chapter before the footer. It dims on the way out like the
           rest, but only once its bottom edge is near the top of the frame —

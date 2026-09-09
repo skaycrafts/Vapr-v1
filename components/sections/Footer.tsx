@@ -2,26 +2,32 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
 import Emblem from '@/components/brand/Emblem';
-import Frame from '@/components/media/Frame';
-import Parallax from '@/motion/primitives/Parallax';
-import { CONTACT, CTA, FOOTER, LOCATIONS, SITE, mapsHref } from '@/lib/content';
+import { CONTACT, FOOTER, LOCATIONS, SITE, mapsHref } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
-import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
+import { CINEMA, EASE, STAGGER } from '@/motion/config';
 
 /**
- * The last scene, and then the practical information.
+ * The practical information, and then the wordmark.
  *
- * The footer is not revealed, it is arrived at (§20). A closing photograph
- * holds the frame, drifts upward as the page runs out, and the type emerges
- * from underneath it — city, then the two addresses, then the one thing left
- * to do. Only after that does the page become a list of details.
+ * ── What used to open it ────────────────────────────────────────────────
+ * A closing scene: a full-bleed photograph over half the viewport, drifting
+ * on scroll and carrying pointer depth, with the city set across it at up to
+ * 7rem, both areas under that, and a last call to action. It has gone.
  *
- * Both addresses sit here in full, because the footer is where people look for
- * them. The wordmark is set once, at full size, at the very end — the only
- * place on the page it is allowed to be the largest thing.
+ * It was the fourth time the page said the same thing. The header now carries
+ * Book now on every screen and follows you down; the enquiry itself sits
+ * directly above this; and the two addresses are printed in full a few
+ * hundred pixels below, where someone looking for them actually reads. A
+ * half-viewport photograph to restate all of it delayed the details it sat on
+ * top of and asked one more time for something the page had already asked for
+ * twice.
+ *
+ * So the footer is a footer. Both addresses sit here in full, because this is
+ * where people look for them, and the wordmark is set once at full size at
+ * the very end — the only place on the page it is allowed to be the largest
+ * thing.
  */
 export default function Footer() {
   const root = useRef<HTMLElement>(null);
@@ -29,33 +35,6 @@ export default function Footer() {
   useMotionEffect(root, () => {
     const el = root.current;
     if (!el) return;
-
-    // The closing frame settles out of a slight over-scale. The drift itself
-    // is handled by <Parallax> below, which also carries the pointer depth.
-    gsap.fromTo(
-      '.footer-plate img',
-      { scale: 1.06 },
-      {
-        scale: 1,
-        ease: EASE.none,
-        scrollTrigger: {
-          trigger: '.footer-scene',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: SCRUB.tight,
-        },
-      }
-    );
-
-    // City, addresses, and the one remaining action — in that order.
-    gsap.from('.footer-lede > *', {
-      yPercent: 60,
-      opacity: 0,
-      duration: CINEMA.base,
-      ease: EASE.outLong,
-      stagger: STAGGER.lines * 2,
-      scrollTrigger: { trigger: '.footer-lede', start: 'top 88%', once: true },
-    });
 
     gsap.from('.footer-col', {
       y: 22,
@@ -82,63 +61,7 @@ export default function Footer() {
 
   return (
     <footer ref={root} className="relative border-t border-hairline bg-void">
-      {/* The closing scene. */}
-      <div className="footer-scene relative h-[52svh] min-h-[18rem] overflow-hidden md:h-[68svh]">
-        {/* The last image on the site, and the only one that gets pointer
-            depth — a few pixels, on a sky, at the moment the page stops. */}
-        <Parallax className="footer-plate absolute inset-0" layer="image" mouse="image">
-          <Frame
-            slug="sky-cutout"
-            ratio="fill"
-            sizes="100vw"
-            className="h-full w-full"
-            position="50% 45%"
-          />
-        </Parallax>
-
-        {/* The type has to stay legible over whatever the sky is doing. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(to bottom, transparent 30%, color-mix(in oklab, var(--color-void) 88%, transparent) 100%)',
-          }}
-        />
-
-        <div className="gutter footer-lede absolute inset-x-0 bottom-0 pb-10 md:pb-14">
-          <p className="type-display text-[clamp(2.5rem,9vw,7rem)] leading-[0.95] text-chalk">
-            {SITE.city}
-          </p>
-
-          <p className="type-label mt-4">
-            {LOCATIONS.map((l) => l.shortName).join(' · ')}
-          </p>
-
-          <Link
-            href={CTA.href}
-            data-cursor="Open"
-            className="group relative mt-8 inline-flex items-center gap-3 pb-2 text-lg text-chalk"
-          >
-            <span className="transition-transform duration-500 ease-[var(--ease-out-quart)] group-hover:translate-x-1">
-              {CTA.label}
-            </span>
-            <ArrowUpRight
-              size={18}
-              strokeWidth={1.5}
-              aria-hidden
-              className="transition-transform duration-500 ease-[var(--ease-out-quart)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-            />
-            <span aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-hairline-strong" />
-            <span
-              aria-hidden
-              className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-chalk transition-transform duration-700 ease-[var(--ease-out-quart)] group-hover:scale-x-100"
-            />
-          </Link>
-        </div>
-      </div>
-
-      <div className="gutter overflow-hidden pt-16 md:pt-24">
+      <div className="gutter overflow-hidden pt-20 md:pt-28">
         <div className="footer-cols grid gap-12 md:grid-cols-12 md:gap-10">
           <div className="footer-col md:col-span-3">
             <Emblem sizes="76px" className="footer-seal w-19" />

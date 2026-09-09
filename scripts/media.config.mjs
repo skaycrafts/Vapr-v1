@@ -17,13 +17,6 @@ export const IMAGES = [
   // at the top of this file.
   { slug: 'ashok-nagar-exterior', src: 'fascade/ashok-nagar-exterior.png', alt: 'The Ashok Nagar building at dusk, lit, seen from above the street corner' },
   { slug: 'guindy-exterior',      src: 'fascade/guindy-exterior.png',      alt: 'The Ekkatuthangal building at dusk, its rooms lit behind full-height glass' },
-  // The same frame as `facade-dusk`, uncropped. `facade-dusk` takes the top
-  // 66% so the gate sign falls away; this one keeps it, because the sign is
-  // what the frame is of — the building named, lit, at the hour it is lit.
-  // The operating franchise's mark is on that sign and is legible here. That
-  // is against the note at the top of this file and is deliberate: it was
-  // supplied this way.
-  { slug: 'facade-signed',    src: 'fascade/JWS03382-HDR.jpg',   alt: 'The Ashok Nagar building at dusk, framed by rain trees, its lit sign at the gate' },
   { slug: 'sky-cutout',       src: 'june/CAT09525.jpg',          alt: 'Monsoon cloud seen through the roof terrace cutout' },
   { slug: 'parking-bay',      src: 'parking/JWS03714-HDR.jpg',   alt: 'Covered parking bay beneath the building' },
 
