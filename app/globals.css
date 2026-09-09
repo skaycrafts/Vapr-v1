@@ -269,38 +269,54 @@
 }
 
 /*
- * The headline voice: bold grotesque, set tight.
+ * The headline voice: the Didone, and the grotesque steps back to support.
  *
- * `letter-spacing` is heavier than a body setting wants because this is only
- * ever used large — at 4rem and up, -0.035em is what closes the gaps the
- * reference closes. Line height under 1 is deliberate for the same reason:
- * two lines of this should read as a block, not as two sentences.
+ * ── Why this turned over ──────────────────────────────────────────────
+ * The Tenir reference led with a bold neo-grotesque and used the Didone for
+ * one italic word. The seven pins after it all do the opposite, and they do
+ * it unanimously: the word carrying the idea — "Money", every time — is a
+ * Didone with unbracketed hairline serifs and a ball terminal, and the
+ * grotesque is demoted to the small supporting line underneath. That is the
+ * "old money" recipe those boards are collecting, and it is the older and
+ * quieter of the two ideas.
+ *
+ * It also happens to be what this site's own mark already is. The wordmark
+ * inside the VAPR emblem is a high-contrast Didone, so a Didone headline is
+ * the logo speaking in its own voice rather than being introduced by another.
+ *
+ * `opsz` is pinned to the top of Bodoni's range. The display master is the
+ * one with the fine hairlines; the text master thickens them to survive
+ * small sizes this is never set at, and thick hairlines are precisely what
+ * separates a Didone that reads as expensive from one that reads as a default
+ * serif. Letter-spacing stays near zero — a Didone is drawn with its fit and
+ * closing it up thickens the colour it is trying to keep light.
  */
 @utility type-display {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-variation-settings: "opsz" 96;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
 }
 
 /*
- * The one place the Didone still speaks, and the reason it is still loaded:
- * an italic word set inside a grotesque headline. Any `<em>`, `<i>` or
- * `.italic` inside display type becomes Bodoni italic automatically, so the
- * device is applied by writing the emphasis rather than by remembering a
- * class — and it can never be a sans italic by accident, which is the one
- * outcome that would make the pairing look like a mistake.
+ * The emphasis inside a headline.
  *
- * Optical size is pushed to the top of Bodoni's range: at headline sizes the
- * high-contrast cut is the whole point, and the text-optimised master thickens
- * the hairlines to survive small sizes it will never be set at.
+ * In the pins this is a formal copperplate script — "Old" over "Money". A
+ * script is not here, and that is a decision rather than an omission: on a
+ * hotel page a copperplate reads as a wedding invitation within about two
+ * uses, it carries almost no weight at small sizes, and it would be a third
+ * family bought for one word.
+ *
+ * Bodoni's own italic is the restrained version of the same move. It is a
+ * true italic rather than a slanted roman — different letterforms, a real
+ * calligraphic slope — so against its roman it gives the pins' contrast
+ * without the costume. Applied by writing the emphasis rather than by
+ * remembering a class, so it can never come out a sans italic by accident.
  */
 .type-display :is(em, i, .italic) {
-  font-family: var(--font-serif);
   font-style: italic;
-  font-weight: 400;
-  font-variation-settings: "opsz" 96;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
 }
 
 @utility tabular {
