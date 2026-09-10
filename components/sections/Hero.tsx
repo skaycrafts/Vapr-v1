@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import DepthText from '@/components/brand/DepthText';
 import { HERO, SITE } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
@@ -51,6 +51,44 @@ export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const { started } = useEntry();
   const { scrollTo } = useScroll();
+
+  /**
+   * Take the hero out of the paint once it is covered.
+   *
+   * `sticky top-0 z-0` is what lets the page climb over it, and it keeps the
+   * hero laid out at the top of the viewport for the whole of `main`. That is
+   * fine while everything above it is opaque — and everything above it is not.
+   * `Chapter` fades a departing section to 0.3, which turned each of those
+   * sections into a window onto a hero that was still sitting there: VAPR
+   * ghosting through the addresses, the headline surfacing in the middle of
+   * the enquiry.
+   *
+   * So it is hidden the moment it can no longer be seen honestly. At a scroll
+   * of exactly one hero height the next section's top edge is level with the
+   * top of the viewport and the cover is complete, so flipping `visibility`
+   * there changes nothing on screen and removes it from every composite after.
+   *
+   * Not a `useMotionEffect`: a reduced-motion visitor gets the sticky hero and
+   * the translucent chapters too, so this has to run for them as well. And not
+   * a ScrollTrigger — its offsets are measured from an element's place in the
+   * document, which for a sticky element is not where it is painted.
+   */
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      el.style.visibility = window.scrollY >= el.offsetHeight ? 'hidden' : 'visible';
+    };
+
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 
   /**
    * Entry. Scheduled against the moment the overture's field begins to lift,
