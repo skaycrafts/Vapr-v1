@@ -13,6 +13,26 @@ import { CINEMA, CONTENT, EASE, SCRUB } from '@/motion/config';
 const LINES = HERO.statement.split('\n');
 
 /**
+ * Set one word of a line in the script face and leave the rest alone.
+ *
+ * Splits on the first occurrence and falls back to the plain string when the
+ * word is not in the line — so `HERO.accent` can be changed or emptied in
+ * content without this file knowing, and a mismatch costs the accent rather
+ * than the headline.
+ */
+function accented(line: string, accent: string) {
+  const at = accent ? line.indexOf(accent) : -1;
+  if (at < 0) return line;
+  return (
+    <>
+      {line.slice(0, at)}
+      <span className="script">{accent}</span>
+      {line.slice(at + accent.length)}
+    </>
+  );
+}
+
+/**
  * The reveal clip, and how it is made to sit exactly on top of the emblem.
  *
  * `scripts/build-brand.mjs` re-frames the supplied animation into an 852x852
@@ -340,20 +360,30 @@ export default function Hero() {
 
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-16">
           {/*
-            One sentence, two voices. The roman states the fact and the italic
-            answers it — the contrast the display family already contains, and
-            the only place on the site it is spent. Both halves still rise out
-            of their own clipping mask, a fifth of a second apart, so the line
-            arrives the way it reads.
+            One sentence, one accent.
+
+            This used to set the whole second line in Bodoni's italic — roman
+            states the fact, italic answers it. That was the right device when
+            there were two faces. There are three now, and the script carrying
+            "quiet" in the line above was competing with it: two different
+            emphases stacked, the script's swashes tangling with the italic
+            underneath, and a reader with no idea which of the two was the
+            point.
+
+            So the second line is roman and the script is the only emphasis in
+            the frame — which is what the reference boards actually do. "Old"
+            against "Money", one word, everything else plain. Both halves still
+            rise out of their own clipping mask a fifth of a second apart, so
+            the line arrives the way it reads.
           */}
           <h1 className="type-display max-w-[16ch] text-[clamp(2.25rem,6.4vw,5.25rem)] text-ink">
             <span className="hero-line-1 split-mask">
               <span className="block" style={{ willChange: 'transform' }}>
-                {LINES[0]}
+                {accented(LINES[0], HERO.accent)}
               </span>
             </span>
             <span className="hero-line-2 split-mask">
-              <span className="block italic">{LINES[1]}</span>
+              <span className="block">{LINES[1]}</span>
             </span>
           </h1>
 

@@ -2,18 +2,50 @@
 
 import { useRef } from 'react';
 import { Check } from 'lucide-react';
-import Frame from '@/components/media/Frame';
 import Glass from '@/components/ui/Glass';
 import RevealText from '@/motion/primitives/RevealText';
-import RevealImage from '@/motion/primitives/RevealImage';
 import { DETAIL, LOCATIONS, STAY } from '@/lib/content';
 import { cn } from '@/lib/utils';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
-import { CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
-import type { ImageSlug } from '@/lib/media';
+import { CONTENT, EASE, STAGGER } from '@/motion/config';
+import DriftWall, { type DriftItem } from '@/components/media/DriftWall';
 
-const CLOSE_UPS: ImageSlug[] = ['detail-number', 'detail-switch', 'detail-latch', 'detail-books'];
+/**
+ * The wall between the specification and the enquiry.
+ *
+ * Twenty photographs rather than the four the horizontal strip carried. A
+ * drifting wall reads as a wall — the eye takes the texture of the place, not
+ * four particular objects — and four frames cycling across five columns would
+ * have been visibly the same picture three times per screen.
+ *
+ * Ordered so neighbours differ: a detail, then a room, then a threshold, then
+ * a public space, and around again. The columns are dealt round robin, so
+ * consecutive entries land in different columns and no column ends up being
+ * the brass-and-door-furniture column.
+ */
+const WALL: DriftItem[] = [
+  { slug: 'detail-number' },
+  { slug: 'room-pillows' },
+  { slug: 'lift-stone' },
+  { slug: 'reception-desk' },
+  { slug: 'detail-switch' },
+  { slug: 'room-headboard' },
+  { slug: 'stair-flight' },
+  { slug: 'dining-counter' },
+  { slug: 'detail-latch' },
+  { slug: 'room-twin' },
+  { slug: 'corridor-door' },
+  { slug: 'breakfast-plate' },
+  { slug: 'detail-lock' },
+  { slug: 'room-lounge' },
+  { slug: 'stair-palm' },
+  { slug: 'common-area' },
+  { slug: 'detail-books' },
+  { slug: 'room-a-window' },
+  { slug: 'parking-bay' },
+  { slug: 'detail-curtain' },
+];
 
 /**
  * What is true of both properties, and where they differ. Set as a
@@ -47,20 +79,6 @@ export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
       scrollTrigger: { trigger: '.detail-sheet', start: 'top 78%', once: true },
     });
 
-    gsap.fromTo(
-      '.detail-strip',
-      { xPercent: 0 },
-      {
-        xPercent: -8,
-        ease: EASE.none,
-        scrollTrigger: {
-          trigger: '.detail-strip',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: SCRUB.loose,
-        },
-      }
-    );
   });
 
   return (
@@ -145,26 +163,43 @@ export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
         </div>
       </div>
 
-      {/* Four things you actually touch. Photographed at Ashok Nagar. */}
-      <div className="detail-strip mt-14 flex gap-3 pl-[max(1.25rem,calc((100vw-90rem)/2))] md:mt-16 md:gap-4">
-        {CLOSE_UPS.map((slug, i) => (
-          // `crop` is the quietest of the four signature reveals — right for
-          // supporting imagery that should not announce itself (§10).
-          <RevealImage
-            key={slug}
-            style="crop"
-            delay={i * 0.06}
-            scaleFrom={1.08}
-            className="w-[62vw] shrink-0 md:w-[26vw]"
-          >
-            <Frame
-              slug={slug}
-              sizes="(min-width: 768px) 26vw, 62vw"
-              ratio={4 / 5}
-              className="w-full"
-            />
-          </RevealImage>
-        ))}
+      {/*
+        The place itself, drifting, between the specification and the enquiry.
+
+        This was a horizontal strip of four close-ups on a scrubbed parallax.
+        The strip is gone and so is its ScrollTrigger — the wall carries its
+        own movement, and a scrubbed transform wrapped around a perspective
+        plane fights it for the same pixels.
+
+        The settings are pulled well back from the component's defaults. Its
+        demo turns the wall 16 degrees and yaws it -14, which is a showreel
+        pose; this is a hotel, and the photography has to stay readable as
+        photography. Half the pitch, half the yaw, a longer perspective so the
+        far columns do not shear, and a slower drift than the 42px/s default.
+        `dim` sits high enough that the resting wall is a texture rather than
+        a gallery demanding to be clicked.
+      */}
+      <div className="mt-14 h-[62svh] min-h-[22rem] w-full md:mt-16 md:h-[70svh]">
+        <DriftWall
+          items={WALL}
+          columns={5}
+          tileWidth={200}
+          tileHeight={132}
+          gap={18}
+          radius={4}
+          tilt={8}
+          turn={-7}
+          perspective={1600}
+          depth={90}
+          speed={26}
+          direction="up"
+          variance={0.4}
+          parallax={0.45}
+          lift={46}
+          fade={0.62}
+          dim={0.7}
+          sizes="(min-width: 768px) 200px, 40vw"
+        />
       </div>
     </section>
   );

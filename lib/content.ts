@@ -332,6 +332,16 @@ export const HERO = {
    */
   place: 'Two addresses',
   statement: 'A quiet floor\nabove a loud street.',
+  /**
+   * The one word set in the script face, and the only one on the site.
+   *
+   * It must appear verbatim in `statement`; `Hero` splits the line on it and
+   * renders the rest unchanged, so a typo here degrades to a plain headline
+   * rather than to a broken one. "quiet" is the word the hotel is actually
+   * selling, which is the test for whether an accent has earned the attention
+   * it takes.
+   */
+  accent: 'quiet',
   scrollCue: 'Scroll',
 } as const;
 

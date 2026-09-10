@@ -59,6 +59,7 @@
    */
   --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-bodoni), "Didot", "Bodoni MT", Georgia, serif;
+  --font-script: var(--font-pinyon), "Snell Roundhand", "Apple Chancery", cursive;
 
   /* Fluid scale, 1.28 ratio. Display ceiling stays at 96px — the page
      should be composed, not shouting. */
@@ -319,6 +320,30 @@
   letter-spacing: -0.005em;
 }
 
+/*
+ * The accent word — the third voice, and the one with a budget.
+ *
+ * In the reference boards this is always a single short word beside the
+ * Didone: "Old" against "Money", "Free" against "Cinematic". Never a line,
+ * never a sentence, never twice on the same screen. That restraint is not
+ * decoration, it is what stops a copperplate reading as a wedding invitation
+ * — the failure mode this face has, and it arrives at about the second use.
+ *
+ * Set larger than the roman it sits in, because a script's x-height is far
+ * smaller than its point size suggests: at 1em beside Bodoni it looks like a
+ * mistake rather than a choice. The negative line-height keeps that extra
+ * size from opening the leading of the line it is inside.
+ */
+.type-display .script {
+  font-family: var(--font-script);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.32em;
+  line-height: 0.7;
+  letter-spacing: 0;
+  padding-inline: 0.03em 0.08em;
+}
+
 @utility tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
@@ -364,10 +389,165 @@
 }
 
 /* Per-glyph and per-line reveal targets produced by SplitType. */
+/*
+ * `overflow: hidden` is what the line reveal rises out of. The clip-path
+ * reopens it a little on every side: a Didone's descenders and the script's
+ * much longer ones both hang past the line box, and clipping them flat is
+ * more obviously wrong than letting a few pixels of neighbouring line show.
+ * Widened from 15% to 34% vertically when the script joined — a copperplate
+ * `q` drops about a third of its own size below the baseline.
+ */
 @utility split-mask {
   display: block;
   overflow: hidden;
-  clip-path: inset(-15% -2% -15% -2%);
+  clip-path: inset(-34% -2% -34% -2%);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   DriftWall
+
+   Adapted from the React Bits component. Its own stylesheet is folded in
+   here rather than imported beside the component: Next only allows a plain
+   global stylesheet at the root layout, the alternative is a CSS module,
+   and introducing a third styling strategy for one component is worse than
+   one clearly-labelled block in the file that already holds every other
+   piece of bespoke CSS on the site.
+
+   Changed from the original: the tile's placeholder colour and the resting
+   tint come from tokens instead of a hard-coded near-black, so the wall
+   reads correctly on the ink sections and the paper ones alike.
+   ════════════════════════════════════════════════════════════════════ */
+.drift-wall {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: var(--dw-perspective, 1200px);
+  perspective-origin: 50% 50%;
+
+  /* The wall dissolves at its edges rather than being cut by them — an
+     ellipse for the body of it and a linear wash at the foot, intersected. */
+  -webkit-mask-image:
+    radial-gradient(ellipse 78% 82% at 50% 46%, #000 var(--dw-edge), transparent 100%),
+    linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(ellipse 78% 82% at 50% 46%, #000 var(--dw-edge), transparent 100%),
+    linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
+  mask-composite: intersect;
+}
+
+.drift-wall__plane {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: row;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.drift-wall__col {
+  position: relative;
+  width: calc(var(--dw-tile-w) + var(--dw-gap));
+  transform-style: preserve-3d;
+}
+
+.drift-wall__track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.drift-wall__tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(var(--dw-tile-h) + var(--dw-gap));
+  flex: 0 0 auto;
+  outline: none;
+  transform-style: preserve-3d;
+}
+
+.drift-wall__inner {
+  position: absolute;
+  inset: calc(var(--dw-gap) / 2);
+  display: block;
+  border-radius: var(--dw-radius);
+  overflow: hidden;
+  background: var(--color-pitch);
+  opacity: var(--dw-dim);
+  transform: translateZ(0);
+  /* The lift would otherwise carry a tile in and out of its own hit box and
+     make it flicker under a still cursor. The wall does the hit-testing. */
+  pointer-events: none;
+  transition:
+    transform 0.42s var(--ease-out-quart),
+    opacity 0.42s var(--ease-out-quart),
+    box-shadow 0.42s var(--ease-out-quart);
+}
+
+.drift-wall__tile picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.drift-wall__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(var(--dw-gray)) saturate(0.92);
+  transition: filter 0.42s var(--ease-out-quart);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.drift-wall__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--dw-overlay);
+  /* 0.42 in the original. On the ink sections that reads as dimmed; on the
+     paper ones the same wash of white read as washed-out — the photographs
+     are the only colour on the page and they were being bleached out of it.
+     0.32 leaves them present at rest and still lets hover be an event. */
+  opacity: 0.32;
+  pointer-events: none;
+  transition: opacity 0.42s var(--ease-out-quart);
+}
+
+.drift-wall__tile.is-active .drift-wall__inner,
+.drift-wall__tile:focus-visible .drift-wall__inner {
+  opacity: 1;
+  transform: translateZ(var(--dw-lift));
+  box-shadow: 0 24px 60px -18px color-mix(in oklab, var(--color-ink) 70%, transparent);
+}
+
+.drift-wall__tile.is-active img,
+.drift-wall__tile:focus-visible img {
+  filter: grayscale(0) saturate(1.05);
+}
+
+.drift-wall__tile.is-active .drift-wall__overlay,
+.drift-wall__tile:focus-visible .drift-wall__overlay {
+  opacity: 0;
+}
+
+.drift-wall__tile:focus-visible .drift-wall__inner {
+  box-shadow:
+    0 24px 60px -18px color-mix(in oklab, var(--color-ink) 70%, transparent),
+    0 0 0 2px var(--color-ink);
+}
+
+/* Still, but still there. The photographs are content; the drift is not. */
+.drift-wall--reduced .drift-wall__plane,
+.drift-wall--reduced .drift-wall__track {
+  will-change: auto;
 }
 
 /* ════════════════════════════════════════════════════════════════════
