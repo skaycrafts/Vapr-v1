@@ -1,13 +1,12 @@
 'use client';
 
 import { useRef } from 'react';
-import Emblem from '@/components/brand/Emblem';
+import DepthText from '@/components/brand/DepthText';
 import { HERO, SITE } from '@/lib/content';
-import { gsap, ScrollTrigger } from '@/lib/gsap';
+import { gsap } from '@/lib/gsap';
 import { useMotionEffect, refreshScrollTriggers } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
 import { ENTRY, useEntry } from '@/motion/entry';
-import { useCapability } from '@/motion/capability';
 import { CINEMA, CONTENT, EASE, SCRUB } from '@/motion/config';
 
 const LINES = HERO.statement.split('\n');
@@ -33,50 +32,25 @@ function accented(line: string, accent: string) {
 }
 
 /**
- * The reveal clip, and how it is made to sit exactly on top of the emblem.
+ * The word, where the seal used to be.
  *
- * `scripts/build-brand.mjs` re-frames the supplied animation into an 852x852
- * square about the mark's own centre, and in the resolved frame the emblem
- * measures 676x679 across that box — 79.5%. The static `Emblem` fills its box
- * edge to edge, because the artwork is trimmed to its ink. So for the clip's
- * last frame to land ON the emblem rather than near it, the clip is drawn at
- * 1/0.79519 of the mark's width and pulled back by half the difference on
- * both axes.
+ * The hero carried the emblem itself: the supplied reveal animation drawing
+ * the mark on, dissolving into the Lanczos-resampled still, both centred in a
+ * square slot with the clip sized to land its last frame exactly on the
+ * artwork. All of that has gone, and with it every constant that positioned
+ * it and every guard that made sure the still appeared when the clip did not.
  *
- * The fraction is the mean of the two axes: the clip's emblem is 0.4% taller
- * than it is wide, so splitting the difference leaves either axis out by half
- * of that rather than one of them out by all of it. At the size this renders,
- * that is well under a pixel.
- *
- * Deriving these from the measurement rather than typing 126% is the point:
- * re-frame the clip and this is the line to change.
+ * The mark has not left the site — the bar carries it, greyed, over the dark
+ * sections. `public/brand/vapr-logo-reveal.{mp4,webm}` and the `buildReveal`
+ * step that makes them are now unreferenced; they are left in place rather
+ * than deleted, because nothing else regenerates them and this is one line of
+ * JSX away from coming back.
  */
-const EMBLEM_IN_CLIP = 0.79519;
-const CLIP_BOX = 100 / EMBLEM_IN_CLIP;
-const CLIP_INSET = (CLIP_BOX - 100) / 2;
-
-/** The built clip runs 8.0s. The guard is that, with room for a slow start. */
-const REVEAL_GUARD_MS = 11_500;
-/**
- * How long the clip gets to produce its first frame before the mark gives up
- * and shows the artwork.
- *
- * This is the one that catches a broken file. `error` does not fire on a
- * <video> whose <source> children fail — it fires on the last <source>, and
- * the element itself just goes quiet with NETWORK_NO_SOURCE. Waiting on the
- * end-of-clip guard for that meant eleven seconds of an empty frame. Watching
- * for the first `playing` instead covers a 404, a codec the device cannot
- * decode, and a connection too slow to be worth waiting on, with one rule.
- */
-const REVEAL_START_MS = 3_000;
-/** Long enough to read as a settle rather than a swap. */
-const REVEAL_SETTLE = 0.9;
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const { started } = useEntry();
   const { scrollTo } = useScroll();
-  const { animate } = useCapability();
 
   /**
    * Entry. Scheduled against the moment the overture's field begins to lift,
@@ -150,9 +124,8 @@ export default function Hero() {
    */
   useMotionEffect(
     root,
-    ({ q }) => {
-      const el = root.current;
-      if (!el || !started) return;
+    () => {
+      if (!started) return;
 
       gsap.from('.hero-mark', {
         opacity: 0,
@@ -162,60 +135,6 @@ export default function Hero() {
         delay: Math.max(0, ENTRY.headline - ENTRY.lift),
       });
 
-      const [clip] = q('.hero-reveal') as HTMLVideoElement[];
-      const [emblem] = q('.hero-emblem');
-      if (!clip || !emblem) return;
-
-      // Hand the box to the clip. Safe to do here rather than at mount: the
-      // `from` above is already holding the whole mark at opacity 0, so
-      // nothing on screen changes on this frame. The markup default is the
-      // other way round, which is what reduced motion and a dead script get.
-      gsap.set(emblem, { opacity: 0 });
-      gsap.set(clip, { opacity: 1 });
-
-      let settled = false;
-      const settle = () => {
-        if (settled) return;
-        settled = true;
-        clip.pause();
-        gsap
-          .timeline({ defaults: { duration: REVEAL_SETTLE, ease: EASE.outLong } })
-          .to(emblem, { opacity: 1 }, 0)
-          .to(clip, { opacity: 0 }, 0);
-      };
-
-      clip.addEventListener('ended', settle);
-      clip.addEventListener('error', settle);
-
-      // A tab backgrounded mid-clip can throttle to the point where `ended`
-      // arrives minutes late, or not at all. The mark must not wait on it.
-      const guard = window.setTimeout(settle, REVEAL_GUARD_MS);
-
-      // And nothing at all may be coming. Cancelled the moment a frame lands.
-      let startGuard = window.setTimeout(settle, REVEAL_START_MS);
-      const onPlaying = () => {
-        window.clearTimeout(startGuard);
-        startGuard = 0;
-      };
-      clip.addEventListener('playing', onPlaying, { once: true });
-
-      // Past the fold the clip is decoding frames nobody is looking at, and
-      // coming back to a half-drawn emblem would read as a fault rather than
-      // as an entrance. It is an arrival; it does not get a second showing.
-      const leave = ScrollTrigger.create({ trigger: el, start: 'bottom top', onEnter: settle });
-
-      // A rejected promise here is the autoplay policy, which is a normal
-      // answer on a metered or battery-saving device — not an error.
-      void clip.play().catch(settle);
-
-      return () => {
-        clip.removeEventListener('ended', settle);
-        clip.removeEventListener('error', settle);
-        clip.removeEventListener('playing', onPlaying);
-        window.clearTimeout(guard);
-        window.clearTimeout(startGuard);
-        leave.kill();
-      };
     },
     [started]
   );
@@ -287,66 +206,34 @@ export default function Hero() {
         It binds only when the window is genuinely short: above about 750px of
         viewport height the 23.75rem cap still wins and nothing moves.
       */}
+      {/*
+        VAPR, extruded.
+
+        The width cap that used to be here solved a problem that left with the
+        clip: the clip's frame was 1.257x the mark and hung past the slot into
+        the rule below. Type has no such overhang, so the size is just a clamp
+        — and `nowrap` on the layers means it must never be allowed to reach
+        the gutter, hence the vw term rather than a fixed ceiling.
+
+        `tilt` is 5 against the component's default 7.5, and the orbit is
+        slower. At the demo's settings a four-letter word at this size swings
+        far enough to read as a toy; the point here is that the letters have
+        depth, not that they are moving.
+      */}
       <div className="pointer-events-none absolute inset-x-0 top-[9svh] flex h-[50svh] items-center justify-center md:top-[10svh] md:h-[46svh]">
-        <div className="hero-mark relative aspect-square w-[min(62vw,23.75rem,calc(1.0496*max(100svh,34rem)-330px))] md:w-[min(62vw,23.75rem,calc(1.0656*max(100svh,34rem)-389px))]">
-          {/* The white cut of the artwork. This section kept the black
-              ground, and the black cut would be a hole in it. */}
-          <Emblem
-            priority
-            tone="paper"
-            sizes="(min-width: 768px) 380px, 62vw"
-            className="hero-emblem absolute inset-0"
-          />
-
-          {/*
-            The clip sits over the emblem and larger than it, because its own
-            frame carries space around the mark that the trimmed artwork does
-            not. Both are centred on the same point, so the last frame lands on
-            the still rather than beside it.
-
-            No blend mode, and this is the reason the hero kept the black.
-
-            The clip is white line art on #000, and this section's ground
-            resolves to rgb(2,2,2) — two levels apart, below the threshold of
-            a display and well below the clip's own compression noise. So the
-            square it occupies simply is not visible.
-
-            On paper it was. Measured, the same square read 255,255,255
-            against a 250,250,249 page: five levels, and plainly there. The
-            fix needed the clip negated to black-on-white and composited with
-            `mix-blend-mode: multiply`, plus a rectangle of paper painted
-            behind it — because `mix-blend-mode` only sees backdrop painted
-            inside the nearest stacking context, and `.hero-mark` is one: it
-            carries a GSAP transform and an opacity for the entrance and the
-            parallax, so the clip had nothing to blend against and composited
-            as-is.
-
-            All of that worked and none of it is here, because keeping the
-            ground the clip was cut for costs nothing and needs none of it.
-
-            `preload` is gated on capability so a visitor who asked for
-            reduced motion — who will never see a frame of this — does not
-            spend three quarters of a megabyte finding that out.
-          */}
-          <video
-            className="hero-reveal absolute aspect-square max-w-none"
-            style={{
-              width: `${CLIP_BOX}%`,
-              left: `${-CLIP_INSET}%`,
-              top: `${-CLIP_INSET}%`,
-              opacity: 0,
-            }}
-            muted
-            playsInline
-            preload={animate ? 'auto' : 'none'}
-            aria-hidden
-            tabIndex={-1}
-            disablePictureInPicture
-          >
-            <source src="/brand/vapr-logo-reveal.webm" type="video/webm" />
-            <source src="/brand/vapr-logo-reveal.mp4" type="video/mp4" />
-          </video>
-        </div>
+        <DepthText
+          className="hero-mark"
+          text={SITE.name}
+          layers={30}
+          depth={2.2}
+          tilt={5}
+          smoothing={0.12}
+          perspective={1100}
+          orbitSpeed={0.22}
+          fontSize="clamp(4rem, 17vw, 11rem)"
+          fontWeight={400}
+          letterSpacing="0.005em"
+        />
       </div>
 
       <div className="hero-copy gutter absolute inset-x-0 bottom-0 pb-9 md:pb-12">
