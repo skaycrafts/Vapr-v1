@@ -24,7 +24,13 @@ export default function FilmGrain() {
         // it is a tax paid continuously for six pixels of drift nobody can see
         // at that size. The grain still sits there — it just holds still where
         // holding still is worth more than moving.
-        className="grain-layer pointer-events-none fixed inset-0 z-[var(--z-overlay)] opacity-[0.055] mix-blend-overlay"
+        //
+        // Oversized by 10% rather than `inset-0`: the drift moves it by up to
+        // 7% of the viewport, and at `inset-0` that pulled its edge inside the
+        // frame and left a strip of the page with no grain on it. The overhang
+        // is bigger than the furthest the animation can travel, so there is
+        // always tile under every pixel.
+        className="grain-layer pointer-events-none fixed -inset-[10%] z-[var(--z-overlay)] opacity-[0.055] mix-blend-overlay"
         style={{ backgroundImage: NOISE, backgroundSize: '180px 180px' }}
       />
       <div

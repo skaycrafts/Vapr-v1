@@ -57,8 +57,13 @@ export default function Locations() {
       className="relative bg-paper"
     >
       <div className="gutter py-20 md:py-28">
-        <div className="loc-copy grid gap-10 md:grid-cols-12 md:gap-10">
-          <div className="md:col-span-6">
+        {/* The 12-column split waits for `lg`, not `md`. At 768 it gave the
+              heading a 350px column and the sentence a 270px one — "Ashok
+              Nagar & Ekkatuthangal" broke mid-word and the two buttons stacked
+              on top of each other. A tablet reads this better in one column,
+              which is what it now gets up to 1024. */}
+          <div className="loc-copy grid gap-10 lg:grid-cols-12 lg:gap-10">
+          <div className="lg:col-span-6">
             <p data-lede className="type-label">
               {LOCATIONS_INTRO.eyebrow}
             </p>
@@ -72,7 +77,7 @@ export default function Locations() {
             </RevealText>
           </div>
 
-          <div className="space-y-6 md:col-span-5 md:col-start-8 md:pt-3">
+          <div className="space-y-6 lg:col-span-5 lg:col-start-8 lg:pt-3">
             <p
               data-lede
               className="max-w-[46ch] whitespace-pre-line text-lg leading-relaxed text-mist"

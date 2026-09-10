@@ -90,7 +90,7 @@ export default function PropertyHero({ location }: { location: Location }) {
       <div className="gutter relative">
         <Link
           href="/"
-          className="ph-meta mb-8 inline-flex items-center gap-2 text-sm text-mist transition-colors hover:text-ink md:mb-10"
+          className="ph-meta mb-7 inline-flex items-center gap-2 py-1.5 text-sm text-mist transition-colors hover:text-ink md:mb-9"
         >
           <ArrowLeft size={15} strokeWidth={1.5} aria-hidden />
           Both hotels

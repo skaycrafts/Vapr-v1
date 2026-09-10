@@ -62,14 +62,17 @@ export default function Footer() {
   return (
     <footer ref={root} className="on-ink relative bg-paper">
       <div className="gutter overflow-hidden pt-20 md:pt-28">
-        <div className="footer-cols grid gap-12 md:grid-cols-12 md:gap-10">
-          <div className="footer-col md:col-span-3">
+        {/* Two up on a tablet, four only from `lg`. Four columns inside 768
+              broke "59/31, 46th Street, Sarvamangala Colony" over five lines
+              — an address that has to be read in one go. */}
+          <div className="footer-cols grid gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-10">
+          <div className="footer-col sm:col-span-2 lg:col-span-3">
             <Emblem tone="paper" sizes="76px" className="footer-seal w-19" />
             <p className="mt-6 max-w-[32ch] text-mist">{FOOTER.note}</p>
           </div>
 
           {LOCATIONS.map((loc) => (
-            <div key={loc.slug} className="footer-col md:col-span-3">
+            <div key={loc.slug} className="footer-col lg:col-span-3">
               <h2 className="type-label mb-4">{loc.shortName}</h2>
               <address className="not-italic text-bone">
                 <p>{loc.street}</p>
@@ -81,14 +84,14 @@ export default function Footer() {
                 href={mapsHref(loc)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="mt-3 inline-block text-sm text-smoke underline underline-offset-4 transition-colors hover:text-ink"
+                className="mt-2 inline-block py-1.5 text-sm text-smoke underline underline-offset-4 transition-colors hover:text-ink"
               >
                 Open in Maps
               </a>
-              <p className="mt-3">
+              <p className="mt-2">
                 <Link
                   href={`/${loc.slug}`}
-                  className="text-bone transition-colors hover:text-ink"
+                  className="inline-block py-1.5 text-bone transition-colors hover:text-ink"
                 >
                   About this one
                 </Link>
@@ -96,7 +99,7 @@ export default function Footer() {
             </div>
           ))}
 
-          <nav aria-label="Footer" className="footer-col md:col-span-3">
+          <nav aria-label="Footer" className="footer-col sm:col-span-2 lg:col-span-3">
             <h2 className="type-label mb-4">Reach us</h2>
             {/* A dead `tel:` link is worse than an absent one: it looks
                 like a way to reach the hotel and is not. */}
@@ -120,7 +123,7 @@ export default function Footer() {
             ) : (
               <p className="mt-1 block text-smoke">Email — {CONTACT.unset.toLowerCase()}</p>
             )}
-            <ul className="mt-5 space-y-1.5">
+            <ul className="mt-4">
               {/* Straight off LOCATIONS now that NAV has gone. These were the
                   same two links written a second time; with the header down to
                   one button, this list and the homepage's two doors are how
@@ -130,7 +133,7 @@ export default function Footer() {
                 <li key={loc.slug}>
                   <Link
                     href={`/${loc.slug}`}
-                    className="text-bone transition-colors hover:text-ink"
+                    className="inline-block py-1.5 text-bone transition-colors hover:text-ink"
                   >
                     {loc.shortName}
                   </Link>
@@ -160,10 +163,10 @@ export default function Footer() {
           <p>
             &copy; {new Date().getFullYear()} {SITE.legalName}
           </p>
-          <ul className="flex flex-wrap gap-x-6 gap-y-1">
+          <ul className="flex flex-wrap gap-x-6">
             {FOOTER.legal.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="transition-colors hover:text-mist">
+                <Link href={item.href} className="inline-block py-1.5 transition-colors hover:text-mist">
                   {item.label}
                 </Link>
               </li>

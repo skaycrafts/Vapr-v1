@@ -133,7 +133,7 @@ export default function GettingThere({ location }: { location: Location }) {
             target="_blank"
             rel="noreferrer noopener"
             data-cursor="Open"
-            className="mt-7 inline-flex items-center gap-2 border-b border-hairline-strong pb-1 text-sm text-ink transition-colors duration-300 hover:border-ink"
+            className="mt-6 inline-flex items-center gap-2 border-b border-hairline-strong pb-2 pt-1.5 text-sm text-ink transition-colors duration-300 hover:border-ink"
           >
             Open in Maps
             <ExternalLink size={14} strokeWidth={1.5} aria-hidden />
