@@ -58,13 +58,22 @@ export default function Home() {
       */}
       <div className="relative z-10">
 
-      {/* Directly under the hero: a two-property group has to answer "which
-          one?" before it answers anything else. It answers it and hands over
-          — the full-height property stage that used to sit here has gone, now
-          that both hotels have a page carrying every fact it showed. */}
-      <Chapter as="div">
-        <Locations />
-      </Chapter>
+      {/*
+        Directly under the hero: a two-property group has to answer "which
+        one?" before it answers anything else. It answers it and hands over —
+        the full-height property stage that used to sit here has gone, now
+        that both hotels have a page carrying every fact it showed.
+
+        Deliberately NOT in a <Chapter>. This is the section that performs the
+        cover, and a chapter's departure fades its content to 0.3 starting a
+        half-viewport before it leaves — which for a section this short begins
+        while it is still climbing over the hero. Measured: 0.731 opacity at a
+        scroll of 800 with the hero still visible behind it, which is exactly
+        the ghosting. A section cannot both hide the hero and become
+        translucent over it, and of the two jobs the cover is the one that
+        matters here.
+      */}
+      <Locations />
 
       {/* Pinned. The chapter carries the sentence the manifesto used to hold,
           and sits in the same slot — the hero's scroll cue points here. */}

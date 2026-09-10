@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, Check, Copy, MessageCircle } from 'lucide-react';
-import { CONTACT, LOCATIONS, RESERVE, SITE } from '@/lib/content';
+import { CONTACT, LOCATIONS, SITE } from '@/lib/content';
+import DateField from '@/components/ui/DateField';
 import { cn } from '@/lib/utils';
 import { gsap } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
@@ -58,7 +59,13 @@ const STEPS: readonly Step[] = [
   { id: 'email', question: 'And an email?', hint: 'Optional. Rooms, rates and a reply go here.' },
 ] as const;
 
-const UNSURE = 'unsure';
+/**
+ * Ten guests and five rooms is past the point where an online form helps —
+ * a group that size wants the desk, and the message says so rather than
+ * offering a number that would need a phone call anyway.
+ */
+const GUEST_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const ROOM_OPTIONS = [1, 2, 3, 4, 5];
 
 /** Loose on purpose: this validates shape, not existence, and never blocks. */
 const looksLikeEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
@@ -74,8 +81,8 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
   const [slug, setSlug] = useState<string>(defaultSlug ?? '');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState(2);
-  const [rooms, setRooms] = useState(1);
+  const [guests, setGuests] = useState<number | null>(null);
+  const [rooms, setRooms] = useState<number | null>(null);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
 
@@ -109,7 +116,12 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
         }`
       : 'dates still flexible';
 
-    const party = `${guests} guest${guests === 1 ? '' : 's'}, ${rooms} room${rooms === 1 ? '' : 's'}`;
+    const party = [
+      guests ? `${guests} guest${guests === 1 ? '' : 's'}` : null,
+      rooms ? `${rooms} room${rooms === 1 ? '' : 's'}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
 
     const reach = [
       phone.trim() ? `phone ${phone.trim()}` : null,
@@ -119,7 +131,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
     return [
       `Hello ${SITE.name} — this is ${name.trim() || 'a guest'}.`,
       `I would like to enquire about a stay at ${where}.`,
-      `${when.charAt(0).toUpperCase()}${when.slice(1)}, ${party}.`,
+      `${when.charAt(0).toUpperCase()}${when.slice(1)}${party ? `, ${party}` : ''}.`,
       reach.length ? `You can reach me on ${reach.join(', ')}.` : null,
       'Could you confirm availability and the rate?',
     ]
@@ -264,28 +276,15 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
     else void send();
   };
 
-  const reset = () => {
-    interacted.current = false;
-    setStatus('form');
-    setSentVia(null);
-    setStep(0);
-  };
 
   const field =
     'w-full border-b border-hairline-strong bg-transparent py-2.5 text-lg text-bone transition-colors duration-300 placeholder:text-smoke focus-visible:border-ink [color-scheme:dark]';
-  const small = 'w-full border-b border-hairline-strong bg-transparent py-2 text-bone transition-colors duration-300 focus-visible:border-ink [color-scheme:dark]';
+  const select =
+    'w-full appearance-none border-b border-hairline-strong bg-transparent py-2 text-bone transition-colors duration-300 hover:border-ink focus-visible:border-ink';
 
   // ── The closing screen ──────────────────────────────────────────────────
   if (status === 'done') {
-    const heading =
-      sentVia === 'clipboard' ? 'Copied to your clipboard.' : 'Your enquiry is written.';
-
-    const body =
-      sentVia === 'whatsapp'
-        ? `Thanks, ${name.trim()} — WhatsApp is open with everything filled in. Press send there and someone answers.`
-        : sentVia === 'email'
-          ? `Thanks, ${name.trim()} — your mail app is open with everything filled in. Press send there and someone answers.`
-          : `Thanks, ${name.trim()} — the enquiry is on your clipboard. No enquiry channel is configured on this site yet, so paste it wherever you can reach us.`;
+    const where = location ? location.shortName.toUpperCase() : SITE.name;
 
     return (
       <div ref={stage} className="overflow-hidden">
@@ -297,37 +296,28 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
             <Check size={18} strokeWidth={1.5} className="text-ink" />
           </span>
 
-          <h3 className="type-display mt-6 text-[clamp(1.6rem,3vw,2.25rem)] text-ink">
-            {heading}
-          </h3>
-          <p className="mt-3 max-w-[38ch] text-mist">{body}</p>
-
-          {/* The message stays visible and selectable. If the hand-off was
-              refused — a blocked popup, a machine with no mail client — this
-              is still a working way to get it out. */}
-          <p className="mt-6 max-w-[46ch] rounded-lg border border-hairline bg-glass p-4 text-sm leading-relaxed text-smoke">
-            {message}
+          <p className="type-wide mt-6 max-w-[24ch] text-[clamp(1.15rem,2.2vw,1.6rem)] uppercase leading-[1.25] tracking-[0.02em] text-ink">
+            The VAPR {where} team will contact you within 30 mins regarding your stay
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={reset}
-              className="rounded-full border border-hairline-strong px-6 py-3 text-sm text-mist transition-colors duration-300 hover:border-ink hover:text-ink"
-            >
-              Start another
-            </button>
-            {location ? (
-              <a
-                href={`/${location.slug}`}
-                data-cursor="Open"
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-colors duration-300 hover:bg-bone"
-              >
-                See {location.shortName}
-                <ArrowUpRight size={15} strokeWidth={1.75} aria-hidden />
-              </a>
-            ) : null}
-          </div>
+          {/*
+            One line more, and only when there is nothing behind the promise.
+
+            With WhatsApp or email configured the enquiry has genuinely left
+            for the desk and the sentence above is a service commitment like
+            any other. With neither, the message reached the guest's clipboard
+            and nowhere else — nobody is coming in thirty minutes, because
+            nobody has been told. Saying so is the difference between a
+            promise and a lie, and it disappears the moment
+            NEXT_PUBLIC_VAPR_WHATSAPP or NEXT_PUBLIC_VAPR_EMAIL is set.
+          */}
+          {sentVia === 'clipboard' ? (
+            <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-smoke">
+              This site has no enquiry channel configured yet, so your details are on your
+              clipboard rather than with the desk — send them on and the team will pick it up
+              from there.
+            </p>
+          ) : null}
         </div>
       </div>
     );
@@ -399,93 +389,78 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
                         <span
                           className={cn('mt-0.5 block text-xs', active ? 'text-paper/70' : 'text-smoke')}
                         >
-                          {loc.room.name} · {loc.roomCount} rooms
+                          {loc.room.name}
                         </span>
                       </button>
                     );
                   })}
-                  <button
-                    type="button"
-                    onClick={() => setSlug(UNSURE)}
-                    aria-pressed={slug === UNSURE}
-                    className={cn(
-                      'rounded-lg border px-4 py-3.5 text-left transition-colors duration-300 sm:col-span-2',
-                      slug === UNSURE
-                        ? 'border-ink bg-ink text-paper'
-                        : 'border-hairline-strong text-mist hover:border-ink hover:text-ink'
-                    )}
-                  >
-                    <span className="block text-sm font-medium">Not sure yet</span>
-                    <span
-                      className={cn(
-                        'mt-0.5 block text-xs',
-                        slug === UNSURE ? 'text-paper/70' : 'text-smoke'
-                      )}
-                    >
-                      Tell us what you need and we will suggest one
-                    </span>
-                  </button>
                 </div>
               </fieldset>
             ) : null}
 
             {current.id === 'stay' ? (
               <div className="grid gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="check-in" className="type-label mb-1 block">
-                    Check in
-                  </label>
-                  <input
-                    ref={firstField as React.RefObject<HTMLInputElement>}
-                    id="check-in"
-                    type="date"
-                    min={today()}
-                    value={checkIn}
-                    onChange={(e) => setCheckIn(e.target.value)}
-                    className={small}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="check-out" className="type-label mb-1 block">
-                    Check out
-                  </label>
-                  <input
-                    id="check-out"
-                    type="date"
-                    min={checkIn || today()}
-                    value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
-                    className={small}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="guests" className="type-label mb-1 block">
-                    Guests
-                  </label>
-                  <input
-                    id="guests"
-                    type="number"
-                    min={1}
-                    max={12}
-                    value={guests}
-                    onChange={(e) => setGuests(Math.max(1, Number(e.target.value) || 1))}
-                    className={`${small} tabular`}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="rooms" className="type-label mb-1 block">
-                    Rooms
-                  </label>
-                  <input
-                    id="rooms"
-                    type="number"
-                    min={1}
-                    max={8}
-                    value={rooms}
-                    onChange={(e) => setRooms(Math.max(1, Number(e.target.value) || 1))}
-                    className={`${small} tabular`}
-                  />
-                </div>
+                <DateField
+                  label="Check in"
+                  value={checkIn}
+                  min={today()}
+                  onChange={setCheckIn}
+                  inputRef={firstField as React.RefObject<HTMLButtonElement>}
+                />
+                {/* Never earlier than the arrival, so the pair cannot describe
+                    a stay that ends before it starts. */}
+                <DateField
+                  label="Check out"
+                  value={checkOut}
+                  min={checkIn || today()}
+                  onChange={setCheckOut}
+                />
+
+                {/*
+                  Chosen, not typed, and not pre-filled.
+
+                  These were number inputs sitting at 2 and 1 — figures nobody
+                  had entered, which the enquiry then reported as though they
+                  had. A guest who never touched the step sent "2 guests, 1
+                  room" and the desk had no way to tell that from a couple who
+                  meant it. Empty until chosen, so the message can leave them
+                  out entirely when they were never answered.
+                */}
+                <label className="block">
+                  <span className="type-label mb-1 block">Guests</span>
+                  <select
+                    value={guests ?? ''}
+                    onChange={(e) => setGuests(e.target.value ? Number(e.target.value) : null)}
+                    className={select}
+                  >
+                    <option value="">Select</option>
+                    {GUEST_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="type-label mb-1 block">Rooms</span>
+                  <select
+                    value={rooms ?? ''}
+                    onChange={(e) => setRooms(e.target.value ? Number(e.target.value) : null)}
+                    className={select}
+                  >
+                    <option value="">Select</option>
+                    {ROOM_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="mt-1.5 block text-xs text-smoke">
+                    Maximum 3 guests per room
+                  </span>
+                </label>
+
                 {nights ? (
                   <p className="tabular text-sm text-smoke sm:col-span-2">
                     {nights} night{nights === 1 ? '' : 's'}.
@@ -561,7 +536,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
               ) : (
                 <Copy size={16} strokeWidth={1.75} aria-hidden />
               )}
-              {RESERVE.cta}
+              Submit
             </>
           ) : (
             'Continue'

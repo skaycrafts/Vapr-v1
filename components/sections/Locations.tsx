@@ -95,7 +95,7 @@ export default function Locations() {
                   key={loc.slug}
                   href={`/${loc.slug}`}
                   data-cursor="Explore"
-                  className="group inline-flex items-center gap-2.5 rounded-full border border-hairline-strong px-6 py-3 text-sm text-mist transition-colors duration-500 hover:border-ink hover:bg-ink hover:text-paper"
+                  className="group inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-colors duration-500 hover:bg-bone"
                 >
                   {loc.area}
                   <ArrowUpRight
