@@ -6,10 +6,7 @@ import Emblem from '@/components/brand/Emblem';
 import Magnetic from '@/motion/primitives/Magnetic';
 import { CTA } from '@/lib/content';
 import { cn } from '@/lib/utils';
-import { gsap } from '@/lib/gsap';
-import { useMotionEffect } from '@/motion/useMotionEffect';
 import { useScroll } from '@/motion/ScrollProvider';
-import { EASE } from '@/motion/config';
 
 /**
  * Deliberately not a full-width bar. The seal anchors the top-left corner and
@@ -30,6 +27,7 @@ import { EASE } from '@/motion/config';
 export default function Nav() {
   const root = useRef<HTMLElement>(null);
   const [revealed, setRevealed] = useState(false);
+  const [onInk, setOnInk] = useState(false);
   const { scrollTo } = useScroll();
 
   /**
@@ -65,7 +63,39 @@ export default function Nav() {
         : window.innerHeight * 0.78;
     };
 
-    const onScroll = () => setRevealed(window.scrollY >= revealAt);
+    /**
+     * Which ground is under the bar.
+     *
+     * The page alternates paper and ink section by section and the bar floats
+     * over all of it, so it cannot pick one set of colours and keep it.
+     *
+     * ── Why the last one wins, not any one ──────────────────────────────
+     * The first version asked whether *any* `.on-ink` section crossed the
+     * bar's band, and reported ink everywhere. The hero is `.on-ink` and it is
+     * `sticky top-0`, so it spans that band permanently — it is still there,
+     * underneath, for the whole of `main`.
+     *
+     * So the question is not which sections are at that height but which one
+     * is painted on top of the others. The hero is `z-0` and everything after
+     * it is one `z-10` stack in document order, which makes the last section
+     * in the document that spans the band the visible one. A handful of
+     * `getBoundingClientRect` calls, exact at every scroll position rather
+     * than only at the thresholds an IntersectionObserver would be given.
+     */
+    const probeY = 44;
+    const onScroll = () => {
+      setRevealed(window.scrollY >= revealAt);
+
+      const spanning = Array.from(
+        document.querySelectorAll<HTMLElement>('main section, footer')
+      ).filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.top <= probeY && r.bottom >= probeY;
+      });
+
+      const top = spanning[spanning.length - 1];
+      setOnInk(Boolean(top && (top.classList.contains('on-ink') || top.closest('.on-ink'))));
+    };
 
     measure();
     onScroll();
@@ -81,28 +111,6 @@ export default function Nav() {
       window.removeEventListener('load', measure);
     };
   }, []);
-
-  /**
-   * Morph. A single scrub across the first viewport rather than a class
-   * toggled at a threshold, so the layer arrives with the scroll instead of
-   * snapping on at one pixel.
-   */
-  useMotionEffect(root, () => {
-    gsap.fromTo(
-      '.nav-backdrop',
-      { opacity: 0 },
-      {
-        opacity: 1,
-        ease: EASE.none,
-        scrollTrigger: {
-          trigger: document.documentElement,
-          start: '60vh top',
-          end: '110vh top',
-          scrub: true,
-        },
-      }
-    );
-  });
 
   /**
    * Links are real hrefs, so a route change is Next's job. Only a hash that
@@ -145,6 +153,9 @@ export default function Nav() {
         ref={root}
         className={cn(
           'fixed inset-x-0 top-0 z-[var(--z-nav)] transition-transform duration-700 ease-[var(--ease-out-quart)]',
+          // Flips every colour token beneath it, so `bg-ink text-paper` on the
+          // button lands the right way round on either ground.
+          onInk && 'on-ink',
           /*
            * Slid up out of the frame rather than faded out.
            *
@@ -162,17 +173,17 @@ export default function Nav() {
             'pointer-events-none -translate-y-full focus-within:pointer-events-auto focus-within:translate-y-0'
         )}
       >
-        {/* The contrast layer. A gradient rather than a filled bar: it gives
-            the type something to sit on without drawing an edge across the
-            photography. */}
-        <div
-          aria-hidden
-          className="nav-backdrop pointer-events-none absolute inset-x-0 top-0 h-[130%] opacity-0"
-          style={{
-            background:
-              'linear-gradient(to bottom, color-mix(in oklab, var(--color-paper) 72%, transparent), transparent)',
-          }}
-        />
+        {/*
+          The contrast layer is gone.
+
+          It was a gradient from the page's ground down to transparent, and it
+          worked while there was one ground. After the re-theme the bar sits
+          outside every `.on-ink` section, so that gradient resolved to *white*
+          — and every time a dark section passed under the bar it arrived
+          behind a white-to-black wash across the top of the frame. The bar
+          takes the ground's own colours now instead of laying a scrim over it,
+          which is what the layer was standing in for.
+        */}
 
         <div className="gutter relative flex items-center justify-between py-5 md:py-7">
           <Link href="/" data-cursor="Open" className="group flex items-center gap-3 text-ink">
@@ -200,11 +211,33 @@ export default function Nav() {
               and the ornament collapses into grey. This is the smallest the
               mark can be set and still be read as one.
             */}
+            {/*
+              Grey, and only over the black.
+
+              One cut, not two: the white artwork, held at 62% on a flat
+              near-black ground, which is what makes it read as grey. Doing it
+              with opacity rather than a filter or a third re-inked PNG keeps
+              the hairlines as the resampler drew them — this mark is about 2%
+              ink and anything that reprocesses it at 48px turns the ornament
+              to mush.
+
+              On the paper sections it goes to nothing. That is deliberate, and
+              it is also why `focus-visible` brings it back: an invisible link
+              that is still in the tab order is a trap, and the mark is the
+              only route home from the middle of a page. A keyboard reaching it
+              can see it; a pointer on a paper section simply has nothing
+              there. Kept out of the accessibility tree's way rather than
+              removed, so the tab order does not change under the scroll.
+            */}
             <Emblem
               title="VAPR"
+              tone="paper"
               priority
               sizes="(min-width: 768px) 56px, 48px"
-              className="w-12 md:w-14"
+              className={cn(
+                'w-12 transition-opacity duration-500 group-focus-visible:opacity-100 md:w-14',
+                onInk ? 'opacity-[0.62]' : 'opacity-0'
+              )}
             />
           </Link>
 

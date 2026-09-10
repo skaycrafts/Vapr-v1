@@ -162,12 +162,6 @@ export default function Hero() {
         delay: Math.max(0, ENTRY.headline - ENTRY.lift),
       });
 
-      gsap.to('.hero-mark', {
-        yPercent: 10,
-        ease: EASE.none,
-        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: SCRUB.tight },
-      });
-
       const [clip] = q('.hero-reveal') as HTMLVideoElement[];
       const [emblem] = q('.hero-emblem');
       if (!clip || !emblem) return;
@@ -227,19 +221,21 @@ export default function Hero() {
   );
 
   /**
-   * Depart. The frame dims and the copy drifts up as the next section takes
-   * over, so the two overlap rather than butting against each other (§19).
+   * Depart — except it does not any more. It is covered.
+   *
+   * The hero used to drift its copy up and fade it out as the next section
+   * arrived, and the mark drifted against the scroll on top of that. Both are
+   * gone. The hero is `sticky` now and the page rides up over it, so the
+   * frame holds perfectly still and a hard edge crosses it — which is the
+   * whole of the effect and is spoiled by anything underneath it moving. Two
+   * things leaving at once reads as a glitch rather than as a transition.
+   *
+   * What is left is the cue's rail, which is not a departure: it fills as the
+   * first viewport is consumed and then retires.
    */
   useMotionEffect(root, () => {
     const el = root.current;
     if (!el) return;
-
-    gsap.to('.hero-copy', {
-      yPercent: -32,
-      opacity: 0,
-      ease: EASE.none,
-      scrollTrigger: { trigger: el, start: 'top top', end: '70% top', scrub: SCRUB.tight },
-    });
 
     // The indicator fills as the first viewport is consumed, then retires. It
     // never becomes a permanent progress bar across the page (§23).
@@ -254,7 +250,7 @@ export default function Hero() {
     <section
       ref={root}
       id="top"
-      className="on-ink relative h-[100svh] min-h-[34rem] w-full overflow-hidden bg-paper"
+      className="on-ink sticky top-0 z-0 h-[100svh] min-h-[34rem] w-full overflow-hidden bg-paper"
     >
       {/*
         The mark, where the building used to be.

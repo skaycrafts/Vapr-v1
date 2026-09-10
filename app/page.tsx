@@ -47,6 +47,17 @@ export default function Home() {
     <>
       <Hero />
 
+      {/*
+        Everything after the hero rides over it.
+
+        The hero is `sticky top-0 z-0`; this stack is `relative z-10` with
+        opaque grounds, so as it scrolls up it covers the hero with a hard
+        horizontal edge instead of pushing it off the top. The hero releases
+        on its own when `main` ends, and the footer — which is outside `main`
+        — is unaffected.
+      */}
+      <div className="relative z-10">
+
       {/* Directly under the hero: a two-property group has to answer "which
           one?" before it answers anything else. It answers it and hands over
           — the full-height property stage that used to sit here has gone, now
@@ -72,6 +83,7 @@ export default function Home() {
       <Chapter as="div">
         <Reserve />
       </Chapter>
+      </div>
     </>
   );
 }
