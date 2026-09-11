@@ -4,6 +4,7 @@ import { useRef, type ElementType, type ReactNode } from 'react';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { EASE, SCRUB } from '@/motion/config';
+import { cn } from '@/lib/utils';
 
 /**
  * VAPR SIGNATURE MOTION 3 — the chapter transition.
@@ -46,6 +47,21 @@ export type ChapterProps = {
   /** How far the chapter dims as it goes. 1 keeps it lit. */
   fadeTo?: number;
   /**
+   * The ground the chapter dims *into*.
+   *
+   * The departure is an opacity fade, so whatever is behind the chapter is
+   * what a departing chapter reveals — and behind every chapter is the page,
+   * which is paper. On a paper chapter that is invisible. On an ink one it
+   * was a wash of near-white climbing the frame as the section left: measured
+   * at the top of the viewport, a row averaging 250 while the chapter sat at
+   * 0.3.
+   *
+   * Painting the ground on the wrapper rather than the page gives the fade
+   * its own colour to dim into. The wrapper does not move and does not fade —
+   * only the inner does — so an ink chapter now dims into ink.
+   */
+  ground?: 'paper' | 'ink';
+  /**
    * Skip the departure. For chapters whose own timeline already owns the exit
    * — a pinned scene that fades its contents out on its last beat would fight
    * this, and two systems animating one opacity is how flicker happens.
@@ -59,6 +75,7 @@ export default function Chapter({
   className,
   lift = 5,
   fadeTo = 0.3,
+  ground,
   hold = false,
   ...rest
 }: ChapterProps) {
@@ -103,7 +120,16 @@ export default function Chapter({
   const ref = root as React.RefObject<HTMLElement | null>;
 
   return (
-    <Tag ref={ref as never} className={className} data-chapter {...rest}>
+    <Tag
+      ref={ref as never}
+      className={cn(
+        ground === 'ink' && 'on-ink bg-paper',
+        ground === 'paper' && 'bg-paper',
+        className
+      )}
+      data-chapter
+      {...rest}
+    >
       <div data-chapter-inner>{children}</div>
     </Tag>
   );

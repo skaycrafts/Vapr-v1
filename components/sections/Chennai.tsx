@@ -245,7 +245,7 @@ export default function Chennai() {
       ref={root}
       id="chennai"
       aria-label="Chennai, and what VAPR is for"
-      className="on-ink group relative mt-[6vh] bg-paper md:mt-[10vh]"
+      className="on-ink group relative bg-paper pt-[6vh] md:pt-[10vh]"
     >
       <style>{NOISE_PLACEMENT_CSS}</style>
       <div

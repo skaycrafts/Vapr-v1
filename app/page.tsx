@@ -91,17 +91,17 @@ export default function Home() {
           and sits in the same slot — the hero's scroll cue points here. */}
       <Chennai />
 
-      <Chapter as="div">
+      <Chapter as="div" ground="paper">
         <Reel />
       </Chapter>
-      <Chapter as="div">
+      <Chapter as="div" ground="ink">
         <Detail />
       </Chapter>
 
       {/* The last chapter before the footer. It dims on the way out like the
           rest, but only once its bottom edge is near the top of the frame —
           long after anyone has finished typing into it. */}
-      <Chapter as="div">
+      <Chapter as="div" ground="ink">
         <Reserve />
       </Chapter>
       </div>
