@@ -81,46 +81,74 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
     <section
       ref={root}
       id="reserve"
-      className="relative overflow-hidden bg-paper py-20 md:py-28"
+      className="on-ink relative overflow-hidden bg-paper py-20 md:py-28"
     >
       {/*
-        The scrims here were built to sink a photograph into black, and this
-        section is on paper now. Left alone they did the same job in the same
-        direction and bleached the frame to nearly nothing — a room you could
-        only just make out under a wash of white.
+        The photograph is the ground. No wash over it.
 
-        So they are inverted in intent as well as in colour. The photograph
-        runs at full strength through the middle of the section, which is what
-        the reference does: the picture is the only colour in an otherwise
-        monochrome page, and dimming it throws away the one thing carrying any.
-        The vertical gradient now only lands the top and bottom edges into the
-        page so the section has no seam, and the horizontal one holds paper
-        across the left column — where type sits directly on the frame — and
-        releases it by 66%, which is where the glass panel begins.
+        This carried two paper gradients — one landing the top and bottom
+        edges into the page, one holding paper across the left column so dark
+        type had something to sit on. Together they were a sheet of white over
+        a lit room, and the room was the only colour on the page. Both are
+        gone and the frame runs at full strength, edge to edge.
+
+        What replaces them is a scrim that belongs to the type rather than to
+        the section: a soft dark wash weighted to the left, where the heading
+        and the rates are. It is dark, not white — so the picture keeps its own
+        light and the copy is legible against it — and it stops well before the
+        card, which brings its own ground.
+
+        The section is `.on-ink` for the same reason: the copy is now standing
+        on a photograph rather than on paper, and the whole scale has to flip
+        with it. The card inside is unaffected; it sets its own colours.
       */}
       <Frame
         slug="room-b-light"
         className="reserve-plate absolute inset-0 h-full w-full"
         ratio="fill"
         sizes="100vw"
-        imgClassName="opacity-90"
         position="50% 60%"
       />
+      {/*
+        The scrim follows the copy, and the copy moves.
+
+        Stacked on a phone — heading, rates and the note across the full width
+        with the card beneath — so there the wash has to come down from the
+        top. Side by side from `md`, so there it comes in from the left and
+        clears before the card.
+
+        Written as plain `rgba` rather than `color-mix(… transparent)`: the
+        first version used the latter at 76% black and still measured 2.5:1
+        under the body copy, because mixing a colour with `transparent` in
+        oklab is not the same as that colour at 0.76 alpha. Explicit alpha is
+        the version whose numbers can be reasoned about.
+      */}
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="absolute inset-0 md:hidden"
         style={{
           background:
-            'linear-gradient(to bottom, var(--color-paper) 0%, color-mix(in oklab, var(--color-paper) 30%, transparent) 16%, transparent 46%, color-mix(in oklab, var(--color-paper) 34%, transparent) 84%, var(--color-paper) 100%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.82) 34%, rgba(0,0,0,0.45) 54%, rgba(0,0,0,0.12) 72%, transparent 88%)',
         }}
       />
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="absolute inset-0 hidden md:block"
         style={{
           background:
-            'linear-gradient(to right, color-mix(in oklab, var(--color-paper) 96%, transparent) 0%, color-mix(in oklab, var(--color-paper) 92%, transparent) 30%, color-mix(in oklab, var(--color-paper) 55%, transparent) 48%, transparent 66%)',
+            'linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.84) 26%, rgba(0,0,0,0.5) 44%, rgba(0,0,0,0.14) 58%, transparent 72%)',
         }}
+      />
+      {/* Only the very edges, so the section joins the page without a seam. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-24 md:h-28"
+        style={{ background: 'linear-gradient(to bottom, var(--color-paper), transparent)' }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-24 md:h-28"
+        style={{ background: 'linear-gradient(to top, var(--color-paper), transparent)' }}
       />
 
       <div className="gutter relative grid gap-12 md:grid-cols-12 md:items-center md:gap-10">
@@ -210,7 +238,7 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
             are opaque white with a soft edge, for the same reason: a form is
             the one place on a page where legibility outranks material.
           */}
-          <div className="rounded-2xl bg-paper p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_-12px_rgba(0,0,0,0.18)] ring-1 ring-hairline md:p-9">
+          <div className="on-paper rounded-2xl bg-paper p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_50px_-14px_rgba(0,0,0,0.45)] ring-1 ring-hairline md:p-9">
             <EnquiryFlow defaultSlug={defaultSlug} />
           </div>
         </div>

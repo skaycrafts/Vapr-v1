@@ -59,7 +59,7 @@ export default function Locations() {
       <div className="gutter py-20 md:py-28">
         {/* The 12-column split waits for `lg`, not `md`. At 768 it gave the
               heading a 350px column and the sentence a 270px one — "Ashok
-              Nagar & Ekkatuthangal" broke mid-word and the two buttons stacked
+              Nagar & Guindy" broke mid-word and the two buttons stacked
               on top of each other. A tablet reads this better in one column,
               which is what it now gets up to 1024. */}
           <div className="loc-copy grid gap-10 lg:grid-cols-12 lg:gap-10">
@@ -86,13 +86,12 @@ export default function Locations() {
             </p>
 
             {/*
-              The two ways in, named the way a guest navigating Chennai would
-              name them: by area. The second property is `shortName` "Guindy"
-              everywhere else on the site, but its address is Ekkatuthangal and
-              the sentence directly above says so — a button labelled
-              differently from the line introducing it is a button people
-              hesitate over. `area` is exactly those two words already, so this
-              stays driven by the data rather than by two hard-coded labels.
+              The two ways in, still driven by `area` rather than by two
+              hard-coded labels — though the two fields now agree. `area` was
+              "Ekkatuthangal" and `shortName` "Guindy", and this used `area` so
+              the buttons matched the sentence above them. Both say Guindy now,
+              so the choice no longer matters visually; it is kept because the
+              data should still be what decides.
             */}
             <div data-lede className="flex flex-wrap gap-3">
               {LOCATIONS.map((loc) => (

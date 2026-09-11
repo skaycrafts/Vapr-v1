@@ -115,6 +115,30 @@
    declared, not at the point it is used — so redefining `--color-ink`
    further down the tree does not re-run the mix.
    ════════════════════════════════════════════════════════════════════ */
+/*
+ * The way back. A light surface inside a dark section — a card floating on a
+ * photograph, which is the one place the two grounds meet inside each other.
+ * Restates the root values, for the same reason `.on-ink` restates them: a
+ * custom property is substituted where it is declared, not where it is used.
+ */
+.on-paper {
+  --color-paper: oklch(0.985 0.002 95);
+  --color-pitch: oklch(0.958 0.002 95);
+  --color-carbon: oklch(0.925 0.003 95);
+  --color-graphite: oklch(0.84 0.004 250);
+  --color-ash: oklch(0.70 0.004 250);
+  --color-smoke: oklch(0.545 0.006 250);
+  --color-mist: oklch(0.415 0.006 250);
+  --color-bone: oklch(0.275 0.006 250);
+  --color-ink: oklch(0.17 0.006 250);
+
+  --color-hairline: color-mix(in oklab, var(--color-ink) 14%, transparent);
+  --color-hairline-strong: color-mix(in oklab, var(--color-ink) 26%, transparent);
+  --color-glass: color-mix(in oklab, var(--color-ink) 6%, transparent);
+
+  color-scheme: light;
+}
+
 .on-ink {
   --color-paper: oklch(0.09 0 0);
   --color-pitch: oklch(0.128 0.002 250);

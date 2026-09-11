@@ -16,7 +16,7 @@ export const IMAGES = [
   // elevation is left in place at the client's instruction, against the note
   // at the top of this file.
   { slug: 'ashok-nagar-exterior', src: 'fascade/ashok-nagar-exterior.png', alt: 'The Ashok Nagar building at dusk, lit, seen from above the street corner' },
-  { slug: 'guindy-exterior',      src: 'fascade/guindy-exterior.png',      alt: 'The Ekkatuthangal building at dusk, its rooms lit behind full-height glass' },
+  { slug: 'guindy-exterior',      src: 'fascade/guindy-exterior.png',      alt: 'The Guindy building at dusk, its rooms lit behind full-height glass' },
   { slug: 'sky-cutout',       src: 'june/CAT09525.jpg',          alt: 'Monsoon cloud seen through the roof terrace cutout' },
   { slug: 'parking-bay',      src: 'parking/JWS03714-HDR.jpg',   alt: 'Covered parking bay beneath the building' },
 

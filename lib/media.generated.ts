@@ -327,7 +327,7 @@ export const IMAGES = {
   },
   "guindy-exterior": {
     "slug": "guindy-exterior",
-    "alt": "The Ekkatuthangal building at dusk, its rooms lit behind full-height glass",
+    "alt": "The Guindy building at dusk, its rooms lit behind full-height glass",
     "width": 1620,
     "height": 971,
     "aspect": 1.6684,

@@ -19,7 +19,7 @@ export const SITE = {
   country: 'IN',
   tagline: 'Two small hotels in Chennai.',
   description:
-    'VAPR is two small hotels in Chennai — one in Ashok Nagar, one in Ekkatuthangal, near Guindy. Cold air, a proper desk, breakfast in the morning, and someone at the desk who knows your name.',
+    'VAPR is two small hotels in Chennai — one in Ashok Nagar, one in Guindy. Cold air, a proper desk, breakfast in the morning, and someone at the desk who knows your name.',
   url: 'https://vapr.example',
 } as const;
 
@@ -222,14 +222,24 @@ export const LOCATIONS: readonly Location[] = [
     slug: 'guindy',
     name: 'VAPR Guindy',
     shortName: 'Guindy',
-    area: 'Ekkatuthangal',
+    /**
+     * Guindy, not Ekkatuthangal.
+     *
+     * Ekkatuthangal is the postal locality for 600032 and it is what the
+     * Treebo listing carries. Guindy is the name the hotel goes by and the one
+     * a guest navigating Chennai recognises, so it is the name used
+     * throughout. The street and the postcode are untouched, and between them
+     * they still carry the search — `mapsHref` sends the whole line and 600032
+     * is the precise part of it.
+     */
+    area: 'Guindy',
     street: '4, 4th Cross Street, Kalaimagal Nagar',
     postalCode: '600032',
     rating: { score: 4.0, count: 377 },
     roomCount: 16,
-    blurb: 'Sixteen rooms in Ekkatuthangal, close to the Guindy industrial belt.',
+    blurb: 'Sixteen rooms in Guindy, close to the industrial belt.',
     note: [
-      'Sixteen rooms, which makes it the smaller and the quieter of the two. Ekkatuthangal is working Chennai — offices, workshops, a good many places to eat within a few hundred metres.',
+      'Sixteen rooms, which makes it the smaller and the quieter of the two. Guindy is working Chennai — offices, workshops, a good many places to eat within a few hundred metres.',
       'The rooms here are the larger ones: a fridge, a locker, a sofa chair and a low table, and room for a third person if you need it. Parking is indoors, and there is someone on security through the night.',
     ],
     room: {
@@ -295,7 +305,8 @@ export const LOCATIONS: readonly Location[] = [
 export const locationBySlug = (slug: string) => LOCATIONS.find((l) => l.slug === slug);
 
 /**
- * "Ekkatuthangal, Chennai" for Guindy; plain "Chennai" for Ashok Nagar, whose
+ * Plain "Chennai" for both, now that each property's area and short name are
+ * the same word. The helper appends the area only where it differs, which was
  * neighbourhood and short name are the same word.
  */
 export const placeOf = (l: Location) =>
@@ -356,12 +367,12 @@ export const LOCATIONS_INTRO = {
    * is rendered with `whitespace-pre-line`, the same way the hero sets its
    * statement across two lines.
    */
-  body: 'Ashok Nagar & Ekkatuthangal —\nsame comfort, same people, just closer to wherever you’re headed.',
+  body: 'Ashok Nagar & Guindy —\nsame comfort, same people, just closer to wherever you’re headed.',
 } as const;
 
 export const MANIFESTO = {
   body: 'Chennai arrives all at once. Heat off the tar, three horns at every junction, white glare off the hoardings. Both of our doors do the same job: they shut behind you, and the noise stops. Cold air. A desk you can actually work at. Breakfast downstairs from the morning. Everything you need, and not one thing more.',
-  attribution: 'Ashok Nagar and Ekkatuthangal, Chennai',
+  attribution: 'Ashok Nagar and Guindy, Chennai',
 } as const;
 
 /** Shown on the home page. Photographed at Ashok Nagar. */
@@ -417,7 +428,7 @@ export const RESERVE = {
 } as const;
 
 export const FOOTER = {
-  note: 'VAPR is two small hotels in Chennai — Ashok Nagar and Ekkatuthangal. Same beds, same breakfast, twenty minutes apart.',
+  note: 'VAPR is two small hotels in Chennai — Ashok Nagar and Guindy. Same beds, same breakfast, twenty minutes apart.',
   legal: [
     { label: 'Terms', href: '/terms' },
     { label: 'Privacy', href: '/privacy' },
@@ -454,5 +465,5 @@ export const CHENNAI = {
   resolution: 'And the noise stops.',
   closing:
     'Cold air. A desk you can actually work at. Breakfast downstairs from the morning. Everything you need, and not one thing more.',
-  attribution: 'Ashok Nagar and Ekkatuthangal, Chennai',
+  attribution: 'Ashok Nagar and Guindy, Chennai',
 } as const;

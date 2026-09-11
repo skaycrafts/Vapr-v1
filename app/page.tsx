@@ -50,13 +50,25 @@ export default function Home() {
       {/*
         Everything after the hero rides over it.
 
-        The hero is `sticky top-0 z-0`; this stack is `relative z-10` with
-        opaque grounds, so as it scrolls up it covers the hero with a hard
-        horizontal edge instead of pushing it off the top. The hero releases
-        on its own when `main` ends, and the footer — which is outside `main`
-        — is unaffected.
+        The hero is `sticky top-0 z-0`; this stack is `relative z-10`, so as
+        it scrolls up it covers the hero with a hard horizontal edge instead of
+        pushing it off the top. The hero releases on its own when `main` ends,
+        and the footer — which is outside `main` — is unaffected.
+
+        ── Why the stack carries its own ground ────────────────────────────
+        The sections are opaque. The spaces *between* them were not, and a
+        sticky hero turns every one of those into a hole. Chennai opens with a
+        `mt-[6vh]` margin, and that margin is transparent — so the hero showed
+        through the gap beneath a Locations section that is shorter than the
+        viewport, and the page rendered as a white band with the hero's
+        headline above it and below it at the same time.
+
+        A cover only works if what rides over it is opaque for a full viewport.
+        Painting the ground on the stack rather than on each section makes the
+        gaps opaque too — and it restores exactly what those margins showed
+        before the hero was sticky, which was the page.
       */}
-      <div className="relative z-10">
+      <div className="relative z-10 bg-paper">
 
       {/*
         Directly under the hero: a two-property group has to answer "which
