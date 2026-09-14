@@ -45,11 +45,15 @@ export default function Footer() {
       scrollTrigger: { trigger: '.footer-cols', start: 'top 90%', once: true },
     });
 
+    // Triggered by the row above it, not by the word. The word is the last
+    // thing on the page and ends flush with it, so on a phone its top is
+    // never more than ~65px above the bottom of the screen — past `top 92%`
+    // at no scroll position, and the word stayed hidden below its own crop.
     gsap.from('.footer-wordmark > span', {
       yPercent: 108,
       duration: CINEMA.slow,
       ease: EASE.outLong,
-      scrollTrigger: { trigger: '.footer-wordmark', start: 'top 92%', once: true },
+      scrollTrigger: { trigger: '.footer-base', start: 'top 92%', once: true },
     });
 
     // The seal used to rotate 90° across the footer's scroll. Chennai's whole
@@ -144,22 +148,12 @@ export default function Footer() {
         </div>
 
         {/*
-          The ceiling was 17rem — a fixed 272px whatever the screen is doing —
-          which set the word at barely half the measure it is centred in. This
-          is the one place on the page the wordmark is allowed to be the
-          largest thing; at 53% of the column it was merely a large heading
-          with a lot of air either side. 26vw is the size that actually fills
-          the measure, and it holds the same proportion on a phone as on a
-          desktop rather than collapsing to a cap at one end and a floor at
-          the other.
+          The small print, above the wordmark rather than under it: the word
+          is now the last thing on the page and runs off its bottom edge, so
+          nothing can follow it. Three groups — the copyright, the policies,
+          the credit — in a row on a laptop and stacked below that.
         */}
-        <div className="footer-wordmark mt-16 overflow-hidden pb-[0.06em] md:mt-24" aria-hidden>
-          <span className="type-display block text-center text-[clamp(3.5rem,26vw,24rem)] leading-[1.02] tracking-[0.02em] text-ink">
-            VAPR
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-hairline py-7 text-xs text-smoke sm:flex-row sm:items-center sm:justify-between">
+        <div className="footer-base mt-16 flex flex-col gap-4 border-t border-hairline py-7 text-xs text-smoke md:mt-24 lg:flex-row lg:items-center lg:justify-between">
           <p>
             &copy; {new Date().getFullYear()} {SITE.legalName}
           </p>
@@ -172,6 +166,57 @@ export default function Footer() {
               </li>
             ))}
           </ul>
+          <p>
+            {FOOTER.credit.prefix}{' '}
+            <a
+              href={FOOTER.credit.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block py-1.5 font-medium tracking-[0.08em] text-bone transition-colors hover:text-ink"
+            >
+              {FOOTER.credit.name}
+            </a>
+          </p>
+        </div>
+
+        {/*
+          The wordmark, cropped by the bottom of the page.
+
+          The word is set larger than the footer can hold and the box is cut
+          a little below the bowl of the P — never at it, or the P and R close
+          into D's and the word reads "VADD" — so the letters appear
+          to continue below the screen — the page ends on the name rather than
+          on a rule. Only the top of each letter is needed to read it: the
+          serifs of the V, the apex of the A and the bowls of the P and R are
+          all in the upper part.
+
+          The box height is in `em` of the word's own size, so the crop lands
+          at the same place on the letters at every width. The face runs from
+          full white at the top to a slightly dimmer white at the cut, which
+          is what keeps a flat white block from reading as a sticker.
+        */}
+        <div
+          className="footer-wordmark relative mt-6 overflow-hidden text-[clamp(5.5rem,27vw,26rem)] md:mt-10"
+          style={{ height: '0.6em' }}
+          aria-hidden
+        >
+          <span
+            className="type-display absolute inset-x-0 top-0 block text-center"
+            style={{
+              // Inline rather than utilities: `type-display` sets both, and
+              // which of two utilities wins is stylesheet order, not intent.
+              lineHeight: 1,
+              letterSpacing: '-0.01em',
+              marginTop: '0em',
+              color: 'transparent',
+              backgroundImage:
+                'linear-gradient(to bottom, var(--color-ink) 25%, color-mix(in oklab, var(--color-ink) 86%, var(--color-paper)) 75%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+            }}
+          >
+            VAPR
+          </span>
         </div>
       </div>
     </footer>

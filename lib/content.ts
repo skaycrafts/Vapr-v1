@@ -436,6 +436,7 @@ export const FOOTER = {
     { label: 'Privacy', href: '/privacy' },
     { label: 'Cancellation', href: '/cancellation' },
   ],
+  credit: { prefix: 'Designed and developed by', name: 'SKAY CRAFTS', href: 'https://skaycrafts.com/' },
 } as const;
 
 /** Google Maps deep link from the postal address — no invented coordinates. */
