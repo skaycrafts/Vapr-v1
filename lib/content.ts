@@ -425,6 +425,8 @@ export const RESERVE = {
   title: 'Stay',
   body: 'Tell us which one and when. Someone answers.',
   cta: 'Send the enquiry',
+  /** Under the enquiry card, above a button to each property's page. */
+  explore: 'Before choosing the location, have a look at them and their nearby places',
 } as const;
 
 export const FOOTER = {

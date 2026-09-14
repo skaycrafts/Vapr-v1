@@ -110,8 +110,11 @@ export default async function LocationPage({ params }: { params: Promise<Params>
         leave a guest who is choosing between the two unable to see what they
         would be choosing against, which is the question this page exists to
         settle. The title says "either way" and means it.
+
+        Ink, like the homepage's copy of it, so the rooms, this sheet and the
+        way there read as one dark run between the building and the enquiry.
       */}
-      <Detail tone="paper" />
+      <Detail tone="ink" />
       <GettingThere location={location} />
       <Reserve defaultSlug={location.slug} />
     </>

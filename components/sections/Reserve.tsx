@@ -1,11 +1,12 @@
 'use client';
 
 import { useRef } from 'react';
+import Link from 'next/link';
 import { ArrowUpRight, Phone } from 'lucide-react';
 import Frame from '@/components/media/Frame';
 import EnquiryFlow from '@/components/sections/EnquiryFlow';
 import RevealText from '@/motion/primitives/RevealText';
-import { CONTACT, RESERVE, STAY } from '@/lib/content';
+import { CONTACT, LOCATIONS, RESERVE, STAY } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { CINEMA, CONTENT, EASE, SCRUB, STAGGER } from '@/motion/config';
@@ -240,6 +241,41 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
           */}
           <div className="on-paper rounded-2xl bg-paper p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_50px_-14px_rgba(0,0,0,0.45)] ring-1 ring-hairline md:p-9">
             <EnquiryFlow defaultSlug={defaultSlug} />
+          </div>
+
+          {/*
+            A way to look before choosing. The card asks which hotel; this
+            points at the two pages that answer "which one suits me" — rooms,
+            shared spaces and what is nearby — for a guest not ready to say.
+
+            On its own dark backing: below the card the photograph is at full
+            strength with no scrim, and white type straight on a lit room is
+            unreadable. The buttons are black with white text, as they are
+            under the hero, and the page being viewed is marked current.
+          */}
+          <div className="reserve-explore mt-5 rounded-2xl bg-black/70 p-5 ring-1 ring-hairline backdrop-blur-md md:mt-6 md:p-6">
+            <p className="max-w-[44ch] text-sm leading-relaxed text-bone md:text-base">
+              {RESERVE.explore}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {LOCATIONS.map((loc) => (
+                <Link
+                  key={loc.slug}
+                  href={`/${loc.slug}`}
+                  aria-current={loc.slug === defaultSlug ? 'page' : undefined}
+                  data-cursor="Explore"
+                  className="group on-paper inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper ring-1 ring-white/25 transition-colors duration-500 hover:bg-bone"
+                >
+                  {loc.area}
+                  <ArrowUpRight
+                    size={15}
+                    strokeWidth={1.5}
+                    aria-hidden
+                    className="transition-transform duration-500 ease-[var(--ease-out-quart)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  />
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>

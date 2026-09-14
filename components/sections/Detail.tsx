@@ -57,11 +57,9 @@ const WALL: DriftItem[] = [
  * letting someone discover it at check-in.
  */
 /**
- * The one section that appears on three pages, so it is the one that has to
- * be told which ground it is on: the homepage runs Reel (paper) → Detail →
- * Reserve (paper), and a property page runs Spaces (ink) → Detail →
- * GettingThere (ink). The same constant in both places would double a black
- * on one and a white on the other.
+ * The one section that appears on three pages, so it can be told which ground
+ * it is on. Every page currently asks for ink — white type on black — and the
+ * prop stays so a future page with different neighbours need not fork it.
  */
 export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
   const root = useRef<HTMLElement>(null);
