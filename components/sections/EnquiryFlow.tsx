@@ -11,7 +11,26 @@ import { CONTENT, EASE } from '@/motion/config';
 
 const { whatsapp, email: deskEmail } = CONTACT;
 
-const today = () => new Date().toISOString().slice(0, 10);
+/**
+ * Today, and the day after a given date, as local YYYY-MM-DD.
+ *
+ * `toISOString` was here, and it is UTC: in India — five and a half hours
+ * ahead — every local time before 5.30am belongs to the previous UTC day, so
+ * between midnight and dawn the calendar offered yesterday as a valid
+ * arrival. `DateField` already builds its dates locally for this reason; this
+ * is the same rule on the other side of the same control.
+ */
+const localISO = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const today = () => localISO(new Date());
+
+/** The day after `iso`, so a stay cannot check out on the day it checks in. */
+const dayAfter = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  return localISO(new Date(y, m - 1, d + 1));
+};
 
 /**
  * The enquiry, asked one question at a time.
@@ -263,6 +282,19 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
     firstField.current?.focus({ preventScroll: true });
   }, [step, status]);
 
+  /**
+   * Choosing an arrival clears a departure that is no longer possible.
+   *
+   * The floor on the check-out calendar stops a bad pair being *picked*, but
+   * it cannot undo one already chosen: pick the 10th and the 12th, then move
+   * the arrival to the 15th, and the enquiry read "arriving 15th, leaving
+   * 12th". The departure is dropped instead, and the guest picks it again.
+   */
+  const onCheckIn = (value: string) => {
+    setCheckIn(value);
+    if (checkOut && value && checkOut <= value) setCheckOut('');
+  };
+
   const go = (to: number) => {
     interacted.current = true;
     setStep(to);
@@ -404,7 +436,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
                   label="Check in"
                   value={checkIn}
                   min={today()}
-                  onChange={setCheckIn}
+                  onChange={onCheckIn}
                   inputRef={firstField as React.RefObject<HTMLButtonElement>}
                 />
                 {/* Never earlier than the arrival, so the pair cannot describe
@@ -412,7 +444,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
                 <DateField
                   label="Check out"
                   value={checkOut}
-                  min={checkIn || today()}
+                  min={checkIn ? dayAfter(checkIn) : dayAfter(today())}
                   onChange={setCheckOut}
                 />
 

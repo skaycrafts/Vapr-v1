@@ -303,7 +303,7 @@ export default function DriftWall({
     [tileWidth, tileHeight, gap, radius, perspective, lift, dim, grayscale, overlayColor, fade]
   );
 
-  const renderTile = (item: DriftItem, id: string, col: number) => {
+  const renderTile = (item: DriftItem, id: string, col: number, copy: number) => {
     const meta = IMAGES[item.slug];
     const inner = (
       <span className="drift-wall__inner">
@@ -325,25 +325,44 @@ export default function DriftWall({
       </span>
     );
 
+    /**
+     * Every photograph is in the DOM at least twice — the loop needs a second
+     * copy of each column to run without a seam — so only the first copy is
+     * exposed. Without this a screen reader read the same twenty alt texts
+     * two and three times over, as though the hotel had sixty rooms.
+     */
     const common = {
       className: cn('drift-wall__tile', activeId === id && 'is-active'),
       'data-tile-id': id,
       'data-col': col,
+      ...(copy > 0 ? { 'aria-hidden': true } : {}),
       onFocus: () => activate(id, col),
       onBlur: release,
     };
 
-    if (item.href) {
+    // A linked tile, but only the copy that is actually exposed. A hidden
+    // copy rendered as a link would be focusable and `aria-hidden` at once,
+    // which is the one combination that is worse than either.
+    if (item.href && copy === 0) {
       return (
         <a key={id} href={item.href} target="_blank" rel="noreferrer noopener" {...common}>
           {inner}
         </a>
       );
     }
-    // Not a button: it does nothing when pressed. It is focusable only so a
-    // keyboard can bring a frame forward and read its alt text.
+    /**
+     * Not focusable.
+     *
+     * It carried `tabIndex={0}` so a keyboard could bring a frame forward and
+     * hear its alt text. The wall holds twenty photographs across five
+     * columns, each column doubled for the loop — so that was forty tab stops
+     * between the specification sheet and the enquiry, on a decoration that
+     * does nothing when pressed. The photographs and their descriptions are
+     * still in the accessibility tree, where a screen reader reads them
+     * without anyone having to step through them one at a time.
+     */
     return (
-      <div key={id} tabIndex={0} aria-label={item.title ?? meta.alt} {...common}>
+      <div key={id} {...common}>
         {inner}
       </div>
     );
@@ -372,7 +391,7 @@ export default function DriftWall({
               }}
             >
               {Array.from({ length: columnMeta[c].copies }).map((_, copy) =>
-                col.map((item, i) => renderTile(item, `${c}-${copy}-${i}`, c))
+                col.map((item, i) => renderTile(item, `${c}-${copy}-${i}`, c, copy))
               )}
             </div>
           </div>

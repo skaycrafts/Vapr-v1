@@ -160,7 +160,19 @@ export default function Footer() {
           <ul className="flex flex-wrap gap-x-6">
             {FOOTER.legal.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="inline-block py-1.5 transition-colors hover:text-mist">
+                {/*
+                  Not prefetched. These three pages do not exist yet, and in
+                  production Next fetches every link in view — so each of them
+                  fired a 404 in the console on every single page load, on
+                  every page of the site. The links stay, because they are
+                  where the policies will be; the speculative fetch for
+                  something that is not there does not.
+                */}
+                <Link
+                  href={item.href}
+                  prefetch={false}
+                  className="inline-block py-1.5 transition-colors hover:text-mist"
+                >
                   {item.label}
                 </Link>
               </li>

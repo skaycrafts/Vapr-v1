@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Inter_Tight, Pinyon_Script } from 'next/font/google';
 import { CONTACT, LOCATIONS, SITE } from '@/lib/content';
+import { renditionOf } from '@/lib/media';
 import SiteShell from '@/components/chrome/SiteShell';
 import Footer from '@/components/sections/Footer';
 import './globals.css';
@@ -73,13 +74,16 @@ export const metadata: Metadata = {
     title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
     locale: 'en_IN',
-    images: [{ url: '/media/img/facade-dusk-1600.webp', width: 1600, height: 1067, alt: SITE.tagline }],
+    // Dimensions from the manifest rather than typed in: this said 1067 tall
+    // for a frame that is 704, and platforms that trust the declared size
+    // crop to it.
+    images: [{ ...renditionOf('facade-dusk'), alt: SITE.tagline }],
   },
   twitter: {
     card: 'summary_large_image',
     title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
-    images: ['/media/img/facade-dusk-1600.webp'],
+    images: [renditionOf('facade-dusk').url],
   },
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },

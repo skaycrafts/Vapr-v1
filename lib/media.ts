@@ -29,6 +29,26 @@ export function fallbackSrc(slug: ImageSlug) {
   return `${BASE}/${slug}-${widths[widths.length - 1]}.webp`;
 }
 
+/**
+ * A rendition that exists, with its real dimensions — for share cards and the
+ * image sitemap, which name one file rather than a srcset.
+ *
+ * Capped at 1600 by default: large enough for every share card, small enough
+ * to be fetched quickly by the crawlers that render them. Below the cap it is
+ * the largest width the pipeline produced, so an image whose source is
+ * narrower than 1600 is never pointed at a file that was never written.
+ */
+export function renditionOf(slug: ImageSlug, max = 1600) {
+  const { width, height } = IMAGES[slug];
+  const widths = widthsFor(slug).filter((w) => w <= max);
+  const w = widths.length ? widths[widths.length - 1] : widthsFor(slug)[0];
+  return {
+    url: `${BASE}/${slug}-${w}.webp`,
+    width: w,
+    height: Math.round((w * height) / width),
+  };
+}
+
 export function image(slug: ImageSlug) {
   return IMAGES[slug];
 }

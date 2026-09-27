@@ -7,6 +7,7 @@ import Spaces from '@/components/sections/Spaces';
 import Reserve from '@/components/sections/Reserve';
 import Detail from '@/components/sections/Detail';
 import { LOCATIONS, SITE, STAY, locationBySlug, placeOf } from '@/lib/content';
+import { renditionOf, type ImageSlug } from '@/lib/media';
 
 type Params = { location: string };
 
@@ -37,8 +38,11 @@ export async function generateMetadata({
       title,
       description,
       url: `/${location.slug}`,
+      // Was a hard-coded `-1600.webp` at 1600×704 for both. Ashok Nagar's
+      // exterior is 1278px wide at source, so no 1600 file was ever made and
+      // its share card pointed at nothing.
       images: location.heroImage
-        ? [{ url: `/media/img/${location.heroImage}-1600.webp`, width: 1600, height: 704 }]
+        ? [{ ...renditionOf(location.heroImage as ImageSlug), alt: location.name }]
         : undefined,
     },
   };

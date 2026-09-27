@@ -20,7 +20,19 @@ export const SITE = {
   tagline: 'Two small hotels in Chennai.',
   description:
     'VAPR is two small hotels in Chennai — one in Ashok Nagar, one in Guindy. Cold air, a proper desk, breakfast in the morning, and someone at the desk who knows your name.',
-  url: 'https://vapr.example',
+  /**
+   * The origin every absolute URL is built from — canonical links, share
+   * images, structured data, the sitemap and robots.txt.
+   *
+   * This was `https://vapr.example`, a placeholder that went live: every
+   * canonical and every share card pointed at a domain that does not exist.
+   * It falls back to the Railway address the site is actually served from,
+   * and `NEXT_PUBLIC_SITE_URL` overrides it the day a real domain is pointed
+   * at the site — set it there and rebuild, nothing else changes. Read with
+   * the literal `process.env.NEXT_PUBLIC_…` spelling for the reason given
+   * above `CONTACT`.
+   */
+  url: (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://vapr-v1-production.up.railway.app').replace(/\/+$/, ''),
 } as const;
 
 /**

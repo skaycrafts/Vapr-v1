@@ -61,6 +61,16 @@ export default function Spaces({ note }: { note?: string } = {}) {
         // not. Read at refresh, so rotating the device recomputes it.
         end: () => `+=${plates.length * (window.innerWidth < 768 ? 38 : 55)}%`,
         pin: scene,
+        // Pinned by transform, not by `position: fixed`.
+        //
+        // ScrollTrigger's default pin takes the stage out of flow and puts it
+        // back again, and the browser scores each of those as a layout shift:
+        // measured on the production build, the two transitions were worth
+        // about 1.4 of cumulative shift on their own — fourteen times the
+        // threshold where a page is called unstable, from one section. A
+        // transform moves the same pixels without touching layout, so the
+        // scene behaves identically and nothing below it is ever re-laid out.
+        pinType: 'transform',
         anticipatePin: 1,
         scrub: SCRUB.weighted,
         invalidateOnRefresh: true,
