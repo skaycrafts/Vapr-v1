@@ -76,10 +76,27 @@ export default function DateField({
     startOfDay(selected ?? minDate ?? new Date())
   );
 
-  useEffect(() => {
-    if (selected) setCursor(new Date(selected.getFullYear(), selected.getMonth(), 1));
-    else if (minDate) setCursor(new Date(minDate.getFullYear(), minDate.getMonth(), 1));
-  }, [selected, minDate]);
+  /**
+   * Re-aimed during render rather than in an effect.
+   *
+   * This was a `useEffect` that called `setCursor` whenever the selection or
+   * the floor changed — which renders the old month first, then immediately
+   * renders again with the new one, and is what React's cascading-render rule
+   * is pointing at. Comparing against the last value seen and correcting in
+   * the same pass is the documented way to adjust state when props change:
+   * React re-runs this component before touching the DOM, so the wrong month
+   * is never on screen.
+   *
+   * The key is the two inputs as strings. `selected` and `minDate` are new
+   * `Date` objects on every render and would never compare equal.
+   */
+  const aim = `${value}|${min ?? ''}`;
+  const [lastAim, setLastAim] = useState(aim);
+  if (aim !== lastAim) {
+    setLastAim(aim);
+    const at = selected ?? minDate;
+    if (at) setCursor(new Date(at.getFullYear(), at.getMonth(), 1));
+  }
 
   /** Escape closes; so does a click that lands outside. */
   useEffect(() => {

@@ -63,7 +63,11 @@ export default function Locations() {
               on top of each other. A tablet reads this better in one column,
               which is what it now gets up to 1024. */}
           <div className="loc-copy grid gap-10 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-6">
+          {/* Full width, on its own row. The title held six of twelve columns
+              while it was "Two hotels. One VAPR."; the sentence that replaced
+              it is four times as long and has to hold one line, so it takes
+              the whole measure and the paragraph moves underneath. */}
+          <div className="lg:col-span-12">
             <p data-lede className="type-label">
               {LOCATIONS_INTRO.eyebrow}
             </p>
@@ -71,13 +75,14 @@ export default function Locations() {
               as="h2"
               id="locations-title"
               mode="lines"
-              className="type-display mt-4 text-[clamp(2.25rem,5vw,4rem)] text-ink"
+              className="type-display fit-line mt-4 text-ink"
+              style={{ '--fit-ratio': 19.61, '--fit-max': '4rem' } as React.CSSProperties}
             >
               {LOCATIONS_INTRO.title}
             </RevealText>
           </div>
 
-          <div className="space-y-6 lg:col-span-5 lg:col-start-8 lg:pt-3">
+          <div className="space-y-6 lg:col-span-5 lg:col-start-8">
             <p
               data-lede
               className="max-w-[46ch] whitespace-pre-line text-lg leading-relaxed text-mist"

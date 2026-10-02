@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowUpRight, Check, Copy, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { CONTACT, LOCATIONS, SITE } from '@/lib/content';
 import DateField from '@/components/ui/DateField';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,20 @@ const localISO = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 const today = () => localISO(new Date());
+
+/**
+ * `2026-12-01` → `1 Dec 2026`, for the message itself.
+ *
+ * The dates went into the enquiry in the form the inputs hold them in. That
+ * was tolerable while they were optional and often absent; they are required
+ * now, so every message the desk reads carries two of them, and nobody reads
+ * a stay as ISO-8601.
+ */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const spoken = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return y && m && d ? `${d} ${MONTHS[m - 1]} ${y}` : iso;
+};
 
 /** The day after `iso`, so a stay cannot check out on the day it checks in. */
 const dayAfter = (iso: string) => {
@@ -73,9 +87,9 @@ const STEPS: readonly Step[] = [
     question: 'Which one?',
     hint: 'Twenty minutes apart. You can change your mind later.',
   },
-  { id: 'stay', question: 'When, and how many?', hint: 'Leave the dates empty if they are still moving.' },
-  { id: 'phone', question: 'A number we can reach you on?', hint: 'Optional — the desk calls before it emails.' },
-  { id: 'email', question: 'And an email?', hint: 'Optional. Rooms, rates and a reply go here.' },
+  { id: 'stay', question: 'When, and how many?', hint: 'Dates, guests and rooms — all four.' },
+  { id: 'phone', question: 'A number we can reach you on?', hint: 'The desk calls before it emails.' },
+  { id: 'email', question: 'And an email?', hint: 'Rooms, rates and a reply go here.' },
 ] as const;
 
 /**
@@ -95,6 +109,8 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
 
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<'form' | 'sending' | 'done'>('form');
+  /** Set by a press on an unfinished step, so nothing is said before then. */
+  const [attempted, setAttempted] = useState(false);
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState<string>(defaultSlug ?? '');
@@ -130,7 +146,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
       : 'either of your two hotels — I am not sure which yet';
 
     const when = checkIn
-      ? `arriving ${checkIn}${checkOut ? `, leaving ${checkOut}` : ''}${
+      ? `arriving ${spoken(checkIn)}${checkOut ? `, leaving ${spoken(checkOut)}` : ''}${
           nights ? ` (${nights} night${nights === 1 ? '' : 's'})` : ''
         }`
       : 'dates still flexible';
@@ -165,21 +181,69 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
       )}&body=${encodeURIComponent(message)}`
     : null;
 
-  /** Can the current step be left? Only the name and the choice are required. */
+  /**
+   * Can the current step be left? Every field on it has to be answered.
+   *
+   * The dates, the party size, the phone and the email used to be optional —
+   * the enquiry simply left out whatever was missing. It no longer does:
+   * a desk that has the dates and the headcount can answer with a room and a
+   * price in one reply instead of three, and an enquiry with neither a phone
+   * nor an email cannot be answered at all.
+   */
   const canAdvance = useMemo(() => {
     switch (STEPS[step].id) {
       case 'name':
         return name.trim().length > 1;
       case 'where':
         return slug !== '';
+      case 'stay':
+        return Boolean(checkIn && checkOut && guests && rooms);
       case 'phone':
-        return phone.trim() === '' || looksLikePhone(phone);
+        return looksLikePhone(phone);
       case 'email':
-        return email.trim() === '' || looksLikeEmail(email);
+        return looksLikeEmail(email);
       default:
         return true;
     }
-  }, [step, name, slug, phone, email]);
+  }, [step, name, slug, checkIn, checkOut, guests, rooms, phone, email]);
+
+  /**
+   * What is still missing on this step, said plainly.
+   *
+   * A disabled button with no explanation is the worst of both worlds: the
+   * guest can see they cannot continue and not why. This is shown beside it
+   * only once they have tried, so it reads as an answer rather than as the
+   * form complaining before they have begun.
+   */
+  const missing = useMemo(() => {
+    switch (STEPS[step].id) {
+      case 'name':
+        return 'Your name, so the reply has someone to go to.';
+      case 'where':
+        return 'Choose one of the two.';
+      case 'stay': {
+        const gaps = [
+          !checkIn && 'a check-in date',
+          !checkOut && 'a check-out date',
+          !guests && 'how many guests',
+          !rooms && 'how many rooms',
+        ].filter(Boolean) as string[];
+        if (!gaps.length) return null;
+        const last = gaps.pop();
+        return `Still needed: ${gaps.length ? `${gaps.join(', ')} and ${last}` : last}.`;
+      }
+      case 'phone':
+        return phone.trim() === ''
+          ? 'A phone number, so the desk can call.'
+          : 'That does not look like a phone number.';
+      case 'email':
+        return email.trim() === ''
+          ? 'An email address, for rooms, rates and the reply.'
+          : 'That does not look like an email address.';
+      default:
+        return null;
+    }
+  }, [step, checkIn, checkOut, guests, rooms, phone, email]);
 
   const send = useCallback(async () => {
     setStatus('sending');
@@ -297,13 +361,24 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
 
   const go = (to: number) => {
     interacted.current = true;
+    setAttempted(false);
     setStep(to);
   };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canAdvance) return;
+
+    // The button stays pressable while the step is unfinished. A disabled
+    // control cannot be clicked, hovered or focused, so it can never say why
+    // it is disabled — the guest is left guessing which field it wants.
+    if (!canAdvance) {
+      setAttempted(true);
+      firstField.current?.focus({ preventScroll: true });
+      return;
+    }
+
     interacted.current = true;
+    setAttempted(false);
     if (step < STEPS.length - 1) setStep(step + 1);
     else void send();
   };
@@ -417,12 +492,12 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
                             : 'border-hairline-strong text-mist hover:border-ink hover:text-ink'
                         )}
                       >
+                        {/* The hotel, and nothing else. The room category —
+                            Maple, Deluxe — was under each name: a word from
+                            the booking platform's vocabulary, asked of
+                            someone who has not been shown a room yet and is
+                            only being asked which part of the city. */}
                         <span className="block text-sm font-medium">{loc.shortName}</span>
-                        <span
-                          className={cn('mt-0.5 block text-xs', active ? 'text-paper/70' : 'text-smoke')}
-                        >
-                          {loc.room.name}
-                        </span>
                       </button>
                     );
                   })}
@@ -549,32 +624,37 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
 
         <button
           type="submit"
-          disabled={!canAdvance || status === 'sending'}
+          disabled={status === 'sending'}
           data-cursor={last ? 'Send' : undefined}
           className={cn(
             'flex flex-1 items-center justify-center gap-2 rounded-full py-3.5 font-medium transition-[background-color,opacity,transform] duration-300',
             'bg-ink text-paper hover:bg-bone active:scale-[0.99]',
-            'disabled:cursor-not-allowed disabled:opacity-35 disabled:active:scale-100'
+            'disabled:cursor-not-allowed disabled:opacity-35 disabled:active:scale-100',
+            // Dimmed, but neither `disabled` nor `aria-disabled`. Both tell a
+            // screen reader the control is unavailable, and it is not: it is
+            // the thing that says which field is still empty. A control that
+            // cannot be pressed can never explain why.
+            !canAdvance && 'opacity-45'
           )}
         >
-          {status === 'sending' ? (
-            'Composing…'
-          ) : last ? (
-            <>
-              {whatsappHref ? (
-                <MessageCircle size={16} strokeWidth={1.75} aria-hidden />
-              ) : mailHref ? (
-                <ArrowUpRight size={16} strokeWidth={1.75} aria-hidden />
-              ) : (
-                <Copy size={16} strokeWidth={1.75} aria-hidden />
-              )}
-              Submit
-            </>
-          ) : (
-            'Continue'
-          )}
+          {/*
+            The word alone. The button carried the channel's own icon — a
+            speech bubble for WhatsApp, an arrow for mail, a copy glyph with
+            neither configured — which put a clipboard symbol on the one
+            control the guest is being asked to press, and a clipboard is not
+            what they think they are doing. The line underneath already says
+            where the enquiry is going, in words.
+          */}
+          {status === 'sending' ? 'Composing…' : last ? 'Submit' : 'Continue'}
         </button>
       </div>
+
+      {/* Only after a press, and read out when it appears. */}
+      {attempted && !canAdvance && missing ? (
+        <p role="alert" className="mt-4 text-center text-sm text-bone">
+          {missing}
+        </p>
+      ) : null}
 
       {/*
         What the last button will actually do, said before it is pressed. The

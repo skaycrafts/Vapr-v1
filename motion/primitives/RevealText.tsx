@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type ElementType, type ReactNode } from 'react';
+import { useRef, useState, type CSSProperties, type ElementType, type ReactNode } from 'react';
 import SplitType from 'split-type';
 import { gsap } from '@/lib/gsap';
 import { useCapability } from '@/motion/capability';
@@ -20,6 +20,12 @@ export type RevealTextProps = {
   mode?: Mode;
   as?: ElementType;
   className?: string;
+  /**
+   * Inline style, for the custom properties a heading needs to size itself —
+   * `fit-line` reads `--fit-ratio` and `--fit-max` off the element it is set
+   * on, and those are per-title values rather than classes.
+   */
+  style?: CSSProperties;
   /** Needed where a landmark points at this title with `aria-labelledby`. */
   id?: string;
   /** Start when the element reaches this point in the viewport. */
@@ -52,6 +58,7 @@ export default function RevealText({
   mode = 'lines',
   as = 'div',
   className,
+  style,
   id,
   start = 'top 82%',
   delay = 0,
@@ -148,7 +155,7 @@ export default function RevealText({
   // `data-motion` is the hook the global reduced-motion rule uses to force
   // everything back to its resting state (see globals.css).
   return (
-    <Tag ref={ref} id={id} className={className} data-motion={animate ? 'text' : undefined}>
+    <Tag ref={ref} id={id} className={className} style={style} data-motion={animate ? 'text' : undefined}>
       {children}
     </Tag>
   );

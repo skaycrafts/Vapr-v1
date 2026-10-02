@@ -86,17 +86,28 @@ export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
       className={cn('relative overflow-hidden bg-paper py-20 md:py-28', tone === 'ink' && 'on-ink')}
     >
       <div className="gutter">
-        <header className="flex flex-col gap-6 border-b border-hairline pb-9 md:flex-row md:items-end md:justify-between">
+        {/*
+          Stacked, where this was a two-column row.
+
+          The title and the paragraph sat side by side, which gave the title
+          roughly half the page and a `max-w-[16ch]` on top of that — fine for
+          "What you get, either way", impossible for a sentence twice that
+          long that now has to hold one line. The title takes the full measure
+          and the paragraph sits under it, pushed right from `md` so the
+          header still reads as two things rather than as a stack.
+        */}
+        <header className="flex flex-col gap-6 border-b border-hairline pb-9">
           {/* A major section title, so it gets the line reveal rather than a
               fade — the type is uncovered by its own mask (§06). */}
           <RevealText
             as="h2"
             mode="lines"
-            className="type-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
+            className="type-display fit-line text-ink"
+            style={{ '--fit-ratio': 17.409, '--fit-max': '3.5rem' } as React.CSSProperties}
           >
             {DETAIL.title}
           </RevealText>
-          <p className="max-w-[40ch] text-mist">{DETAIL.intro}</p>
+          <p className="max-w-[40ch] text-mist md:ml-auto md:text-right">{DETAIL.intro}</p>
         </header>
 
         {/*
@@ -141,6 +152,13 @@ export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
                 </li>
               ))}
             </ul>
+            {/*
+              Under the list, not in it. Everything above is complimentary and
+              already there; this is a kitchen that will cook if it is asked
+              in time, which is a different kind of promise and would be a
+              small lie with a tick beside it.
+            */}
+            <p className="mt-4 border-t border-hairline pt-4 text-sm text-mist">{STAY.meals}</p>
           </Glass>
 
           {LOCATIONS.map((loc) => (

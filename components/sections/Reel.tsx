@@ -90,11 +90,11 @@ export default function Reel() {
           as="h2"
           id="reel-title"
           mode="lines"
-          className="type-display text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
+          className="type-display fit-line text-ink"
+          style={{ '--fit-ratio': 6.971, '--fit-max': '3.5rem' } as React.CSSProperties}
         >
           The hotel in use
         </RevealText>
-        <p className="type-label">Shot on a phone, on ordinary days</p>
       </header>
 
       {/*

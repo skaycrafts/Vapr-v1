@@ -27,7 +27,23 @@ export async function generateMetadata({
   if (!location) return {};
 
   const title = `${location.shortName} — ${placeOf(location)}`;
-  const description = `${location.blurb} ${location.room.name} rooms with ${location.room.bed.toLowerCase()}. Breakfast and Wi-Fi included.`;
+  /**
+   * Built from whichever the property has: three occupancies, or one named
+   * category and its bed. It read "Maple rooms with queen, or twin beds that
+   * join" — a sentence that is wrong the moment a property stops having a
+   * single room category, which Ashok Nagar now has.
+   */
+  const occupancies = location.roomTypes?.map((t) =>
+    t.name.toLowerCase().replace(/\s*occupancy$/, '')
+  );
+  const rooms = occupancies?.length
+    ? `Rooms for ${
+        occupancies.length > 1
+          ? `${occupancies.slice(0, -1).join(', ')} and ${occupancies[occupancies.length - 1]}`
+          : occupancies[0]
+      } occupancy.`
+    : `${location.room.name} rooms with ${location.room.bed?.toLowerCase() ?? 'a double bed'}.`;
+  const description = `${location.blurb} ${rooms} Breakfast and Wi-Fi included.`;
 
   return {
     title,

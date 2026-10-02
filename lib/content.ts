@@ -122,12 +122,33 @@ export type Location = {
   readonly blurb: string;
   /** One paragraph of voice, written for this property. */
   readonly note: readonly string[];
+  /**
+   * What is in every room here, whatever its occupancy — and, where the
+   * property has only one category, that category's own name and bed.
+   *
+   * `name`, `bed` and `sleeps` are optional because a property with several
+   * room types has no single answer to any of the three; it has `roomTypes`
+   * instead. `inclusions` is always true of all of them.
+   */
   readonly room: {
-    readonly name: string;
-    readonly bed: string;
-    readonly sleeps: string;
+    readonly name?: string;
+    readonly bed?: string;
+    readonly sleeps?: string;
     readonly inclusions: readonly string[];
   };
+  /**
+   * The ways a room here can be taken, where there is more than one. Each is
+   * an occupancy rather than a brand name: what a guest is choosing is how
+   * many people are staying, which is the question they can actually answer.
+   */
+  readonly roomTypes?: readonly {
+    readonly name: string;
+    readonly sleeps: string;
+    /** Only where the arrangement is worth stating. Never invented. */
+    readonly note?: string;
+  }[];
+  /** True of every room type here. Shown once, under the list. */
+  readonly roomNote?: string;
   readonly facilities: readonly string[];
   readonly landmarks: readonly Landmark[];
   /** Slugs from the media manifest. Empty where the shoot has not happened. */
@@ -167,6 +188,12 @@ export const STAY = {
    * through here.
    */
   notAvailable: ['Laundry service', 'Swimming pool', 'Gym'],
+  /**
+   * Not in `included` — it is neither complimentary nor automatic. It is a
+   * kitchen that will cook for you if you ask it in advance, which is a
+   * different promise and is written as one.
+   */
+  meals: 'Lunch and dinner on a pre-order basis.',
   earlyCheckIn:
     'Early check-in depends on what is free that morning. Give the desk a day’s notice and they will try.',
 } as const;
@@ -182,14 +209,38 @@ export const LOCATIONS: readonly Location[] = [
     rating: { score: 4.1, count: 168 },
     roomCount: 30,
     blurb: 'Thirty rooms on a residential street, eight minutes’ walk from the metro.',
+    /**
+     * Two short lines, because this is read on a phone before anything else
+     * on the page and nobody came here to read.
+     *
+     * Cut to what a guest can act on: it is quiet, there is parking, the
+     * metro is close and so is T. Nagar. The colour that went with it — the
+     * gate, the evenings of children and scooters — was the best writing in
+     * the paragraph and the first thing to go, because it was nine lines of
+     * phone screen standing between a visitor and the rooms.
+     */
     note: [
-      'The building sits back from 46th Street behind two rain trees, which is the first quiet thing about it. Park under the deck and come up through the gate.',
-      'It is a residential street, so the mornings are quiet and the evenings are children and scooters. The metro is 850 metres away, which means you can leave the car and still be in T. Nagar in ten minutes.',
+      'Set back from 46th Street behind two rain trees. Parking under the deck.',
+      'A quiet residential street. The metro is 850 metres away; T. Nagar, ten minutes.',
     ],
+    /**
+     * Three occupancies rather than one category called Maple.
+     *
+     * The name came off the booking platform and meant nothing to anyone
+     * standing in the room. What a guest is deciding is how many people are
+     * staying, so that is what the page asks and answers.
+     */
+    roomTypes: [
+      { name: 'Single occupancy', sleeps: 'One guest' },
+      { name: 'Double occupancy', sleeps: 'Two guests' },
+      {
+        name: 'Triple occupancy',
+        sleeps: 'Three guests',
+        note: 'Two beds, with an additional mattress made up for the third.',
+      },
+    ],
+    roomNote: 'Maximum three guests in a room, whichever type you take.',
     room: {
-      name: 'Maple',
-      bed: 'Queen, or twin beds that join',
-      sleeps: 'Two',
       inclusions: [
         'Air conditioning',
         'Work desk and chair',
@@ -250,9 +301,18 @@ export const LOCATIONS: readonly Location[] = [
     rating: { score: 4.0, count: 377 },
     roomCount: 16,
     blurb: 'Sixteen rooms in Guindy, close to the industrial belt.',
+    /**
+     * Two short lines, for the reason Ashok Nagar's are two short lines.
+     *
+     * What went was not only length but duplication: the fridge, the locker,
+     * the sofa chair and the low table are the room's inclusion list, and the
+     * indoor parking and the night security are in the building's — both
+     * printed in full a few centimetres to the right. This column is for what
+     * the specification cannot say, which is what the place is like.
+     */
     note: [
-      'Sixteen rooms, which makes it the smaller and the quieter of the two. Guindy is working Chennai — offices, workshops, a good many places to eat within a few hundred metres.',
-      'The rooms here are the larger ones: a fridge, a locker, a sofa chair and a low table, and room for a third person if you need it. Parking is indoors, and there is someone on security through the night.',
+      'The smaller of the two, and the quieter. The rooms here are the larger ones.',
+      'Working Chennai: offices, workshops, and places to eat within a few hundred metres.',
     ],
     room: {
       name: 'Deluxe',
@@ -331,8 +391,8 @@ export const placeOf = (l: Location) =>
  * nowhere.
  *
  * It is not repointed because there is no longer one destination to point at:
- * Maple is Ashok Nagar's room and Deluxe is Guindy's, and both properties are
- * already the two entries above. Sending "The rooms" to either one would
+ * each property carries its own rooms on its own page, and both properties
+ * are already the two entries above. Sending "The rooms" to either one would
  * quietly pick a favourite.
  */
 /**
@@ -365,13 +425,15 @@ export const HERO = {
    * it takes.
    */
   accent: 'quiet',
+  /** Under the wordmark: where the two of them are, before anything else. */
+  areas: 'Guindy and Ashok Nagar',
   scrollCue: 'Scroll',
 } as const;
 
 /** The section directly under the hero. */
 export const LOCATIONS_INTRO = {
   eyebrow: 'Two addresses',
-  title: 'Two hotels. One VAPR.',
+  title: 'Two Destinations. One Signature Experience.',
   /**
    * One sentence, and it is a string rather than the two paragraphs it
    * replaced. The break after the dash is deliberate — the two place names
@@ -399,7 +461,7 @@ export const SPACES = [
     id: 'dining',
     name: 'Dining Room',
     image: 'dining-room',
-    line: 'Breakfast is included. Idli, pongal, toast, and filter coffee worth getting up for.',
+    line: 'Breakfast is included. Idli, pongal, toast, and filter coffee worth getting up for. Lunch and dinner on a pre-order basis.',
   },
   {
     id: 'meeting',
@@ -428,7 +490,7 @@ export const SPACES = [
 ] as const;
 
 export const DETAIL = {
-  title: 'What you get, either way',
+  title: 'Different stays. The same VAPR feeling.',
   intro:
     'The two properties differ in size and in a few fittings. Everything below is true of both.',
 } as const;
@@ -460,20 +522,23 @@ export const mapsHref = (l: Location) =>
 /**
  * The Chennai chapter — the one scripted scene on the page.
  *
- * The words are the city as it arrives: heat, traffic, horns, glare, stacked
- * on top of each other until the screen is as loud as the street. Then they
- * all go, and what is left is the hotel. The copy below is the same sentence
- * the manifesto has always carried; the chapter just gives it somewhere to
- * land.
+ * The words are what the stay is, arriving one after another and overlapping
+ * — the morning, the light, the time, the stay itself. Then they all go, and
+ * what is left is the hotel. The copy below is the same sentence the
+ * manifesto has always carried; the chapter just gives it somewhere to land.
+ *
+ * These were the city instead — heat, traffic, horns, glare, stacked until
+ * the screen was as loud as the street. Worth knowing when reading `turn`
+ * and `resolution` below, which still answer the louder version.
  */
 export const CHENNAI = {
   city: 'Chennai',
   /** Arrive in order, and overlap. Each one is a fragment of the sentence. */
   noise: [
-    { word: 'Heat', note: 'off the tar' },
-    { word: 'Traffic', note: 'at every junction' },
-    { word: 'Horns', note: 'three of them' },
-    { word: 'Glare', note: 'white, off the hoardings' },
+    { word: 'Morning', note: 'without the rush' },
+    { word: 'Light', note: 'through the curtains' },
+    { word: 'Time', note: 'to slow down' },
+    { word: 'A stay', note: 'worth remembering' },
   ],
   /** The turn. One line, held in silence. */
   turn: 'Then a door shuts behind you.',

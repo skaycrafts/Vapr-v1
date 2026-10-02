@@ -22,6 +22,7 @@ export default function PropertyRoom({ location }: { location: Location }) {
   const root = useRef<HTMLElement>(null);
   // Four fills the row exactly; a fifth wrapped and left a hole.
   const gallery = location.images.slice(1, 5);
+  const types = location.roomTypes?.length ? location.roomTypes : null;
 
   useMotionEffect(root, () => {
     const el = root.current;
@@ -60,7 +61,7 @@ export default function PropertyRoom({ location }: { location: Location }) {
         </div>
 
         <div className="md:col-span-6 md:col-start-7">
-          <p className="pr-note type-label">The room</p>
+          <p className="pr-note type-label">{types ? 'The rooms' : 'The room'}</p>
           {/* A section title, so it is uncovered by its own mask rather than
               fading in with the paragraphs around it (§06). */}
           <RevealText
@@ -68,20 +69,43 @@ export default function PropertyRoom({ location }: { location: Location }) {
             mode="lines"
             className="type-display mt-3 text-[clamp(2rem,4.4vw,3.5rem)] text-ink"
           >
-            {location.room.name}
+            {types ? 'Three ways to stay' : (location.room.name ?? 'The room')}
           </RevealText>
 
           <dl className="pr-spec mt-8">
+            {/*
+              Either several occupancies, or one category's bed and headcount.
+              A property with three ways to take a room has no single bed to
+              report, and a row saying "Bed — queen, or twin, or twin plus a
+              mattress" is a worse answer than three rows that each mean one
+              thing.
+            */}
+            {types ? (
+              types.map((type) => (
+                <div key={type.name} className="pr-row border-t border-hairline py-3.5">
+                  <div className="flex items-baseline justify-between gap-6">
+                    <dt className="text-sm text-ink">{type.name}</dt>
+                    <dd className="text-right text-sm text-bone">{type.sleeps}</dd>
+                  </div>
+                  {type.note ? (
+                    <dd className="mt-1 max-w-[42ch] text-sm text-smoke">{type.note}</dd>
+                  ) : null}
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="pr-row flex items-baseline justify-between gap-6 border-t border-hairline py-3.5">
+                  <dt className="type-label">Bed</dt>
+                  <dd className="text-right text-sm text-bone">{location.room.bed}</dd>
+                </div>
+                <div className="pr-row flex items-baseline justify-between gap-6 border-t border-hairline py-3.5">
+                  <dt className="type-label">Sleeps</dt>
+                  <dd className="text-right text-sm text-bone">{location.room.sleeps}</dd>
+                </div>
+              </>
+            )}
             <div className="pr-row flex items-baseline justify-between gap-6 border-t border-hairline py-3.5">
-              <dt className="type-label">Bed</dt>
-              <dd className="text-right text-sm text-bone">{location.room.bed}</dd>
-            </div>
-            <div className="pr-row flex items-baseline justify-between gap-6 border-t border-hairline py-3.5">
-              <dt className="type-label">Sleeps</dt>
-              <dd className="text-right text-sm text-bone">{location.room.sleeps}</dd>
-            </div>
-            <div className="pr-row flex items-baseline justify-between gap-6 border-t border-hairline py-3.5">
-              <dt className="type-label">Rooms of this kind</dt>
+              <dt className="type-label">{types ? 'Rooms in all' : 'Rooms of this kind'}</dt>
               <dd className="tabular text-right text-sm text-bone">{location.roomCount}</dd>
             </div>
             <div className="pr-row border-y border-hairline py-4">
@@ -95,6 +119,10 @@ export default function PropertyRoom({ location }: { location: Location }) {
               </dd>
             </div>
           </dl>
+
+          {location.roomNote ? (
+            <p className="pr-row mt-4 text-sm text-smoke">{location.roomNote}</p>
+          ) : null}
 
           <div className="pr-row mt-8">
             <p className="type-label mb-2">In the building</p>

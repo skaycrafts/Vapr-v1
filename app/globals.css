@@ -284,6 +284,36 @@
   letter-spacing: -0.02em;
 }
 
+/*
+ * A heading that is always exactly one line.
+ *
+ * Long titles — "Two Destinations. One Signature Experience." — were breaking
+ * across two and three lines, which on a Didone at display size reads as a
+ * paragraph rather than as a title. Rather than hand-tuning a clamp per
+ * breakpoint and hoping, the size is solved from the string itself: each
+ * heading declares how wide it is in ems (measured once, in this font, at
+ * `--fit-ratio`) and the type is set to whatever size makes that fill the
+ * gutter — never larger than `--fit-max`, which is the size the design wanted
+ * before the sentence got long.
+ *
+ * The width expression is the gutter's own: the page's `max-width` and its
+ * fluid side padding, restated. If either changes in `@utility gutter`, it
+ * changes here too.
+ *
+ * The cost is honest and worth stating: a 42-character title on a 390px
+ * phone can only be one line at about 18px. That is the arithmetic of the
+ * request, not a bug in it.
+ */
+@utility fit-line {
+  white-space: nowrap;
+  font-size: min(
+    var(--fit-max, 3.5rem),
+    calc(
+      (min(100vw, 120rem) - 2 * clamp(1.25rem, 0.7rem + 2.6vw, 4.5rem)) / var(--fit-ratio, 10)
+    )
+  );
+}
+
 @utility type-label {
   font-family: var(--font-sans);
   font-size: var(--text-2xs);

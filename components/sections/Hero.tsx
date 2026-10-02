@@ -258,7 +258,7 @@ export default function Hero() {
         far enough to read as a toy; the point here is that the letters have
         depth, not that they are moving.
       */}
-      <div className="pointer-events-none absolute inset-x-0 top-[9svh] flex h-[50svh] items-center justify-center md:top-[10svh] md:h-[46svh]">
+      <div className="pointer-events-none absolute inset-x-0 top-[9svh] flex h-[50svh] flex-col items-center justify-center gap-10 md:top-[10svh] md:h-[46svh] md:gap-12">
         <DepthText
           className="hero-mark"
           text={SITE.name}
@@ -272,10 +272,31 @@ export default function Hero() {
           fontWeight={400}
           letterSpacing="0.005em"
         />
+        {/*
+          The two areas, under the word.
+
+          Inside the mark's own box rather than placed below it: the slot is
+          half the frame tall and centres the word in it, so anything pinned
+          to the slot's foot floated a clear 140px under the letters at the
+          bottom of an empty space. A column with a gap holds the pair
+          together, and the gap is the same whether the word is at its 4rem
+          floor on a phone or its 11rem ceiling on a desktop.
+        */}
+        <p className="hero-areas type-label text-center text-[0.8125rem] tracking-[0.2em] text-mist md:text-[0.9375rem]">
+          {HERO.areas}
+        </p>
       </div>
 
+
+
       <div className="hero-copy gutter absolute inset-x-0 bottom-0 pb-9 md:pb-12">
-        <p className="hero-place type-label mb-4 text-ink/80">{SITE.city}</p>
+        {/* Set heavier than a label. It is the only word above the rule and
+            it names the city both hotels are in; at 500 weight and 80% it
+            read as a caption for the sentence below rather than as the
+            frame's own standing line. */}
+        <p className="hero-place type-label mb-4 text-[0.8125rem] font-bold tracking-[0.2em] text-ink md:text-[0.9375rem]">
+          {SITE.city}
+        </p>
 
         <div className="hero-rule mb-4 h-px w-full origin-left bg-hairline-strong md:mb-5" />
 
