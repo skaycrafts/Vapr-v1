@@ -71,26 +71,51 @@ const NOISE_PLACEMENT_CSS = `
     /* Up needs the drift; down gets it for free, as the title moves away. */
     --band-up: calc(var(--half) + var(--drift) + 22px);
     --band-down: calc(var(--half) + 22px);
+
+    /*
+     * The word's own height: the display line, plus the label under it and
+     * the gap between them. Measured rather than guessed — the label and its
+     * margin come to 26px at every size, because only the word above it
+     * scales.
+     *
+     * It exists so the placement can be clamped against the stage's edges.
+     * Everything above measures from the centre line outwards, which keeps
+     * the words clear of the title but says nothing about where they stop:
+     * on a short window the fourth word, which sits furthest from the
+     * centre, ran straight off the bottom of the stage and was cut in half.
+     */
+    --word-h: calc(clamp(2rem, 7vw, 7rem) + 26px);
+    --edge: 24px;
   }
 
-  /* Heat — top left, the first thing that hits you. */
+  /*
+   * Each word is placed from the centre line and then held inside the stage.
+   *
+   * A min() on a distance from an edge is a floor on how far out the word can
+   * be pushed: the first term is where the composition wants it, the second
+   * is the furthest it can go and still be whole. On a tall window the first
+   * term wins and nothing is different; on a short one the second takes over
+   * and the word stops at the edge instead of crossing it.
+   */
+
+  /* First — top left, the furthest out, so the first to meet the top edge. */
   #chennai[data-scene='on'] .chennai-noise:nth-child(1) {
-    bottom: calc(50% + var(--band-up) + 40px);
+    bottom: min(calc(50% + var(--band-up) + 40px), calc(100% - var(--word-h) - var(--edge)));
     left: 6%;
   }
-  /* Traffic — above the title rather than across it. */
+  /* Second — above the title rather than across it. */
   #chennai[data-scene='on'] .chennai-noise:nth-child(2) {
-    bottom: calc(50% + var(--band-up));
+    bottom: min(calc(50% + var(--band-up)), calc(100% - var(--word-h) - var(--edge)));
     left: 44%;
   }
-  /* Horns — below the title, on the left. */
+  /* Third — below the title, on the left. */
   #chennai[data-scene='on'] .chennai-noise:nth-child(3) {
-    top: calc(50% + var(--band-down));
+    top: min(calc(50% + var(--band-down)), calc(100% - var(--word-h) - var(--edge)));
     left: 8%;
   }
-  /* Glare — bottom right, out of the way of the attribution line. */
+  /* Fourth — bottom right, and the one that was being cut. */
   #chennai[data-scene='on'] .chennai-noise:nth-child(4) {
-    top: calc(50% + var(--band-down) + 60px);
+    top: min(calc(50% + var(--band-down) + 60px), calc(100% - var(--word-h) - var(--edge)));
     left: 40%;
   }
 
