@@ -176,11 +176,18 @@ export type Location = {
    */
   readonly spacesArePlaceholder?: boolean;
   /**
-   * This property's own frame for a shared room, keyed by the room's `id` in
-   * SPACES. Only the rooms listed here are replaced; anything absent keeps
-   * the Ashok Nagar frame and stays covered by the disclosure.
+   * What this property has in place of the shared room with that `id` in
+   * SPACES — its own photograph of the same room, or a different room
+   * altogether where the buildings differ.
+   *
+   * Only the ids listed here change; anything absent keeps Ashok Nagar's
+   * entry and stays covered by the disclosure. It replaces an image-only
+   * override, which could not express "this building has a gym where the
+   * other one has a stair worth photographing".
    */
-  readonly spaceImages?: Readonly<Record<string, string>>;
+  readonly spaces?: Readonly<
+    Record<string, { readonly name?: string; readonly line?: string; readonly image?: string }>
+  >;
   readonly heroImage: string | null;
 };
 
@@ -202,7 +209,14 @@ export const STAY = {
    * anything reads it — delete it if it is still unused when you next pass
    * through here.
    */
-  notAvailable: ['Laundry service', 'Swimming pool', 'Gym'],
+  /*
+   * The gym came off this list: Guindy has one, confirmed by the client and
+   * photographed. The two that remain are still stated as unavailable on
+   * both listings. Nothing renders this — see the note above — but a list
+   * that says a hotel has no gym while the page shows its gym is the kind of
+   * wrong that outlives the file it is in.
+   */
+  notAvailable: ['Laundry service', 'Swimming pool'],
   /**
    * Not in `included` — it is neither complimentary nor automatic. It is a
    * kitchen that will cook for you if you ask it in advance, which is a
@@ -347,6 +361,7 @@ export const LOCATIONS: readonly Location[] = [
     },
     facilities: [
       'Indoor parking',
+      'Gym',
       'Lift',
       'Pantry',
       'Ironing boards',
@@ -385,10 +400,18 @@ export const LOCATIONS: readonly Location[] = [
     // Three of the six shared rooms are this building's own now. Reception,
     // the stair and lift, and the parking are still Ashok Nagar's, which is
     // what the disclosure below the section says.
-    spaceImages: {
-      dining: 'guindy-dining',
-      meeting: 'guindy-meeting',
-      common: 'guindy-lounge',
+    spaces: {
+      dining: { image: 'guindy-dining' },
+      meeting: { image: 'guindy-meeting' },
+      common: { image: 'guindy-lounge' },
+      // Where Ashok Nagar shows its stair and lift. Guindy has a lift too —
+      // it is in the facilities below — but a gym is the more useful thing
+      // to show someone deciding between the two.
+      circulation: {
+        name: 'Gym',
+        line: 'Two treadmills, a cross-trainer and a cycle. Air-conditioned.',
+        image: 'guindy-gym',
+      },
     },
     spacesArePlaceholder: true,
     // Guindy's own building at last. `imagesArePlaceholder` still stands and

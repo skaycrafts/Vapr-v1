@@ -35,16 +35,17 @@ import type { ImageSlug } from '@/lib/media';
  */
 export default function Spaces({
   note,
-  images,
+  overrides,
 }: {
   note?: string;
   /**
-   * Per-room photograph overrides, keyed by the room's id. The six rooms and
-   * what each is for are the same in both buildings; only the frames differ,
-   * so a property supplies the ones it has rather than a second copy of the
-   * whole list.
+   * Per-room overrides, keyed by the room's id: a property's own photograph
+   * of the same room, or a different room where the buildings differ. Six
+   * rooms, one list, and each property says only where it departs from it.
    */
-  images?: Readonly<Record<string, string>>;
+  overrides?: Readonly<
+    Record<string, { readonly name?: string; readonly line?: string; readonly image?: string }>
+  >;
 } = {}) {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -197,14 +198,17 @@ export default function Spaces({
           single stage and the items stack on top of each other.
         */}
         <ol className="group-data-[scene=on]:relative group-data-[scene=on]:mt-8 group-data-[scene=on]:min-h-0 group-data-[scene=on]:flex-1">
-          {SPACES.map((space, i) => (
+          {SPACES.map((base, i) => {
+            // The room this property actually has at this position.
+            const space = { ...base, ...(overrides?.[base.id] ?? {}) };
+            return (
             <li
               key={space.id}
               className="mt-12 first:mt-0 group-data-[scene=on]:absolute group-data-[scene=on]:inset-0 group-data-[scene=on]:mt-0 group-data-[scene=on]:grid group-data-[scene=on]:grid-cols-1 group-data-[scene=on]:items-center group-data-[scene=on]:gap-8 md:group-data-[scene=on]:grid-cols-12 md:group-data-[scene=on]:gap-12"
             >
               <div className="space-plate group-data-[scene=on]:h-full group-data-[scene=on]:min-h-0 md:group-data-[scene=on]:col-span-7">
                 <Frame
-                  slug={(images?.[space.id] ?? space.image) as ImageSlug}
+                  slug={space.image as ImageSlug}
                   sizes="(min-width: 768px) 58vw, 100vw"
                   ratio={16 / 10}
                   className="h-full w-full"
@@ -229,7 +233,8 @@ export default function Spaces({
                 </p>
               </div>
             </li>
-          ))}
+            );
+          })}
         </ol>
       </div>
     </section>

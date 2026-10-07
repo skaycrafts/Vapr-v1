@@ -81,6 +81,7 @@ export const IMAGES = [
   { slug: 'guindy-lounge',      src: 'guindy/lounge.jpg',    alt: 'The upstairs lounge, wicker seating along a wall of windows' },
   { slug: 'guindy-dining',      src: 'guindy/dining.jpg',    alt: 'The breakfast room, tables laid and the service counter behind' },
   { slug: 'guindy-meeting',     src: 'guindy/conference.png', alt: 'The meeting room: one table, eight chairs and two boards', crop: { height: 0.90 } },
+  { slug: 'guindy-gym',         src: 'guindy/gym.png',       alt: 'The gym: two treadmills, a cross-trainer and a cycle', crop: { height: 0.90 } },
   { slug: 'breakfast-plate',  src: 'june/CAT00160.jpg',          alt: 'South Indian breakfast plated with sambar and chutney' },
 ];
 

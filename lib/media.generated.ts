@@ -412,6 +412,14 @@ export const IMAGES = {
     "height": 506,
     "aspect": 2.3063,
     "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoUAAkAPwl0sFCrpySisAgBcCEJZQC2yBMoj2WICvyAAP5XZqRcE13hX3bovK3IaRMLaOshzveIDcxsX6UAAA=="
+  },
+  "guindy-gym": {
+    "slug": "guindy-gym",
+    "alt": "The gym: two treadmills, a cross-trainer and a cycle",
+    "width": 1178,
+    "height": 576,
+    "aspect": 2.0451,
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACwAwCdASoUAAoAPwlwr1ArpqQisAgBcCEJYwC7ABuzXTI/wNE9gAD+jOuIXuBANA2EwZBEf/V8YNBtHX+VSqR+0wXgAA=="
   }
 } as const satisfies Record<string, Rendition>;
 
