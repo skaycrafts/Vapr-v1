@@ -33,7 +33,19 @@ import type { ImageSlug } from '@/lib/media';
  * was the wrong place to meet them. `note` carries the disclosure for a
  * property whose own shared rooms have not been photographed yet.
  */
-export default function Spaces({ note }: { note?: string } = {}) {
+export default function Spaces({
+  note,
+  images,
+}: {
+  note?: string;
+  /**
+   * Per-room photograph overrides, keyed by the room's id. The six rooms and
+   * what each is for are the same in both buildings; only the frames differ,
+   * so a property supplies the ones it has rather than a second copy of the
+   * whole list.
+   */
+  images?: Readonly<Record<string, string>>;
+} = {}) {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
 
@@ -192,7 +204,7 @@ export default function Spaces({ note }: { note?: string } = {}) {
             >
               <div className="space-plate group-data-[scene=on]:h-full group-data-[scene=on]:min-h-0 md:group-data-[scene=on]:col-span-7">
                 <Frame
-                  slug={space.image as ImageSlug}
+                  slug={(images?.[space.id] ?? space.image) as ImageSlug}
                   sizes="(min-width: 768px) 58vw, 100vw"
                   ratio={16 / 10}
                   className="h-full w-full"

@@ -332,6 +332,86 @@ export const IMAGES = {
     "height": 971,
     "aspect": 1.6684,
     "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoUAAwAPwlysVArpqSisAgBcCEJQBOgBDwtJmzzokLkYMAA/qlPZ9VtaRHJeQV8ZrNfmmv2PDR7hDIKXn2zOZ8eqZ3yCCA6KgAAAA=="
+  },
+  "guindy-room-king": {
+    "slug": "guindy-room-king",
+    "alt": "Bed against the dark headboard wall, wardrobe and armchair beyond",
+    "width": 1213,
+    "height": 589,
+    "aspect": 2.0594,
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADQAwCdASoUAAoAPwlurk+rpiQiMAgBcCEJZACdACHepXTQ16BfPCYA/lC4iWAT6tdO/rPyb8Zih3KY8h4QwTjJWjiW2zrTBMJlgTKDIAA="
+  },
+  "guindy-room-twin": {
+    "slug": "guindy-room-twin",
+    "alt": "Two beds made up side by side, with the desk and television beyond",
+    "width": 1193,
+    "height": 581,
+    "aspect": 2.0534,
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADwAwCdASoUAAoAPwlwsE+rpqSiMAgBcCEJZgCsAGtpRNcZEYsYSmAAAP7oMglRGjiZP2H/ao2ZAF0JvwAM88Ku/X7RD+6LTHboMwfk9eRr+AAA"
+  },
+  "guindy-room-desk": {
+    "slug": "guindy-room-desk",
+    "alt": "The desk, mirror and window across from the bed",
+    "width": 1187,
+    "height": 584,
+    "aspect": 2.0325,
+    "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACQAwCdASoUAAoAPwlurk+rpiQiMAgBcCEJQBadA85l3NOtqM3QAPzf5pwb1qPr4idxwfpmLhVsnOMK+P2M8qgAAAA="
+  },
+  "guindy-room-wide": {
+    "slug": "guindy-room-wide",
+    "alt": "A room seen from the door: bed, desk, window and ceiling fan",
+    "width": 1195,
+    "height": 583,
+    "aspect": 2.0497,
+    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADwAwCdASoUAAoAPwlyr0+rpyQiMAgBcCEJZAC7ACHdAIEUR2/a43AAAP5Sp6nZS2ogg2f16D6NyrbOrJWjYqkrFlf/KgrwhsAAAA=="
+  },
+  "guindy-room-view": {
+    "slug": "guindy-room-view",
+    "alt": "Afternoon light through the window of a guest room",
+    "width": 1280,
+    "height": 764,
+    "aspect": 1.6754,
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAABQAwCdASoUAAwAPwlurk+rpiQiMAgBcCEJQBdgBaD8EvHoAAD+45qeoBkjvCKpxKO6EaVpEPBowxeh7IZfW8oj4k2QAAAA"
+  },
+  "guindy-twin-beds": {
+    "slug": "guindy-twin-beds",
+    "alt": "Twin beds with the wardrobe and luggage bench by the door",
+    "width": 1280,
+    "height": 764,
+    "aspect": 1.6754,
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADwAwCdASoUAAwAPwlur0+rpiQiMAgBcCEJZgCdACIBAA2A4ymWkiMAAP5Wpx9CAembLtlNjYIhq9MQ80aRc/9IFxV/ac5WlGCp81wAAAA="
+  },
+  "guindy-lounge": {
+    "slug": "guindy-lounge",
+    "alt": "The upstairs lounge, wicker seating along a wall of windows",
+    "width": 1280,
+    "height": 764,
+    "aspect": 1.6754,
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoUAAwAPwlysVArpqSisAgBcCEJagCdMoADTV9MDBR08cAA/sMZytBadZKLktLzPsSh4XJevOhG396MIw/13iecQFQjERGtkgXAAA=="
+  },
+  "guindy-dining": {
+    "slug": "guindy-dining",
+    "alt": "The breakfast room, tables laid and the service counter behind",
+    "width": 1280,
+    "height": 764,
+    "aspect": 1.6754,
+    "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADQAwCdASoUAAwAPwl0sFCrpySisAgBcCEJQBdgBDqN5PhzD156gYAA/lKvA9ypA0mTCnut89ycl+Lw42nROcpgXmN3OaF0uAA="
+  },
+  "guindy-bath": {
+    "slug": "guindy-bath",
+    "alt": "Basin and mirror in a guest bathroom",
+    "width": 602,
+    "height": 643,
+    "aspect": 0.9362,
+    "lqip": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAAAQBACdASoUABUAPwVssU+rpiUiMBgMAXAgiWRm71NWf6EFHNlo8EkvAAD+4mMbOgFUJcIfJt95uhcQNaESWMklS0G6jvqAHFW21yfnDq961ozCHboy05jEDMLKAA=="
+  },
+  "guindy-meeting": {
+    "slug": "guindy-meeting",
+    "alt": "The meeting room: one table, eight chairs and two boards",
+    "width": 1167,
+    "height": 506,
+    "aspect": 2.3063,
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoUAAkAPwl0sFCrpySisAgBcCEJZQC2yBMoj2WICvyAAP5XZqRcE13hX3bovK3IaRMLaOshzveIDcxsX6UAAA=="
   }
 } as const satisfies Record<string, Rendition>;
 

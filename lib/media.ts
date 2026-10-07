@@ -14,7 +14,11 @@ const BASE = '/media/img';
 function widthsFor(slug: ImageSlug) {
   const { width } = IMAGES[slug];
   const usable = IMAGE_WIDTHS.filter((w) => w <= width * 1.05);
-  return usable.length ? usable : [IMAGE_WIDTHS[0]];
+  // An image narrower than the smallest width in the ladder is written at its
+  // own size — see the matching fallback in `scripts/optimize-media.mjs`. The
+  // old fallback named the ladder's first width, which is a file that cannot
+  // exist for such an image, and the browser got a 404 instead of a picture.
+  return usable.length ? usable : [width];
 }
 
 export function srcSet(slug: ImageSlug, format: 'avif' | 'webp') {

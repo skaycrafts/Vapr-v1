@@ -58,6 +58,29 @@ export const IMAGES = [
   { slug: 'conference-wide',  src: 'conference-room/JWS03564.jpg', alt: 'Conference room with projection wall' },
   { slug: 'common-area',      src: 'common-area/JWS03430.jpg',   alt: 'The common lounge on the upper floor' },
   { slug: 'common-wide',      src: 'common-area/JWS03410.jpg',   alt: 'Long view across the common area' },
+
+  // ── Guindy ────────────────────────────────────────────────────────
+  //
+  // The property's own frames, supplied by the client. Everything above this
+  // block was shot at Ashok Nagar, which is why Guindy's gallery had been
+  // borrowing it under a disclosure; these replace the borrowed rooms.
+  //
+  // They come from a listing export and carry a map service's watermark in
+  // the bottom-left corner, so each one is cropped to lose the bottom tenth.
+  // The crop is small enough to cost a strip of floor and nothing else.
+  { slug: 'guindy-room-king',   src: 'guindy/room-1.png',    alt: 'Bed against the dark headboard wall, wardrobe and armchair beyond', crop: { height: 0.91 } },
+  { slug: 'guindy-room-twin',   src: 'guindy/room-2.png',    alt: 'Two beds made up side by side, with the desk and television beyond', crop: { height: 0.91 } },
+  { slug: 'guindy-room-desk',   src: 'guindy/room-3.png',    alt: 'The desk, mirror and window across from the bed', crop: { height: 0.91 } },
+  { slug: 'guindy-room-wide',   src: 'guindy/room-4.png',    alt: 'A room seen from the door: bed, desk, window and ceiling fan', crop: { height: 0.91 } },
+  // The only two frames without the watermark, so they are left whole.
+  { slug: 'guindy-room-view',   src: 'guindy/room-view.jpg', alt: 'Afternoon light through the window of a guest room' },
+  { slug: 'guindy-twin-beds',   src: 'guindy/twin.jpg',      alt: 'Twin beds with the wardrobe and luggage bench by the door' },
+  // Supplied as a two-up of the shower and the basin. The right half is the
+  // basin, and the only half without the watermark across it.
+  { slug: 'guindy-bath',        src: 'guindy/bathroom.png',  alt: 'Basin and mirror in a guest bathroom', crop: { left: 0.505, width: 0.495 } },
+  { slug: 'guindy-lounge',      src: 'guindy/lounge.jpg',    alt: 'The upstairs lounge, wicker seating along a wall of windows' },
+  { slug: 'guindy-dining',      src: 'guindy/dining.jpg',    alt: 'The breakfast room, tables laid and the service counter behind' },
+  { slug: 'guindy-meeting',     src: 'guindy/conference.png', alt: 'The meeting room: one table, eight chairs and two boards', crop: { height: 0.90 } },
   { slug: 'breakfast-plate',  src: 'june/CAT00160.jpg',          alt: 'South Indian breakfast plated with sambar and chutney' },
 ];
 

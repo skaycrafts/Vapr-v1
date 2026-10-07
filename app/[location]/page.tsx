@@ -115,10 +115,13 @@ export default async function LocationPage({ params }: { params: Promise<Params>
       */}
       <PropertyHero location={location} />
       <PropertyRoom location={location} />
+      {/* Keyed to the shared rooms' own flag, not the guest rooms'. A property
+          can have photographs of its rooms and none of its stair. */}
       <Spaces
+        images={location.spaceImages}
         note={
-          location.imagesArePlaceholder
-            ? `${location.shortName}'s shared rooms are still being photographed. The frames here are from Ashok Nagar, finished to the same standard.`
+          location.spacesArePlaceholder
+            ? `Some of ${location.shortName}'s shared rooms are still being photographed. Where a frame is missing it is from Ashok Nagar, finished to the same standard.`
             : undefined
         }
       />

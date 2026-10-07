@@ -74,8 +74,20 @@ async function processImage(entry) {
   const width = region ? region.width : meta.width;
   const height = region ? region.height : meta.height;
 
-  for (const w of WIDTHS) {
-    if (w > width * 1.05) continue;
+  /*
+   * Never leave an image with no rendition at all.
+   *
+   * The rule is "skip any width wider than the source", which is right until
+   * the source is narrower than the smallest width in the ladder: then every
+   * entry is skipped, no file is written, and the manifest still lists the
+   * slug — so the page asks for a 640 that was never made and shows a broken
+   * image. A 602px-wide crop did exactly that. Where nothing in the ladder
+   * fits, the source's own width is the rendition.
+   */
+  const widths = WIDTHS.filter((w) => w <= width * 1.05);
+  if (!widths.length) widths.push(width);
+
+  for (const w of widths) {
     for (const [fmt, opts] of [
       ['avif', { quality: 58, effort: 6, chromaSubsampling: '4:2:0' }],
       ['webp', { quality: 82, effort: 5 }],

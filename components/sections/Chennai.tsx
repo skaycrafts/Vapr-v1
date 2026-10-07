@@ -180,7 +180,22 @@ export default function Chennai() {
     const tl = gsap.timeline({
       defaults: { ease: EASE.none },
       scrollTrigger: {
-        trigger: el,
+        /*
+         * The stage, not the section.
+         *
+         * The section opens with 6vh of top padding (10vh from md), so its
+         * top edge reaches the top of the window a tenth of a screen before
+         * the stage does. Pinning on the section held the stage exactly that
+         * far down — a 720px laptop pinned a 720px stage at y=72, putting its
+         * last 72px permanently below the fold, which is where the fourth
+         * word sits. It was cut on every window short enough for the padding
+         * to matter, and whole on mine, which is why it survived a first fix.
+         *
+         * Triggering on the stage lets the padding scroll away first and pins
+         * the scene flush with the top of the window, so the viewport and the
+         * composition are the same rectangle again.
+         */
+        trigger: scene,
         start: 'top top',
         // 170vh of travel, down from 260. Most of that budget was being spent
         // on scroll rather than on anything moving, and reaching the turn had
@@ -189,7 +204,7 @@ export default function Chennai() {
         // This is close to the floor. At 170 each word still gets about one
         // gesture of scroll to arrive; much below it and the scrub turns
         // twitchy, which reads as cheap rather than as fast.
-        end: '+=170%',
+        end: '+=190%',
         pin: scene,
         // Pinned by transform, not by `position: fixed`.
         //
@@ -233,42 +248,52 @@ export default function Chennai() {
       tl.to(word, { yPercent: i % 2 === 0 ? -7 : 5, duration: 1.4 }, at);
     });
 
-    // ── 3. The turn. ─────────────────────────────────────────────────────
-    // Everything goes at once. A stagger would soften it, and this is the one
-    // moment on the site that should be abrupt.
-    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 2.6).to(
+    /**
+     * ── 3. The turn. ─────────────────────────────────────────────────────
+     *
+     * Everything goes at once. A stagger would soften it, and this is the one
+     * moment on the site that should be abrupt.
+     *
+     * At 2.6 it was too soon to be abrupt — it was early. The fourth word
+     * starts arriving at 2.05 and is not fully in until 2.55, so it had five
+     * hundredths of the timeline on screen before the turn took it: about a
+     * dozen pixels of scroll on a laptop. The word that completes the
+     * sentence — a stay worth remembering — was the one nobody ever read.
+     * 3.2 gives it a held beat, the same as the three words before it.
+     */
+    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 3.2).to(
       '.chennai-title',
       { opacity: 0, duration: 0.3 },
-      2.6
+      3.2
     );
 
     // ── The silence. ─────────────────────────────────────────────────────
-    // Nothing is scheduled between 3.05 and 3.55. The gap is the animation.
+    // Nothing is scheduled between 3.65 and 4.15. The gap is the animation.
 
     tl.fromTo(
       '.chennai-turn',
       { opacity: 0, y: 16 },
       { opacity: 1, y: 0, duration: 0.5, ease: EASE.out },
-      3.55
+      4.15
     )
       .fromTo(
         '.chennai-resolution',
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.5, ease: EASE.out },
-        3.95
+        4.55
       )
       // The mark, last, and barely.
-      .fromTo('.chennai-seal', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 4.3)
+      .fromTo('.chennai-seal', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 4.9)
       .fromTo(
         '.chennai-closing',
         { opacity: 0, y: 12 },
         { opacity: 1, y: 0, duration: 0.6, ease: EASE.out },
-        4.55
+        5.15
       )
       // The attribution belongs to this block and was the one part of it with
       // no animation at all — so it sat at full opacity through the noise,
       // which is what "Glare" was colliding with.
-      .fromTo('.chennai-attribution', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 4.8);
+      .fromTo('.chennai-attribution', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 5.4);
 
     return () => {
       delete el.dataset.scene;

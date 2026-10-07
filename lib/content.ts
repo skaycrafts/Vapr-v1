@@ -166,6 +166,21 @@ export type Location = {
    * rather than implying the pictures show this building.
    */
   readonly imagesArePlaceholder?: boolean;
+  /**
+   * The same, for the shared rooms.
+   *
+   * It was one flag for both, which stopped working the day a property had
+   * its own room photographs but not its own lounge and stair: clearing the
+   * flag would have taken the disclosure off the shared rooms as well, and
+   * left Ashok Nagar's lift standing in for Guindy's with nothing saying so.
+   */
+  readonly spacesArePlaceholder?: boolean;
+  /**
+   * This property's own frame for a shared room, keyed by the room's `id` in
+   * SPACES. Only the rooms listed here are replaced; anything absent keeps
+   * the Ashok Nagar frame and stays covered by the disclosure.
+   */
+  readonly spaceImages?: Readonly<Record<string, string>>;
   readonly heroImage: string | null;
 };
 
@@ -210,17 +225,17 @@ export const LOCATIONS: readonly Location[] = [
     roomCount: 30,
     blurb: 'Thirty rooms on a residential street, eight minutes’ walk from the metro.',
     /**
-     * Two short lines, because this is read on a phone before anything else
-     * on the page and nobody came here to read.
+     * One line, because this is read on a phone before anything else on the
+     * page and nobody came here to read.
      *
-     * Cut to what a guest can act on: it is quiet, there is parking, the
-     * metro is close and so is T. Nagar. The colour that went with it — the
-     * gate, the evenings of children and scooters — was the best writing in
-     * the paragraph and the first thing to go, because it was nine lines of
-     * phone screen standing between a visitor and the rooms.
+     * It was two paragraphs, then two sentences, and is now the one fact a
+     * guest can act on: it is quiet, the metro is close, and so is T. Nagar.
+     * The building's own approach — set back behind two rain trees, parking
+     * under the deck — is in the photographs directly beneath this and on
+     * the way-there map further down, which is where someone looking for it
+     * is looking.
      */
     note: [
-      'Set back from 46th Street behind two rain trees. Parking under the deck.',
       'A quiet residential street. The metro is 850 metres away; T. Nagar, ten minutes.',
     ],
     /**
@@ -352,18 +367,30 @@ export const LOCATIONS: readonly Location[] = [
       { place: 'Chennai Central', km: 8.6 },
     ],
     // PLACEHOLDER: these are Ashok Nagar's photographs, standing in until
-    // Guindy is shot. They are not this building. Swap them the moment real
-    // frames exist — `imagesArePlaceholder` drives the on-page disclosure, so
-    // clear that flag at the same time.
+    // Guindy's own rooms at last, supplied by the client. The first is the
+    // panel frame; the four after it are the gallery, which takes
+    // `images.slice(1, 5)`. The bathroom and the lounge sit at the end,
+    // outside that window, so they are carried but not shown twice.
     images: [
-      'room-b-wide',
-      'room-b-bed',
-      'room-headboard',
-      'room-pillows',
-      'room-b-light',
-      'detail-curtain',
+      'guindy-room-king',
+      'guindy-room-view',
+      'guindy-twin-beds',
+      'guindy-room-desk',
+      'guindy-bath',
+      'guindy-lounge',
+      'guindy-dining',
+      'guindy-room-wide',
+      'guindy-room-twin',
     ],
-    imagesArePlaceholder: true,
+    // Three of the six shared rooms are this building's own now. Reception,
+    // the stair and lift, and the parking are still Ashok Nagar's, which is
+    // what the disclosure below the section says.
+    spaceImages: {
+      dining: 'guindy-dining',
+      meeting: 'guindy-meeting',
+      common: 'guindy-lounge',
+    },
+    spacesArePlaceholder: true,
     // Guindy's own building at last. `imagesArePlaceholder` still stands and
     // still drives the disclosures — the *rooms* here are Ashok Nagar's — but
     // the exterior is no longer among them, and `facade-canopy` was a
