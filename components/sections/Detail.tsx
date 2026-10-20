@@ -195,7 +195,17 @@ export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
         `dim` sits high enough that the resting wall is a texture rather than
         a gallery demanding to be clicked.
       */}
-      <div className="mt-14 h-[62svh] min-h-[22rem] w-full md:mt-16 md:h-[70svh]">
+      {/*
+        Five columns and about five rows, on every screen.
+
+        The wall fits its columns to whatever width it is given, so a phone
+        gets five narrow columns where it used to get one magnified one. The
+        height has to follow the same rule or the same frame that holds five
+        rows on a laptop holds twelve on a phone — the grid reads as a mosaic
+        and the photographs stop being photographs. These are five rows of
+        the tile size each width produces.
+      */}
+      <div className="mt-14 h-[26svh] min-h-[11rem] w-full sm:h-[34svh] md:mt-16 md:h-[46svh] lg:h-[62svh]">
         <DriftWall
           items={WALL}
           columns={5}

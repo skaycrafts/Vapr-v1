@@ -136,9 +136,35 @@ export default function DriftWall({
   const pointer = useRef({ x: 0, y: 0 });
   const damped = useRef({ x: 0, y: 0 });
 
-  const [height, setHeight] = useState(600);
+  const [size, setSize] = useState({ width: 1200, height: 600 });
+  const { height } = size;
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeIdRef = useRef<string | null>(null);
+
+  /**
+   * Tile size, scaled so every column fits the frame it is in.
+   *
+   * `tileWidth` and `tileHeight` were absolute pixels, which made the wall a
+   * fixed 1090px across whatever it was shown in. On a laptop that is a wall
+   * of five columns; on a 390px phone it is nearly three screens wide, so a
+   * visitor saw one column magnified and no wall at all.
+   *
+   * They are a maximum now. The plane carries a constant `scale(1.18)` and
+   * sits at a slight yaw, so the width it really occupies is a little more
+   * than the sum of its columns; `PLANE_SPREAD` is that, measured, and the
+   * 0.98 leaves a hair of air at the sides. The aspect ratio and the gap
+   * scale with the tile, so the composition is the same picture at every
+   * size rather than a different one.
+   */
+  const fit = useMemo(() => {
+    const PLANE_SPREAD = 1.18;
+    const natural = columns * (tileWidth + gap) * PLANE_SPREAD;
+    return Math.min(1, (size.width * 0.98) / natural);
+  }, [columns, tileWidth, gap, size.width]);
+
+  const tileW = Math.round(tileWidth * fit);
+  const tileH = Math.round(tileHeight * fit);
+  const tileGap = Math.max(4, Math.round(gap * fit));
 
   /** Deal the photographs across the columns, round robin. */
   const columnItems = useMemo(() => {
@@ -153,17 +179,22 @@ export default function DriftWall({
    * or the loop has a gap in it at the seam.
    */
   const columnMeta = useMemo(() => {
-    const unit = tileHeight + gap;
+    const unit = tileH + tileGap;
     return columnItems.map((col) => {
       const copyHeight = Math.max(unit, col.length * unit);
       return { copyHeight, copies: Math.max(2, Math.ceil((height * 1.6) / copyHeight) + 1) };
     });
-  }, [columnItems, tileHeight, gap, height]);
+  }, [columnItems, tileH, tileGap, height]);
 
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setHeight(entry.contentRect.height || 600));
+    const ro = new ResizeObserver(([entry]) =>
+      setSize({
+        width: entry.contentRect.width || 1200,
+        height: entry.contentRect.height || 600,
+      })
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -289,9 +320,9 @@ export default function DriftWall({
   const cssVars = useMemo(
     () =>
       ({
-        '--dw-tile-w': `${tileWidth}px`,
-        '--dw-tile-h': `${tileHeight}px`,
-        '--dw-gap': `${gap}px`,
+        '--dw-tile-w': `${tileW}px`,
+        '--dw-tile-h': `${tileH}px`,
+        '--dw-gap': `${tileGap}px`,
         '--dw-radius': `${radius}px`,
         '--dw-perspective': `${perspective}px`,
         '--dw-lift': `${lift}px`,
@@ -300,16 +331,21 @@ export default function DriftWall({
         '--dw-overlay': overlayColor,
         '--dw-edge': `${Math.max(0, (1 - fade) * 100)}%`,
       }) as React.CSSProperties,
-    [tileWidth, tileHeight, gap, radius, perspective, lift, dim, grayscale, overlayColor, fade]
+    [tileW, tileH, tileGap, radius, perspective, lift, dim, grayscale, overlayColor, fade]
   );
+
+  const tileSizes = tileW > 0 ? `${tileW}px` : sizes;
 
   const renderTile = (item: DriftItem, id: string, col: number, copy: number) => {
     const meta = IMAGES[item.slug];
     const inner = (
       <span className="drift-wall__inner">
         <picture>
-          <source type="image/avif" srcSet={srcSet(item.slug, 'avif')} sizes={sizes} />
-          <source type="image/webp" srcSet={srcSet(item.slug, 'webp')} sizes={sizes} />
+          {/* The measured tile, not a guess: the fitted width is known by the
+              time anything paints, and a `sizes` written for the desktop tile
+              had phones downloading frames three times the size they drew. */}
+          <source type="image/avif" srcSet={srcSet(item.slug, 'avif')} sizes={tileSizes} />
+          <source type="image/webp" srcSet={srcSet(item.slug, 'webp')} sizes={tileSizes} />
           <img
             src={fallbackSrc(item.slug)}
             alt={item.title ?? meta.alt}
