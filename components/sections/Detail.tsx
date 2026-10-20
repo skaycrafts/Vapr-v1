@@ -204,8 +204,12 @@ export default function Detail({ tone = 'ink' }: { tone?: 'ink' | 'paper' }) {
         rows on a laptop holds twelve on a phone — the grid reads as a mosaic
         and the photographs stop being photographs. These are five rows of
         the tile size each width produces.
+
+        The first step is the tallest because it is also the widest tile: a
+        phone shows three columns rather than five, so each one is half as
+        wide again and five rows of it need more room.
       */}
-      <div className="mt-14 h-[26svh] min-h-[11rem] w-full sm:h-[34svh] md:mt-16 md:h-[46svh] lg:h-[62svh]">
+      <div className="mt-14 h-[40svh] min-h-[15rem] w-full sm:h-[34svh] md:mt-16 md:h-[46svh] lg:h-[62svh]">
         <DriftWall
           items={WALL}
           columns={5}

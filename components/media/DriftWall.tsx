@@ -52,6 +52,14 @@ export type DriftItem = {
 export type DriftWallProps = {
   items: readonly DriftItem[];
   columns?: number;
+  /**
+   * Columns below `narrowAt`. Five columns of a 390px screen are 68px wide,
+   * which is a wall of texture and not a photograph of anything; three are
+   * half as wide again and still read as a grid.
+   */
+  narrowColumns?: number;
+  /** The width at which the wall drops to `narrowColumns`. */
+  narrowAt?: number;
   tileWidth?: number;
   tileHeight?: number;
   gap?: number;
@@ -101,6 +109,8 @@ const columnFactor = (index: number, variance: number) => {
 export default function DriftWall({
   items,
   columns = 5,
+  narrowColumns = 3,
+  narrowAt = 640,
   tileWidth = 200,
   tileHeight = 132,
   gap = 18,
@@ -156,11 +166,22 @@ export default function DriftWall({
    * scale with the tile, so the composition is the same picture at every
    * size rather than a different one.
    */
+  /**
+   * How many columns this screen gets.
+   *
+   * Fitting five columns to a phone works — every column is on screen — but
+   * at 68px a tile the photographs stop being photographs. Three columns at
+   * the same width are 99px, which still reads as a wall and lets a frame be
+   * seen. The deal, the loop and the fit all key off this rather than the
+   * prop, so a resize across the threshold re-deals the whole wall.
+   */
+  const cols = size.width > 0 && size.width < narrowAt ? Math.min(columns, narrowColumns) : columns;
+
   const fit = useMemo(() => {
     const PLANE_SPREAD = 1.18;
-    const natural = columns * (tileWidth + gap) * PLANE_SPREAD;
+    const natural = cols * (tileWidth + gap) * PLANE_SPREAD;
     return Math.min(1, (size.width * 0.98) / natural);
-  }, [columns, tileWidth, gap, size.width]);
+  }, [cols, tileWidth, gap, size.width]);
 
   const tileW = Math.round(tileWidth * fit);
   const tileH = Math.round(tileHeight * fit);
@@ -168,10 +189,10 @@ export default function DriftWall({
 
   /** Deal the photographs across the columns, round robin. */
   const columnItems = useMemo(() => {
-    const cols: DriftItem[][] = Array.from({ length: columns }, () => []);
-    items.forEach((item, i) => cols[i % columns].push(item));
-    return cols.map((col) => (col.length ? col : items.slice(0, 1)));
-  }, [items, columns]);
+    const dealt: DriftItem[][] = Array.from({ length: cols }, () => []);
+    items.forEach((item, i) => dealt[i % cols].push(item));
+    return dealt.map((col) => (col.length ? col : items.slice(0, 1)));
+  }, [items, cols]);
 
   /**
    * How tall one repeat of a column is, and how many repeats it takes to
