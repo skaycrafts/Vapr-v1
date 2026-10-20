@@ -33,6 +33,16 @@ import type { ImageSlug } from '@/lib/media';
  * was the wrong place to meet them. `note` carries the disclosure for a
  * property whose own shared rooms have not been photographed yet.
  */
+/** Up to the six the site has. Beyond that the figure itself is fine. */
+const COUNT_WORDS: Record<number, string> = {
+  1: 'One',
+  2: 'Two',
+  3: 'Three',
+  4: 'Four',
+  5: 'Five',
+  6: 'Six',
+};
+
 export default function Spaces({
   note,
   overrides,
@@ -44,9 +54,29 @@ export default function Spaces({
    * rooms, one list, and each property says only where it departs from it.
    */
   overrides?: Readonly<
-    Record<string, { readonly name?: string; readonly line?: string; readonly image?: string }>
+    Record<
+      string,
+      {
+        readonly name?: string;
+        readonly line?: string;
+        readonly image?: string;
+        /** Not in this building at all, or not worth a frame of its own. */
+        readonly omit?: boolean;
+      }
+    >
   >;
 } = {}) {
+  /**
+   * The rooms this property actually shows, in the shared order.
+   *
+   * Resolved once, here, rather than inside the list: the pinned timeline
+   * counts the plates to decide how long the sequence runs, and the numbers
+   * down the side are positions in what is on screen. Both have to agree
+   * with a list that is six long in one building and four in another.
+   */
+  const spaces = SPACES.map((base) => ({ ...base, ...(overrides?.[base.id] ?? {}) })).filter(
+    (space) => !space.omit
+  );
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
 
@@ -185,7 +215,13 @@ export default function Spaces({
             The rest of it
           </RevealText>
           <div className="max-w-[38ch]">
-            <p className="text-mist">Six shared rooms, and what each one is for.</p>
+            {/* Counted, not asserted. Guindy shows four of these rooms and
+                Ashok Nagar six, and a heading that says six either way is
+                wrong on one of the two pages. */}
+            <p className="text-mist">
+              {COUNT_WORDS[spaces.length] ?? spaces.length} shared rooms, and what each one is
+              for.
+            </p>
             {/* Where the photographs are not of the building you are reading
                 about, the page says so rather than letting the pictures
                 imply otherwise. */}
@@ -198,9 +234,7 @@ export default function Spaces({
           single stage and the items stack on top of each other.
         */}
         <ol className="group-data-[scene=on]:relative group-data-[scene=on]:mt-8 group-data-[scene=on]:min-h-0 group-data-[scene=on]:flex-1">
-          {SPACES.map((base, i) => {
-            // The room this property actually has at this position.
-            const space = { ...base, ...(overrides?.[base.id] ?? {}) };
+          {spaces.map((space, i) => {
             return (
             <li
               key={space.id}

@@ -186,7 +186,16 @@ export type Location = {
    * other one has a stair worth photographing".
    */
   readonly spaces?: Readonly<
-    Record<string, { readonly name?: string; readonly line?: string; readonly image?: string }>
+    Record<
+      string,
+      {
+        readonly name?: string;
+        readonly line?: string;
+        readonly image?: string;
+        /** Left out of this property's sequence entirely. */
+        readonly omit?: boolean;
+      }
+    >
   >;
   readonly heroImage: string | null;
 };
@@ -397,10 +406,18 @@ export const LOCATIONS: readonly Location[] = [
       'guindy-room-wide',
       'guindy-room-twin',
     ],
-    // Three of the six shared rooms are this building's own now. Reception,
-    // the stair and lift, and the parking are still Ashok Nagar's, which is
-    // what the disclosure below the section says.
+    /*
+     * Four rooms, every one of them this building.
+     *
+     * Reception and the parking were the last two frames borrowed from Ashok
+     * Nagar; rather than show another hotel's desk under this one's name they
+     * are left out, and the section is four rooms long here and six at Ashok
+     * Nagar. Put them back the moment Guindy's own are photographed — the
+     * entries below are all that stand between them and the page.
+     */
     spaces: {
+      reception: { omit: true },
+      parking: { omit: true },
       dining: { image: 'guindy-dining' },
       meeting: { image: 'guindy-meeting' },
       common: { image: 'guindy-lounge' },
@@ -413,7 +430,7 @@ export const LOCATIONS: readonly Location[] = [
         image: 'guindy-gym',
       },
     },
-    spacesArePlaceholder: true,
+    // Nothing borrowed is shown any more, so there is nothing to disclose.
     // Guindy's own building at last. `imagesArePlaceholder` still stands and
     // still drives the disclosures — the *rooms* here are Ashok Nagar's — but
     // the exterior is no longer among them, and `facade-canopy` was a
