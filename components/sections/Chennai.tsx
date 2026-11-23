@@ -5,6 +5,7 @@ import Emblem from '@/components/brand/Emblem';
 import { CHENNAI } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
+import { useCapability } from '@/motion/capability';
 import { EASE, SCRUB } from '@/motion/config';
 
 /**
@@ -131,6 +132,7 @@ const NOISE_PLACEMENT_CSS = `
 export default function Chennai() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const { pointerMotion } = useCapability();
 
   useMotionEffect(root, ({ q }) => {
     const el = root.current;
@@ -236,10 +238,26 @@ export default function Chennai() {
     noise.forEach((word, i) => {
       const at = 0.7 + i * 0.45;
 
+      /*
+       * The blur is dropped on a phone, and only there.
+       *
+       * A scrubbed `filter: blur()` is the most expensive thing on this
+       * page: every frame of the scrub re-rasterises the word at a new
+       * radius, at 7vw, four words deep. Scale and opacity are composited
+       * and cost nothing. The arrival still reads as an arrival — it fades
+       * and settles rather than focusing — and the scene stops dropping
+       * frames in the middle of its own sentence.
+       */
       tl.fromTo(
         word,
-        { opacity: 0, scale: 0.94, filter: 'blur(6px)' },
-        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.5, ease: EASE.out },
+        { opacity: 0, scale: 0.94, ...(pointerMotion ? { filter: 'blur(6px)' } : {}) },
+        {
+          opacity: 1,
+          scale: 1,
+          ...(pointerMotion ? { filter: 'blur(0px)' } : {}),
+          duration: 0.5,
+          ease: EASE.out,
+        },
         at
       );
 
@@ -261,7 +279,16 @@ export default function Chennai() {
      * sentence — a stay worth remembering — was the one nobody ever read.
      * 3.2 gives it a held beat, the same as the three words before it.
      */
-    tl.to(noise, { opacity: 0, filter: 'blur(10px)', duration: 0.45, ease: EASE.inOut }, 3.2).to(
+    tl.to(
+      noise,
+      {
+        opacity: 0,
+        ...(pointerMotion ? { filter: 'blur(10px)' } : {}),
+        duration: 0.45,
+        ease: EASE.inOut,
+      },
+      3.2
+    ).to(
       '.chennai-title',
       { opacity: 0, duration: 0.3 },
       3.2
@@ -298,7 +325,7 @@ export default function Chennai() {
     return () => {
       delete el.dataset.scene;
     };
-  });
+  }, [pointerMotion]);
 
   return (
     <section

@@ -187,12 +187,27 @@ export default function DriftWall({
   const tileH = Math.round(tileHeight * fit);
   const tileGap = Math.max(4, Math.round(gap * fit));
 
-  /** Deal the photographs across the columns, round robin. */
+  /**
+   * Deal the photographs across the columns, round robin — from a shorter
+   * deck on a phone.
+   *
+   * Twenty photographs across five columns, each column doubled for the
+   * loop, is forty-six images live at once. On a phone showing three
+   * columns, two thirds of them are never on screen long enough to be
+   * looked at, and all of them are decoded, held in memory and composited.
+   * Twelve is enough that neighbours still differ down a column, which is
+   * the only thing the deck's order was protecting.
+   */
+  const deck = useMemo(
+    () => (cols < columns ? items.slice(0, Math.max(cols * 4, 12)) : items),
+    [items, cols, columns]
+  );
+
   const columnItems = useMemo(() => {
     const dealt: DriftItem[][] = Array.from({ length: cols }, () => []);
-    items.forEach((item, i) => dealt[i % cols].push(item));
-    return dealt.map((col) => (col.length ? col : items.slice(0, 1)));
-  }, [items, cols]);
+    deck.forEach((item, i) => dealt[i % cols].push(item));
+    return dealt.map((col) => (col.length ? col : deck.slice(0, 1)));
+  }, [deck, cols]);
 
   /**
    * How tall one repeat of a column is, and how many repeats it takes to
@@ -286,7 +301,36 @@ export default function DriftWall({
     };
 
     gsap.ticker.add(tick);
+
+    const container = containerRef.current;
+    if (!container) return () => gsap.ticker.remove(tick);
+
+    /*
+     * The wall stops moving when it is not being looked at.
+     *
+     * The loop was joined once and ran for the life of the page — five
+     * columns translated, a plane re-transformed, on every frame of every
+     * scroll, including the several screens of enquiry form and footer where
+     * the wall is nowhere near the viewport. Nothing was visibly wrong,
+     * which is exactly why it went unnoticed: it was simply a tax on every
+     * other animation on the page.
+     *
+     * The margin is generous so the wall is already moving by the time any
+     * of it is on screen — it must never be caught standing still.
+     */
+    let running = true;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting === running) return;
+        running = entry.isIntersecting;
+        if (running) gsap.ticker.add(tick);
+        else gsap.ticker.remove(tick);
+      },
+      { rootMargin: '60% 0px' }
+    );
+    io.observe(container);
     return () => {
+      io.disconnect();
       gsap.ticker.remove(tick);
     };
   }, [animate, applyPlane, baseVelocities, columnMeta, parallax, pauseOnHover]);

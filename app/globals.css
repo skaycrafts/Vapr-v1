@@ -626,6 +626,26 @@
   -webkit-user-drag: none;
 }
 
+/*
+ * No filter on a phone.
+ *
+ * `saturate(0.92)` is eight per cent of colour nobody can name, and it puts
+ * every tile through a filter pass — two dozen images, each on its own
+ * raster path, inside a 3D plane that is moving. It is a real cost for an
+ * invisible difference on a 390px screen, and dropping it is the single
+ * cheapest thing available in this section.
+ *
+ * Keyed on the pointer rather than the width: it is the device that cannot
+ * afford it, not the window. A desktop browser narrowed to phone width is
+ * still a desktop and keeps the grade.
+ */
+@media (pointer: coarse) {
+  .drift-wall__tile img {
+    filter: none;
+    transition: none;
+  }
+}
+
 .drift-wall__overlay {
   position: absolute;
   inset: 0;

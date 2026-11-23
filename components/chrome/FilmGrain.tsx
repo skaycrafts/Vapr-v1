@@ -30,7 +30,17 @@ export default function FilmGrain() {
         // frame and left a strip of the page with no grain on it. The overhang
         // is bigger than the furthest the animation can travel, so there is
         // always tile under every pixel.
-        className="grain-layer pointer-events-none fixed -inset-[10%] z-[var(--z-overlay)] opacity-[0.055] mix-blend-overlay"
+        /*
+         * The blend is desktop-only.
+         *
+         * The tile is static and the tile is free, but `mix-blend-overlay` on
+         * a full-viewport fixed layer is not: every scrolled frame has to
+         * read the page underneath and blend the whole viewport again. On a
+         * phone that tax is paid on every frame of every scroll, for a grain
+         * that is 5.5% opaque on a 390px screen. The vignette below stays —
+         * it is a plain gradient and composites once.
+         */
+        className="grain-layer pointer-events-none fixed -inset-[10%] z-[var(--z-overlay)] opacity-[0.055] max-[767px]:hidden md:mix-blend-overlay"
         style={{ backgroundImage: NOISE, backgroundSize: '180px 180px' }}
       />
       <div

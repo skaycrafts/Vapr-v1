@@ -106,7 +106,26 @@ export default function DepthText({
   const rootRef = useRef<HTMLSpanElement>(null);
   const stageRef = useRef<HTMLSpanElement>(null);
 
-  const safeLayers = clamp(Math.round(Number(layers) || 1), 2, MAX_LAYERS);
+  /*
+   * The extrusion is thinner on a touch device, and it holds still.
+   *
+   * Thirty layers of a word set at 17vw is thirty full-width glyph layers to
+   * paint and composite, and the orbit asks for all of them again every
+   * frame — measured on a throttled phone, the hero was the worst stretch of
+   * the whole page at 73ms a frame. Ten layers read as the same carved word
+   * at that size, and standing still costs nothing at all: with no orbit the
+   * ticker is never registered.
+   *
+   * A pointer is the proxy for "a machine with room to spare". It is the
+   * same signal that already decides whether the word follows the cursor,
+   * which it cannot do on a phone anyway.
+   */
+  const spare = pointerMotion;
+  const safeLayers = clamp(
+    Math.round(Number(layers) || 1),
+    2,
+    spare ? MAX_LAYERS : Math.min(10, MAX_LAYERS)
+  );
   const safeDepth = clamp(Number(depth) || 0, 0, 12);
   const safeTilt = clamp(Number(tilt) || 0, 0, 12);
   const safeSmoothing = clamp(Number(smoothing) || 0.14, 0.02, 0.35);
@@ -146,6 +165,13 @@ export default function DepthText({
     }
 
     const track = pointerTracking && pointerMotion;
+    const orbit = autoOrbit && spare;
+
+    // Nothing to drive: hold the resting angle and never join the ticker.
+    if (!track && !orbit) {
+      apply(base.x, base.y);
+      return;
+    }
     const current = { ...base };
     const target = { ...base };
     let pointerActive = false;
@@ -178,7 +204,7 @@ export default function DepthText({
       // orbit would jump most of a cycle on the frame it came back.
       elapsed += Math.min(0.05, Math.max(0, deltaMs) / 1000);
 
-      if ((!track || !pointerActive) && autoOrbit) {
+      if ((!track || !pointerActive) && orbit) {
         const orbit = elapsed * safeOrbitSpeed * Math.PI * 2;
         // A pointer that has simply gone idle gets a smaller drift than a
         // device that never had one, so the word does not appear to escape.
@@ -203,7 +229,7 @@ export default function DepthText({
       }
       gsap.ticker.remove(tick);
     };
-  }, [animate, autoOrbit, base, pointerMotion, pointerTracking, safeOrbitSpeed, safeSmoothing, safeTilt]);
+  }, [animate, autoOrbit, base, pointerMotion, pointerTracking, safeOrbitSpeed, safeSmoothing, safeTilt, spare]);
 
   const rootStyle = {
     ...style,
