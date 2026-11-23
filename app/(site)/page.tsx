@@ -4,7 +4,12 @@ import Chennai from '@/components/sections/Chennai';
 import Reel from '@/components/sections/Reel';
 import Detail from '@/components/sections/Detail';
 import Reserve from '@/components/sections/Reserve';
+import type { Metadata } from 'next';
 import Chapter from '@/motion/primitives/Chapter';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 /**
  * The homepage is the brand and the choice; the buildings are their own pages.

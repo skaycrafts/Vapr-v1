@@ -32,7 +32,23 @@ export const SITE = {
    * the literal `process.env.NEXT_PUBLIC_…` spelling for the reason given
    * above `CONTACT`.
    */
-  url: (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://vapr-v1-production.up.railway.app').replace(/\/+$/, ''),
+  url: (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://vaprrooms.com').replace(/\/+$/, ''),
+} as const;
+
+/**
+ * What search results and share cards say about the homepage.
+ *
+ * Separate from `SITE.tagline` and `SITE.description`, which are the brand's
+ * voice. A results page is read in a different way from the site: a visitor
+ * scanning ten blue links is matching words to what they typed — "hotel",
+ * "Guindy", "airport", "T. Nagar" — and the poetic line never contains them.
+ * Each property page owns its own place and landmark terms, so the homepage
+ * names both areas and leaves "airport" and "metro" to the description.
+ */
+export const SEO = {
+  title: 'VAPR — Hotels in Guindy & Ashok Nagar, Chennai',
+  description:
+    'Two small hotels in Chennai: VAPR Guindy, 7.8 km from Chennai Airport, and VAPR Ashok Nagar, 850 m from the metro near T. Nagar. Breakfast and Wi-Fi included.',
 } as const;
 
 /**
@@ -198,7 +214,48 @@ export type Location = {
     >
   >;
   readonly heroImage: string | null;
+  /**
+   * The postal locality where it differs from `area` — Guindy's postcode is
+   * Ekkatuthangal's. Used in structured data, so the address machines read
+   * matches the one on the Treebo listing and the post office's, while the
+   * page keeps calling the hotel by the name guests know.
+   */
+  readonly locality?: string;
+  /** The property's own listing on the booking platform its facts came from. */
+  readonly listingUrl: string;
+  /**
+   * The search-facing half of the property.
+   *
+   * `positioning` is the page's H1: the one line that says what this hotel
+   * is for — the airport side or the city side — in the words someone types.
+   * `title` and `description` are the result snippet. `intro` is a single
+   * self-contained paragraph of facts, written so that it still makes sense
+   * when quoted on its own, which is how answer engines use a page.
+   */
+  readonly seo: {
+    readonly positioning: string;
+    readonly title: string;
+    readonly description: string;
+    readonly intro: string;
+  };
+  /** Shown on the page and marked up from the same list, so the two agree. */
+  readonly faqs: readonly { readonly q: string; readonly a: string }[];
 };
+
+/**
+ * The questions both hotels answer the same way. The wording repeats `STAY`
+ * below — change one, change the other.
+ */
+const sharedFaqs = (name: string) => [
+  {
+    q: `What are the check-in and check-out times at ${name}?`,
+    a: `Check-in is from 1.00 pm and check-out is by 11.00 am. Early check-in depends on what is free that morning — give the desk a day’s notice and they will try.`,
+  },
+  {
+    q: `Is breakfast included at ${name}?`,
+    a: 'Yes. Breakfast and Wi-Fi are included with every room — idli, pongal, toast and filter coffee. Lunch and dinner are available on a pre-order basis.',
+  },
+];
 
 /** Both properties keep the same desk hours. */
 export const STAY = {
@@ -318,6 +375,38 @@ export const LOCATIONS: readonly Location[] = [
     // the street view goes back to being one of the gallery images rather
     // than standing in for the building.
     panelImage: 'ashok-nagar-exterior',
+    listingUrl: 'https://www.treebo.com/hotels-in-chennai/treebo-premium-vapr-ashok-nagar-ashok-nagar-4050/',
+    seo: {
+      positioning: 'Hotel in Ashok Nagar, Chennai — near T. Nagar and the metro',
+      title: 'Hotel in Ashok Nagar, Chennai — Near Metro & T. Nagar | VAPR',
+      description:
+        '30 AC rooms on 46th Street, Ashok Nagar — 850 m from the metro, 2.6 km from T. Nagar. Single, double or triple rooms. Breakfast and Wi-Fi included.',
+      intro:
+        'VAPR Ashok Nagar is a 30-room hotel at 59/31, 46th Street, Sarvamangala Colony, Ashok Nagar, Chennai 600083 — the city-side VAPR. It sits on a quiet residential street 850 metres from Ashok Nagar Metro, 2.6 km from T. Nagar and 3.4 km from Pondy Bazaar, which suits shopping trips, weddings, family visits and hospital stays. Rooms are single, double or triple occupancy, and breakfast and Wi-Fi are included.',
+    },
+    faqs: [
+      {
+        q: 'How far is VAPR Ashok Nagar from the metro?',
+        a: 'Ashok Nagar Metro station is 850 metres away, about eight minutes on foot.',
+      },
+      {
+        q: 'How far is VAPR Ashok Nagar from T. Nagar and Pondy Bazaar?',
+        a: 'T. Nagar is 2.6 km away and Pondy Bazaar 3.4 km. Forum Mall is 2.9 km and SIIMS Hospital 2.6 km.',
+      },
+      {
+        q: 'What rooms does VAPR Ashok Nagar have?',
+        a: 'Thirty rooms, taken as single, double or triple occupancy, with a maximum of three guests in a room. Triple rooms have two beds and an additional mattress for the third guest. Every room has air conditioning, a work desk, a wardrobe, a television with DTH and a geyser.',
+      },
+      ...sharedFaqs('VAPR Ashok Nagar'),
+      {
+        q: 'Is there parking at VAPR Ashok Nagar?',
+        a: 'Yes, outdoor parking on site. The building also has a lift and room service.',
+      },
+      {
+        q: 'How far is VAPR Ashok Nagar from Chennai Airport and Chennai Central?',
+        a: 'Chennai Airport is 9 km away and Chennai Central 10 km. For a stay nearer the airport, VAPR Guindy is 7.8 km from it.',
+      },
+    ],
   },
   {
     slug: 'guindy',
@@ -438,6 +527,39 @@ export const LOCATIONS: readonly Location[] = [
     // the page saying so.
     heroImage: 'guindy-exterior',
     panelImage: 'guindy-exterior',
+    locality: 'Ekkatuthangal',
+    listingUrl: 'https://www.treebo.com/hotels-in-chennai/treebo-vapr-guindy-ekkatuthangal-ekkatuthangal-2559/',
+    seo: {
+      positioning: 'Hotel in Guindy, near Chennai Airport',
+      title: 'Hotel in Guindy near Chennai Airport | VAPR Guindy',
+      description:
+        '16 AC Deluxe rooms in Guindy, 7.8 km from Chennai Airport. Breakfast and Wi-Fi included, plus a gym, indoor parking and 24-hour security.',
+      intro:
+        'VAPR Guindy is a 16-room hotel at 4, 4th Cross Street, Kalaimagal Nagar, Ekkatuthangal, Guindy, Chennai 600032 — the airport-side VAPR. Chennai Airport is 7.8 km away, which makes it a practical base for early and late flights and for work in Guindy’s industrial and office belt. Every room is a Deluxe room with a queen or two single beds; breakfast and Wi-Fi are included, and the building has a gym, indoor parking and 24-hour security.',
+    },
+    faqs: [
+      {
+        q: 'How far is VAPR Guindy from Chennai Airport?',
+        a: 'About 7.8 km. The desk can arrange a cab on request, at a charge.',
+      },
+      {
+        q: 'What rooms does VAPR Guindy have?',
+        a: 'Sixteen Deluxe rooms, each with a queen bed or two separate single beds. Every room has air conditioning, a mini fridge, a work desk, a sofa chair and coffee table, a wardrobe with a locker, a television with DTH and a geyser.',
+      },
+      ...sharedFaqs('VAPR Guindy'),
+      {
+        q: 'Is there parking at VAPR Guindy?',
+        a: 'Yes, indoor parking, with security on the building 24 hours a day.',
+      },
+      {
+        q: 'Does VAPR Guindy have a gym?',
+        a: 'Yes. Two treadmills, a cross-trainer and a cycle, in an air-conditioned room.',
+      },
+      {
+        q: 'What is near VAPR Guindy?',
+        a: 'Ashok Pillar is 2.1 km away, Guindy Bus Stand 3.1 km, MIOT International 3.3 km, Kauvery Hospital 4.1 km, Guindy Station 5.4 km and Phoenix Marketcity 5.6 km. Chennai Central is 8.6 km.',
+      },
+    ],
   },
 ];
 
@@ -492,8 +614,14 @@ export const HERO = {
    * it takes.
    */
   accent: 'quiet',
-  /** Under the wordmark: where the two of them are, before anything else. */
-  areas: 'Guindy and Ashok Nagar',
+  /**
+   * Under the wordmark: where the two of them are, before anything else.
+   *
+   * This is the homepage's H1, so it says what VAPR is as well as where. The
+   * statement below is the line people remember; this is the one a search
+   * engine reads as the page's subject.
+   */
+  areas: 'Hotels in Guindy and Ashok Nagar',
   scrollCue: 'Scroll',
 } as const;
 
@@ -508,7 +636,7 @@ export const LOCATIONS_INTRO = {
    * is rendered with `whitespace-pre-line`, the same way the hero sets its
    * statement across two lines.
    */
-  body: 'Ashok Nagar & Guindy —\nsame comfort, same people, just closer to wherever you’re headed.',
+  body: 'Ashok Nagar & Guindy —\nsame comfort, same people, just closer to wherever you’re headed. Guindy is the airport side, 7.8 km from Chennai Airport. Ashok Nagar is the city side, 850 m from the metro and close to T. Nagar.',
 } as const;
 
 export const MANIFESTO = {

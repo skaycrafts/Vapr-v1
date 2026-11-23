@@ -7,7 +7,7 @@ import Frame from '@/components/media/Frame';
 import Emblem from '@/components/brand/Emblem';
 import RevealText from '@/motion/primitives/RevealText';
 import RevealImage from '@/motion/primitives/RevealImage';
-import { SITE, placeOf, type Location } from '@/lib/content';
+import { SITE, type Location } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 import { useMotionEffect } from '@/motion/useMotionEffect';
 import { CINEMA, EASE, SCRUB, STAGGER } from '@/motion/config';
@@ -96,12 +96,16 @@ export default function PropertyHero({ location }: { location: Location }) {
           Both hotels
         </Link>
 
-        <p className="ph-meta type-label">{placeOf(location)}</p>
+        {/* The H1, set as the label over the name — "Hotel in Guindy, near
+            Chennai Airport". The name below is the largest thing on the page,
+            but a heading that is only "Guindy" tells a search engine the page
+            is about a neighbourhood, not about a place to stay in it. */}
+        <h1 className="ph-meta type-label">{location.seo.positioning}</h1>
 
         {/* The property's name is the largest statement on the page, so it
             gets the cinematic weight rather than the content weight (§06). */}
         <RevealText
-          as="h1"
+          as="p"
           mode="lines"
           immediate
           scale="cinema"

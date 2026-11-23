@@ -3,10 +3,12 @@ import { notFound } from 'next/navigation';
 import PropertyHero from '@/components/property/PropertyHero';
 import PropertyRoom from '@/components/property/PropertyRoom';
 import GettingThere from '@/components/property/GettingThere';
+import PropertyGuide from '@/components/property/PropertyGuide';
 import Spaces from '@/components/sections/Spaces';
 import Reserve from '@/components/sections/Reserve';
 import Detail from '@/components/sections/Detail';
-import { LOCATIONS, SITE, STAY, locationBySlug, placeOf } from '@/lib/content';
+import { LOCATIONS, locationBySlug } from '@/lib/content';
+import { jsonLd, propertyNodes } from '@/lib/schema';
 import { renditionOf, type ImageSlug } from '@/lib/media';
 
 type Params = { location: string };
@@ -26,27 +28,19 @@ export async function generateMetadata({
   const location = locationBySlug(slug);
   if (!location) return {};
 
-  const title = `${location.shortName} — ${placeOf(location)}`;
   /**
-   * Built from whichever the property has: three occupancies, or one named
-   * category and its bed. It read "Maple rooms with queen, or twin beds that
-   * join" — a sentence that is wrong the moment a property stops having a
-   * single room category, which Ashok Nagar now has.
+   * Written per property in `content.ts` rather than assembled here. The
+   * assembled version — "Guindy — Chennai", and a description built from the
+   * blurb and the room list — never contained "hotel", the airport or T.
+   * Nagar, which are the words a guest types.
+   *
+   * `absolute`, because the written titles already carry the brand and the
+   * root template would add a second "— VAPR".
    */
-  const occupancies = location.roomTypes?.map((t) =>
-    t.name.toLowerCase().replace(/\s*occupancy$/, '')
-  );
-  const rooms = occupancies?.length
-    ? `Rooms for ${
-        occupancies.length > 1
-          ? `${occupancies.slice(0, -1).join(', ')} and ${occupancies[occupancies.length - 1]}`
-          : occupancies[0]
-      } occupancy.`
-    : `${location.room.name} rooms with ${location.room.bed?.toLowerCase() ?? 'a double bed'}.`;
-  const description = `${location.blurb} ${rooms} Breakfast and Wi-Fi included.`;
+  const { title, description } = location.seo;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: `/${location.slug}` },
     openGraph: {
@@ -70,38 +64,17 @@ export default async function LocationPage({ params }: { params: Promise<Params>
   if (!location) notFound();
 
   /**
-   * Per-property Hotel schema. The guest rating is shown on the page with its
-   * source named, but is deliberately not marked up as `aggregateRating` —
-   * those reviews were collected by a booking platform, not by this site.
+   * The hotel, its page, its breadcrumb and its questions — linked by `@id`
+   * to the brand nodes the site layout emits. The guest rating is shown on
+   * the page with its source named, but is deliberately not marked up as
+   * `aggregateRating`: those reviews were collected by a booking platform,
+   * not by this site.
    */
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Hotel',
-    name: location.name,
-    description: location.blurb,
-    url: `${SITE.url}/${location.slug}`,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: location.street,
-      addressLocality: `${location.area}, ${SITE.city}`,
-      addressRegion: SITE.region,
-      postalCode: location.postalCode,
-      addressCountry: SITE.country,
-    },
-    numberOfRooms: location.roomCount,
-    checkinTime: '13:00',
-    checkoutTime: '11:00',
-    amenityFeature: [...location.facilities, ...STAY.included.map((i) => i.split(' — ')[0])].map(
-      (name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })
-    ),
-    parentOrganization: { '@type': 'Organization', name: SITE.legalName, url: SITE.url },
-  };
-
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(propertyNodes(location)) }}
       />
       {/*
         The property, end to end: the building, its one room, the rooms
@@ -139,6 +112,10 @@ export default async function LocationPage({ params }: { params: Promise<Params>
       */}
       <Detail tone="ink" />
       <GettingThere location={location} />
+      {/* The same facts again, in sentences: what this hotel is for, and the
+          questions guests ask before booking. Plain text on purpose — it is
+          what search and answer engines quote. */}
+      <PropertyGuide location={location} />
       <Reserve defaultSlug={location.slug} />
     </>
   );

@@ -282,9 +282,12 @@ export default function Hero() {
           together, and the gap is the same whether the word is at its 4rem
           floor on a phone or its 11rem ceiling on a desktop.
         */}
-        <p className="hero-areas type-label text-center text-[0.8125rem] tracking-[0.2em] text-mist md:text-[0.9375rem]">
+        {/* The page's H1. The statement at the foot of the frame is larger,
+            but it says how the place feels rather than what it is, and the
+            heading a search engine files the page under should be the second. */}
+        <h1 className="hero-areas type-label text-center text-[0.8125rem] tracking-[0.2em] text-mist md:text-[0.9375rem]">
           {HERO.areas}
-        </p>
+        </h1>
       </div>
 
 
@@ -318,7 +321,7 @@ export default function Hero() {
             rise out of their own clipping mask a fifth of a second apart, so
             the line arrives the way it reads.
           */}
-          <h1 className="type-display max-w-[16ch] text-[clamp(2.25rem,6.4vw,5.25rem)] text-ink">
+          <p className="type-display max-w-[16ch] text-[clamp(2.25rem,6.4vw,5.25rem)] text-ink">
             <span className="hero-line-1 split-mask">
               <span className="block" style={{ willChange: 'transform' }}>
                 {accented(LINES[0], HERO.accent)}
@@ -327,7 +330,7 @@ export default function Hero() {
             <span className="hero-line-2 split-mask">
               <span className="block">{LINES[1]}</span>
             </span>
-          </h1>
+          </p>
 
           {/* The two addresses used to sit above this, as an eyebrow and a
               line of areas. They have gone: the hero already names the city

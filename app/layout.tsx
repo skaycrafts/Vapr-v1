@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Inter_Tight, Pinyon_Script } from 'next/font/google';
-import { SITE } from '@/lib/content';
+import { SEO, SITE } from '@/lib/content';
 import { renditionOf } from '@/lib/media';
 import './globals.css';
 
@@ -61,16 +61,16 @@ const pinyon = Pinyon_Script({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
+    default: SEO.title,
     template: `%s — ${SITE.name}`,
   },
-  description: SITE.description,
+  description: SEO.description,
   applicationName: SITE.name,
   openGraph: {
     type: 'website',
     siteName: SITE.name,
-    title: `${SITE.name} — ${SITE.tagline}`,
-    description: SITE.description,
+    title: SEO.title,
+    description: SEO.description,
     locale: 'en_IN',
     // Dimensions from the manifest rather than typed in: this said 1067 tall
     // for a frame that is 704, and platforms that trust the declared size
@@ -79,11 +79,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE.name} — ${SITE.tagline}`,
-    description: SITE.description,
+    title: SEO.title,
+    description: SEO.description,
     images: [renditionOf('facade-dusk').url],
   },
-  alternates: { canonical: '/' },
+  // No canonical here. Set at the root it was inherited by every route that
+  // did not set its own — the admin desk and the 404 both claimed to be the
+  // homepage. The homepage and each property declare their own.
   robots: { index: true, follow: true },
 };
 
