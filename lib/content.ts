@@ -617,11 +617,14 @@ export const HERO = {
   /**
    * Under the wordmark: where the two of them are, before anything else.
    *
-   * This is the homepage's H1, so it says what VAPR is as well as where. The
-   * statement below is the line people remember; this is the one a search
-   * engine reads as the page's subject.
+   * This is the homepage's H1 — the statement below is the line people
+   * remember, this is the one a search engine reads as the page's subject.
+   * It said "Hotels in Guindy and Ashok Nagar" for a while, to get the word
+   * "hotel" into the heading. The two place names are the line that was
+   * asked for and the line the frame wants; "hotel" is carried by the title,
+   * the description and every heading under the fold instead.
    */
-  areas: 'Hotels in Guindy and Ashok Nagar',
+  areas: 'Guindy and Ashok Nagar',
   scrollCue: 'Scroll',
 } as const;
 
