@@ -1,35 +1,86 @@
 import { NextResponse } from 'next/server';
-import { cookieName, isLocked, issue, matches, password } from '@/lib/server/admin-auth';
+import {
+  cookieName,
+  matches,
+  mode,
+  newSession,
+  password,
+  verifyWithSupabase,
+} from '@/lib/server/admin-auth';
 import { addressOf, allow } from '@/lib/server/limit';
 
 export const dynamic = 'force-dynamic';
 
-/** Sign in. Rate-limited on the same bucket as the public form. */
+/**
+ * Signing in and out.
+ *
+ * Rate-limited on its own bucket, so a hundred guesses against the desk's
+ * password cannot be made in a minute — and so that someone doing it cannot
+ * also exhaust the public form's allowance on the way.
+ */
 export async function POST(request: Request) {
-  const secret = password();
-  if (!isLocked() || !secret) {
+  const how = mode();
+  if (how === 'open') {
     return NextResponse.json({ ok: true, locked: false });
   }
+
   if (!allow(`admin:${addressOf(request)}`)) {
-    return NextResponse.json({ ok: false, error: 'Too many attempts.' }, { status: 429 });
+    return NextResponse.json(
+      { ok: false, error: 'Too many attempts. Wait a few minutes.' },
+      { status: 429 }
+    );
   }
-  const body = (await request.json().catch(() => ({}))) as { password?: string };
-  if (typeof body.password !== 'string' || !matches(body.password, secret)) {
-    return NextResponse.json({ ok: false, error: 'That is not the password.' }, { status: 401 });
+
+  const body = (await request.json().catch(() => ({}))) as {
+    email?: string;
+    password?: string;
+  };
+  const pass = typeof body.password === 'string' ? body.password : '';
+
+  let who: string;
+
+  if (how === 'supabase') {
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    if (!email || !pass) {
+      return NextResponse.json(
+        { ok: false, error: 'An email and a password are needed.' },
+        { status: 400 }
+      );
+    }
+    const result = await verifyWithSupabase(email, pass);
+    if (!result.ok) {
+      return NextResponse.json({ ok: false, error: result.error }, { status: 401 });
+    }
+    who = result.who;
+  } else {
+    const expected = password();
+    if (!expected || !matches(pass, expected)) {
+      return NextResponse.json({ ok: false, error: 'That is not the password.' }, { status: 401 });
+    }
+    who = 'the desk';
   }
-  const token = issue(secret);
-  const response = NextResponse.json({ ok: true, locked: true });
-  response.cookies.set(cookieName, token.value, {
+
+  const session = newSession(who);
+  if (!session) {
+    // Signing needs a secret. Saying so is better than issuing a cookie that
+    // cannot be verified and leaving someone at a login screen that loops.
+    return NextResponse.json(
+      { ok: false, error: 'Sessions are not configured on the server.' },
+      { status: 500 }
+    );
+  }
+
+  const response = NextResponse.json({ ok: true, who });
+  response.cookies.set(cookieName, session.value, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: token.maxAge,
+    maxAge: session.maxAge,
   });
   return response;
 }
 
-/** Sign out. */
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
   response.cookies.set(cookieName, '', { path: '/', maxAge: 0 });
