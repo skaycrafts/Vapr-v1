@@ -11,10 +11,32 @@ import { deskEmail, guestEmail } from './email-template';
  * why every path here returns rather than throws.
  *
  * Resend's HTTP API, over `fetch`, so no mail dependency enters the build.
- *   RESEND_API_KEY   the provider key
- *   VAPR_FROM_EMAIL  the sender, on a domain verified with the provider
- *   VAPR_DESK_EMAIL  where the desk's copy goes
+ *
+ *   RESEND_API_KEY   the provider key — a secret, environment only, never
+ *                    in this repository. Nothing sends until it is set.
+ *   VAPR_FROM_EMAIL  overrides the sender below
+ *   VAPR_DESK_EMAIL  overrides the desk address below
+ *
+ * The two addresses have defaults and the key does not, which is the whole
+ * point: an address is a business fact and belongs with the rest of the
+ * business facts, while a key is a credential and belongs nowhere near
+ * them. It also means one variable to set rather than three, and two fewer
+ * ways for a deployment to be half-configured.
  */
+
+/**
+ * Who the guest hears from. `vaprrooms.com` is verified with the provider,
+ * so any address on it can send.
+ *
+ * Spelled `enquiers` because that is what the desk asked for. If it was
+ * meant to be `enquiries`, it is `VAPR_FROM_EMAIL` and nothing else — the
+ * mailbox need not exist for sending, and replies go to the desk address
+ * below rather than to this one.
+ */
+const FROM = 'VAPR <enquiers@vaprrooms.com>';
+
+/** Where the enquiry itself lands. */
+const DESK = 'vapr.enquiry@gmail.com';
 
 export type NotifyResult = { sent: boolean; reason?: string };
 
@@ -24,11 +46,7 @@ async function send(letter: Letter): Promise<NotifyResult> {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) return { sent: false, reason: 'no email provider configured' };
 
-  // Resend's sandbox sender works without a verified domain, which is what
-  // makes this testable before anyone owns vapr-whatever.com. It can only
-  // deliver to the account's own address, so a real `VAPR_FROM_EMAIL` on a
-  // verified domain is required before a guest ever receives one of these.
-  const from = process.env.VAPR_FROM_EMAIL?.trim() || 'VAPR <onboarding@resend.dev>';
+  const from = process.env.VAPR_FROM_EMAIL?.trim() || FROM;
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -64,14 +82,13 @@ export async function notifyGuest(enquiry: Enquiry): Promise<NotifyResult> {
     html: letter.html,
     text: letter.text,
     // A reply to the acknowledgement should reach the desk, not the robot.
-    replyTo: process.env.VAPR_DESK_EMAIL?.trim() || undefined,
+    replyTo: process.env.VAPR_DESK_EMAIL?.trim() || DESK,
   });
 }
 
 /** The desk's copy, which is the one that has to arrive. */
 export async function notifyDesk(enquiry: Enquiry): Promise<NotifyResult> {
-  const to = process.env.VAPR_DESK_EMAIL?.trim();
-  if (!to) return { sent: false, reason: 'no desk address configured' };
+  const to = process.env.VAPR_DESK_EMAIL?.trim() || DESK;
   const letter = deskEmail(enquiry);
   return send({
     to,

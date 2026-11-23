@@ -122,7 +122,11 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
   const [email, setEmail] = useState('');
 
   /** Which channel actually carried it. Set once, when it is handed off. */
-  const [sentVia, setSentVia] = useState<'whatsapp' | 'email' | 'clipboard' | null>(null);
+  const [sentVia, setSentVia] = useState<'desk' | 'whatsapp' | 'email' | 'clipboard' | null>(null);
+  /** The desk's own reference, once the enquiry is lodged with it. */
+  const [ref, setRef] = useState<string | null>(null);
+  /** Something the desk refused — a closed date, a rejected field. */
+  const [refused, setRefused] = useState<string | null>(null);
 
   const location = LOCATIONS.find((l) => l.slug === slug) ?? null;
 
@@ -247,10 +251,59 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
 
   const send = useCallback(async () => {
     setStatus('sending');
+    setRefused(null);
 
-    // A beat, so the button's state change is legible rather than a flicker.
-    // It is not a fake network call: nothing is being waited on.
-    await new Promise((r) => window.setTimeout(r, 620));
+    /*
+     * The desk first.
+     *
+     * This used to hand the composed message to the guest's own WhatsApp or
+     * mail app — and with neither configured, to their clipboard, which
+     * meant the enquiry reached nobody while the screen that followed
+     * promised a call within thirty minutes. It is lodged with the hotel
+     * now, and the promise is one the desk can actually keep.
+     *
+     * The old handoffs are kept underneath as a fallback. If the request
+     * fails — the server is restarting, the guest's connection drops midway
+     * — the guest is handed their own message rather than told to start
+     * again, which is the one outcome worse than the clipboard.
+     */
+    try {
+      const response = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          location: slug,
+          checkIn: checkIn || null,
+          checkOut: checkOut || null,
+          guests,
+          rooms,
+          phone: phone.trim() || null,
+          email: email.trim() || null,
+        }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        ok?: boolean; ref?: string; error?: string;
+      };
+
+      if (data.ok && data.ref) {
+        setRef(data.ref);
+        setSentVia('desk');
+        setStatus('done');
+        return;
+      }
+
+      // A refusal the guest can act on — a date the hotel has closed, a
+      // field the server would not take. Said on the step they are on,
+      // rather than behind a screen that claims it was sent.
+      if (response.status === 400 || response.status === 409 || response.status === 429) {
+        setRefused(data.error ?? 'That did not go through. Try again in a moment.');
+        setStatus('form');
+        return;
+      }
+    } catch {
+      // Network, not refusal. Fall through to the handoffs below.
+    }
 
     if (whatsappHref) {
       window.open(whatsappHref, '_blank', 'noopener,noreferrer');
@@ -269,7 +322,7 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
     }
 
     setStatus('done');
-  }, [whatsappHref, mailHref, message]);
+  }, [whatsappHref, mailHref, message, name, slug, checkIn, checkOut, guests, rooms, phone, email]);
 
   // ── Motion ──────────────────────────────────────────────────────────────
   const stage = useRef<HTMLDivElement>(null);
@@ -418,11 +471,29 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
             promise and a lie, and it disappears the moment
             NEXT_PUBLIC_VAPR_WHATSAPP or NEXT_PUBLIC_VAPR_EMAIL is set.
           */}
+          {/*
+            The line under the promise changes with what actually happened,
+            because the promise is only true in the first case.
+          */}
+          {sentVia === 'desk' && ref ? (
+            <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-smoke">
+              Your reference is <span className="tabular text-bone">{ref}</span>.
+              {email.trim() ? ' A copy is on its way to your email.' : ''}
+            </p>
+          ) : null}
+
           {sentVia === 'clipboard' ? (
             <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-smoke">
-              This site has no enquiry channel configured yet, so your details are on your
-              clipboard rather than with the desk — send them on and the team will pick it up
-              from there.
+              We could not reach the desk just now, so your details are on your clipboard
+              rather than with it — send them on and the team will pick it up from there.
+            </p>
+          ) : null}
+
+          {sentVia === 'whatsapp' || sentVia === 'email' ? (
+            <p className="mt-5 max-w-[42ch] text-sm leading-relaxed text-smoke">
+              We could not reach the desk just now, so your enquiry has been written out in
+              your own {sentVia === 'whatsapp' ? 'WhatsApp' : 'mail app'}. Press send there and
+              it is with us.
             </p>
           ) : null}
         </div>
@@ -656,17 +727,20 @@ export default function EnquiryFlow({ defaultSlug }: { defaultSlug?: string }) {
         </p>
       ) : null}
 
+      {/* What the desk itself refused — a closed date, most often. */}
+      {refused ? (
+        <p role="alert" className="mt-4 text-center text-sm text-bone">
+          {refused}
+        </p>
+      ) : null}
+
       {/*
         What the last button will actually do, said before it is pressed. The
         guest should never discover the channel after committing to it.
       */}
       {last ? (
         <p className="mt-4 text-center text-xs text-smoke">
-          {whatsappHref
-            ? 'Opens WhatsApp with the enquiry written. You press send.'
-            : mailHref
-              ? 'Opens your mail app with the enquiry written. You press send.'
-              : 'No enquiry channel is configured yet, so this copies the message for you to send.'}
+          Sends your enquiry to the desk. They call back within 30 minutes.
         </p>
       ) : null}
 
