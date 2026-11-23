@@ -11,10 +11,11 @@ import path from 'node:path';
  * the build and has to outlive it, so it needs somewhere to go.
  *
  * ── Two stores, one interface ──────────────────────────────────────────
- * Postgres when `DATABASE_URL` is set, which is what Railway injects the
- * moment a Postgres service is attached. A JSON file under `.data/`
- * otherwise, so the panel can be built and used on a laptop without anyone
- * installing a database first.
+ * Postgres when `DATABASE_URL` is set — Railway's own Postgres, Supabase,
+ * or anything else that speaks the protocol; Supabase *is* Postgres, so it
+ * needs no client library of its own and no second code path. A JSON file
+ * under `.data/` otherwise, so the panel can be built and used on a laptop
+ * without anyone installing a database first.
  *
  * The file store is explicitly a development convenience. It is single
  * process, it rewrites the whole file on every write, and on Railway it
@@ -35,17 +36,36 @@ let pool: Pool | null = null;
 
 function getPool(): Pool {
   if (!pool) {
+    const local = url?.includes('localhost') || url?.includes('127.0.0.1');
+
     pool = new Pool({
       connectionString: url,
-      // Railway's internal network does not present a certificate the client
-      // can verify, and its managed Postgres is not reachable from outside
-      // the project. Verification off, encryption on.
-      ssl: url?.includes('localhost') || url?.includes('127.0.0.1')
-        ? undefined
-        : { rejectUnauthorized: false },
+      // Encryption on, verification off. Railway's internal network and
+      // Supabase's pooler both present certificates this client cannot chain
+      // to a public root, and refusing them would mean refusing the database.
+      ssl: local ? undefined : { rejectUnauthorized: false },
+      /*
+       * Small on purpose.
+       *
+       * Supabase's transaction pooler counts every client connection against
+       * a project-wide limit, and a serverless-style app that opens a pool
+       * per instance exhausts it quickly. Four is more than a panel used by
+       * a hotel desk will ever need concurrently, and the idle timeout hands
+       * them back rather than holding them open between enquiries.
+       */
       max: 4,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 8_000,
+      // Supabase's pooler closes an idle session eventually; keepalives stop
+      // the first query after a quiet hour failing on a dead socket.
+      keepAlive: true,
+    });
+
+    // A pool error is emitted on the pool, not on the query that caused it.
+    // Unhandled, it takes the whole server process down — which is a strange
+    // way for a hotel's website to go off the air.
+    pool.on('error', (error) => {
+      console.error('[db] idle client error', error.message);
     });
   }
   return pool;
