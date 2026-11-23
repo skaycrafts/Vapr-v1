@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import SiteShell from '@/components/chrome/SiteShell';
+import Footer from '@/components/sections/Footer';
 import { ArrowUpRight } from 'lucide-react';
 import { LOCATIONS, SITE } from '@/lib/content';
 
@@ -20,8 +22,18 @@ export const metadata: Metadata = {
  * visitor who was trying to reach one of them should not have to go back to
  * the homepage to find it.
  */
+/**
+ * Wrapped in the shell by hand.
+ *
+ * Next renders this file for any URL that matches no route, and it renders
+ * inside the *root* layout — which no longer carries the navigation or the
+ * footer, because the admin panel is in the same application and wants
+ * neither. A 404 is still a page of the website, so it asks for the chrome
+ * itself rather than being left as type on a bare document.
+ */
 export default function NotFound() {
   return (
+    <SiteShell footer={<Footer />}>
     <section className="on-ink flex min-h-[78svh] items-center bg-paper py-24 md:py-32">
       <div className="gutter w-full">
         <p className="type-label">404</p>
@@ -59,5 +71,6 @@ export default function NotFound() {
         </div>
       </div>
     </section>
+    </SiteShell>
   );
 }

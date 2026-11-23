@@ -53,3 +53,6 @@ next-env.d.ts
 # reveal animation, which is a real cost paid on every clone; it is accepted
 # because the alternative is a hero asset nobody can re-cut.
 !/media-source/brand
+
+# Local development store — the panel's data before Postgres is attached.
+.data/

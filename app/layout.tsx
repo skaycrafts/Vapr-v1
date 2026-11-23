@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Inter_Tight, Pinyon_Script } from 'next/font/google';
-import { CONTACT, LOCATIONS, SITE } from '@/lib/content';
+import { SITE } from '@/lib/content';
 import { renditionOf } from '@/lib/media';
-import SiteShell from '@/components/chrome/SiteShell';
-import Footer from '@/components/sections/Footer';
 import './globals.css';
 
 /**
@@ -99,51 +97,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-/**
- * Brand-level schema only. Each property carries its own `Hotel` entity on its
- * own page, which is where an address belongs.
- */
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: SITE.legalName,
-  alternateName: SITE.name,
-  description: SITE.description,
-  url: SITE.url,
-  // Emitted only when configured. Structured data asserting a telephone
-  // number of zeroes is a machine-readable lie, and search engines keep it.
-  ...(CONTACT.phone ? { telephone: CONTACT.phone } : {}),
-  ...(CONTACT.email ? { email: CONTACT.email } : {}),
-  areaServed: SITE.city,
-  subOrganization: LOCATIONS.map((l) => ({
-    '@type': 'Hotel',
-    name: l.name,
-    url: `${SITE.url}/${l.slug}`,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: l.street,
-      addressLocality: `${l.area}, ${SITE.city}`,
-      addressRegion: SITE.region,
-      postalCode: l.postalCode,
-      addressCountry: SITE.country,
-    },
-  })),
-};
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN" className={`${bodoni.variable} ${interTight.variable} ${pinyon.variable}`}>
-      <body>
-        <script
-          type="application/ld+json"
-          // Static object under our control; nothing user-supplied reaches it.
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        {/* The shell lives here rather than in each page, so Lenis, the
-            navigation and the entry sequence survive route changes — the
-            sequence plays once per page load, not on every link. */}
-        <SiteShell footer={<Footer />}>{children}</SiteShell>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
