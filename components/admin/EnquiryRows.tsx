@@ -49,6 +49,8 @@ export default function EnquiryRows({ enquiries }: { enquiries: Enquiry[] }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [busy, setBusy] = useState<string | null>(null);
+  /** The one enquiry currently asking "are you sure", if any. */
+  const [confirming, setConfirming] = useState<string | null>(null);
 
   if (enquiries.length === 0) {
     return (
@@ -57,6 +59,26 @@ export default function EnquiryRows({ enquiries }: { enquiries: Enquiry[] }) {
       </p>
     );
   }
+
+  /*
+   * Removing one, with a question first.
+   *
+   * There was no way to do this from the panel at all — the endpoint
+   * existed and nothing called it — so a test enquiry, or one left by
+   * someone leaning on the form, stayed in the list for ever.
+   *
+   * Asking inline rather than through a browser dialog: the confirmation
+   * names the guest, which a system dialog cannot, and the one thing that
+   * must not happen here is deleting the wrong person's enquiry because two
+   * cards look alike.
+   */
+  const remove = async (id: string) => {
+    setBusy(id);
+    await fetch(`/api/admin/enquiries/${id}`, { method: 'DELETE' });
+    setBusy(null);
+    setConfirming(null);
+    start(() => router.refresh());
+  };
 
   const update = async (id: string, status: Status) => {
     setBusy(id);
@@ -143,7 +165,7 @@ export default function EnquiryRows({ enquiries }: { enquiries: Enquiry[] }) {
               ) : null}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 border-t border-hairline pt-4">
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-hairline pt-4">
               {ORDER.map((status) => (
                 <button
                   key={status}
@@ -161,6 +183,37 @@ export default function EnquiryRows({ enquiries }: { enquiries: Enquiry[] }) {
                   {LABEL[status]}
                 </button>
               ))}
+
+              {/* Pushed to the far end, away from the four buttons that get
+                  pressed all day, and quiet until it is needed. */}
+              {confirming === enquiry.id ? (
+                <span className="ml-auto flex items-center gap-3 text-xs">
+                  <span className="text-mist">Delete {enquiry.name}&rsquo;s enquiry?</span>
+                  <button
+                    type="button"
+                    disabled={busy === enquiry.id}
+                    onClick={() => remove(enquiry.id)}
+                    className="rounded-full bg-red-700 px-4 py-2 font-medium text-white transition-opacity hover:opacity-90"
+                  >
+                    {busy === enquiry.id ? 'Deleting…' : 'Yes, delete'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirming(null)}
+                    className="text-mist underline underline-offset-4 hover:text-ink"
+                  >
+                    Keep
+                  </button>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirming(enquiry.id)}
+                  className="ml-auto text-xs text-smoke transition-colors hover:text-ink"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </li>
         );
