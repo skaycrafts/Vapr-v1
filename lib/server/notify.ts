@@ -26,14 +26,10 @@ import { deskEmail, guestEmail } from './email-template';
 
 /**
  * Who the guest hears from. `vaprrooms.com` is verified with the provider,
- * so any address on it can send.
- *
- * Spelled `enquiers` because that is what the desk asked for. If it was
- * meant to be `enquiries`, it is `VAPR_FROM_EMAIL` and nothing else — the
- * mailbox need not exist for sending, and replies go to the desk address
- * below rather than to this one.
+ * so any address on it can send — the mailbox itself need not exist, and
+ * replies are pointed at the desk address below rather than at this one.
  */
-const FROM = 'VAPR <enquiers@vaprrooms.com>';
+const FROM = 'VAPR <enquiries@vaprrooms.com>';
 
 /** Where the enquiry itself lands. */
 const DESK = 'vapr.enquiry@gmail.com';
