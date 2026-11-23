@@ -235,6 +235,23 @@ export default function Chennai() {
     // ── 2. The noise. ────────────────────────────────────────────────────
     // Each word enters before the previous has settled. The overlap is what
     // makes four words feel like a crowd rather than a list.
+    /*
+     * How much scroll a word gets to arrive in.
+     *
+     * The fade is scrubbed, so its duration is really a distance: the pin
+     * runs 190vh over about five and a half timeline units, which put half a
+     * unit at roughly 130px of scroll. A swipe covers that in four frames,
+     * and measured on a phone the first word's opacity moved 0.3 in a single
+     * frame — it did not fade, it appeared in steps.
+     *
+     * Nearly twice the duration spends nearly twice the scroll on each
+     * arrival. The words overlap more as a result, which is what this
+     * sequence wanted anyway: each is meant to enter before the one before
+     * it has settled. The last still completes at 2.95, comfortably ahead of
+     * the turn at 3.2.
+     */
+    const ARRIVAL = 0.9;
+
     noise.forEach((word, i) => {
       const at = 0.7 + i * 0.45;
 
@@ -248,14 +265,25 @@ export default function Chennai() {
        * and settles rather than focusing — and the scene stops dropping
        * frames in the middle of its own sentence.
        */
+      /*
+       * On a phone the word fades and nothing else.
+       *
+       * Scaling display type re-rasterises the glyphs at every step — the
+       * same objection as the blur, at a lower price but on the same four
+       * words. Taking it off a touch device leaves opacity, which is pure
+       * compositing: the arrival is then as smooth as the screen can draw,
+       * and the scene has nothing left in it to re-raster.
+       */
       tl.fromTo(
         word,
-        { opacity: 0, scale: 0.94, ...(pointerMotion ? { filter: 'blur(6px)' } : {}) },
+        {
+          opacity: 0,
+          ...(pointerMotion ? { scale: 0.94, filter: 'blur(6px)' } : {}),
+        },
         {
           opacity: 1,
-          scale: 1,
-          ...(pointerMotion ? { filter: 'blur(0px)' } : {}),
-          duration: 0.5,
+          ...(pointerMotion ? { scale: 1, filter: 'blur(0px)' } : {}),
+          duration: ARRIVAL,
           ease: EASE.out,
         },
         at
