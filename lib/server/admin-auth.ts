@@ -1,6 +1,6 @@
 import 'server-only';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 /**
  * Who may open the desk.
@@ -29,6 +29,15 @@ import { cookies } from 'next/headers';
  */
 
 const COOKIE = 'vapr_admin';
+
+/**
+ * The ceiling on a session, not its usual length.
+ *
+ * In practice a session ends far sooner: the cookie is dropped when the
+ * browser closes, and any full page load asks again — see
+ * `isFreshPageLoad` below. This is only the point past which a signature is
+ * refused outright.
+ */
 const MAX_AGE = 60 * 60 * 12;
 
 export type Mode = 'supabase' | 'password' | 'open';
@@ -159,8 +168,32 @@ export async function currentUser(): Promise<string | null> {
   return read(jar.get(COOKIE)?.value, key)?.who ?? null;
 }
 
+/**
+ * Is this a page being opened, rather than the panel asking for data?
+ *
+ * The desk asked that refreshing the panel ask for the password again — no
+ * staying signed in all afternoon on a counter that anyone can walk up to.
+ * That cannot be done by shortening the session: a refresh and a click
+ * between pages are both server requests, and shortening one shortens both.
+ *
+ * `Sec-Fetch-Dest` separates them. A typed address, a refresh or a new tab
+ * is `document`; the panel fetching its own data, or moving between its
+ * pages, is not. So a session survives working inside the panel and never
+ * survives re-opening it.
+ *
+ * A browser that does not send the header — Safari before 16.4 — reads as
+ * "not a page load", which keeps the panel usable there and loses only the
+ * extra strictness. Failing the other way would sign those browsers out on
+ * every click.
+ */
+async function isFreshPageLoad(): Promise<boolean> {
+  const header = await headers();
+  return header.get('sec-fetch-dest') === 'document';
+}
+
 export async function signedIn(): Promise<boolean> {
   if (mode() === 'open') return true;
+  if (await isFreshPageLoad()) return false;
   return (await currentUser()) !== null;
 }
 

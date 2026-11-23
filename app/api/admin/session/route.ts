@@ -71,12 +71,16 @@ export async function POST(request: Request) {
   }
 
   const response = NextResponse.json({ ok: true, who });
+  /*
+   * No `maxAge`, deliberately: this is a browser-session cookie, gone when
+   * the browser closes. The signature carries its own twelve-hour ceiling,
+   * so a cookie copied out of a machine still expires on its own.
+   */
   response.cookies.set(cookieName, session.value, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: session.maxAge,
   });
   return response;
 }

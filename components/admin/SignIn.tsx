@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,16 @@ export default function SignIn({ mode }: { mode: 'supabase' | 'password' }) {
   const [busy, setBusy] = useState(false);
 
   const ready = mode === 'supabase' ? email.trim() !== '' && secret !== '' : secret !== '';
+
+  /*
+   * Showing this card means the server refused the request — most often
+   * because the panel was re-opened or refreshed, which always asks again.
+   * Whatever cookie was in the jar is of no further use, so it goes now
+   * rather than lingering where the panel's own API would still accept it.
+   */
+  useEffect(() => {
+    void fetch('/api/admin/session', { method: 'DELETE' }).catch(() => {});
+  }, []);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
