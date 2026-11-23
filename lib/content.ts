@@ -704,6 +704,10 @@ export const FOOTER = {
     { label: 'Terms', href: '/terms' },
     { label: 'Privacy', href: '/privacy' },
     { label: 'Cancellation', href: '/cancellation' },
+    // The one in this row that exists today. It is where a reader goes
+    // looking for the page they half-remember, and where a crawler finds
+    // every page on the site expressed as links rather than as XML.
+    { label: 'Sitemap', href: '/sitemap.html' },
   ],
   credit: { prefix: 'Designed and developed by', name: 'SKAY CRAFTS', href: 'https://skaycrafts.com/' },
 } as const;
