@@ -114,9 +114,7 @@ export default function Footer() {
               >
                 {CONTACT.phone}
               </a>
-            ) : (
-              <p className="tabular block text-smoke">Telephone — {CONTACT.unset.toLowerCase()}</p>
-            )}
+            ) : null}
             {CONTACT.email ? (
               <a
                 href={`mailto:${CONTACT.email}`}
@@ -124,9 +122,15 @@ export default function Footer() {
               >
                 {CONTACT.email}
               </a>
-            ) : (
-              <p className="mt-1 block text-smoke">Email — {CONTACT.unset.toLowerCase()}</p>
-            )}
+            ) : null}
+            {/* Nothing stands in for a channel that is not set up.
+                "Telephone — not yet configured" was being printed to guests:
+                a note from the build, in the hotel's own voice, telling the
+                person reading it that the hotel cannot be telephoned. The
+                enquiry form is the channel that does work, and the list of
+                properties under this is the rest of the answer. Set
+                NEXT_PUBLIC_VAPR_PHONE or NEXT_PUBLIC_VAPR_EMAIL and the line
+                appears on its own. */}
             <ul className="mt-4">
               {/* Straight off LOCATIONS now that NAV has gone. These were the
                   same two links written a second time; with the header down to

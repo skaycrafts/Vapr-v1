@@ -210,11 +210,11 @@ export default function Reserve({ defaultSlug }: { defaultSlug?: string }) {
                 <ArrowUpRight size={15} strokeWidth={1.5} aria-hidden />
               </a>
             ) : null}
-            {!phoneHref && !email ? (
-              <p className="text-sm text-smoke">
-                Telephone and email are {CONTACT.unset.toLowerCase()}.
-              </p>
-            ) : null}
+            {/* When neither channel is set up this block is simply empty.
+                It used to read "Telephone and email are not yet configured",
+                which is a note to whoever is building the site, printed where
+                a guest is deciding whether these people can be reached. The
+                form beside it is the answer to that question. */}
           </div>
         </div>
 

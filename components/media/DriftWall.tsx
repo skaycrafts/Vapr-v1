@@ -147,6 +147,24 @@ export default function DriftWall({
   const damped = useRef({ x: 0, y: 0 });
 
   const [size, setSize] = useState({ width: 1200, height: 600 });
+  /**
+   * The correction that centres the wall in its frame.
+   *
+   * The plane is yawed and pushed back in Z, so what the viewer sees is a
+   * *projection* of it — and a projection of an off-axis plane is not
+   * centred on the element it came from. Measured, the wall sat 23px in
+   * from the left of a 390px phone and 7px past its right edge: the right
+   * column was sliced and the left one was not, which reads as a mistake
+   * rather than as a wall that runs off the frame.
+   *
+   * `PLANE_SPREAD` below estimates the projected width, and an estimate is
+   * the wrong tool for this — the real figure is a measurement away. These
+   * two carry it: a horizontal shift that re-centres the projection, and a
+   * last scale for whatever still hangs over the edge. Refs rather than
+   * state: they are read by the per-frame transform and must not re-render.
+   */
+  const shift = useRef(0);
+  const squeeze = useRef(1);
   const { height } = size;
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeIdRef = useRef<string | null>(null);
@@ -254,12 +272,46 @@ export default function DriftWall({
       const plane = planeRef.current;
       if (!plane) return;
       plane.style.transform =
-        `translate(-50%, -50%) scale(1.18) ` +
+        `translate(calc(-50% + ${shift.current}px), -50%) ` +
+        `scale(${1.18 * squeeze.current}) ` +
         `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) rotateZ(${roll}deg) ` +
         `translateZ(${-depth}px)`;
     },
     [tilt, turn, roll, depth]
   );
+
+  /**
+   * Measure the projection, then correct it.
+   *
+   * Two passes, because the thing being measured is what the correction
+   * changes: clear it, read where the projected plane actually lands, work
+   * out the shift that centres it and the scale that fits it, write both,
+   * and re-apply. It runs on layout changes only — a resize, a column count,
+   * a tile size — never per frame.
+   */
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    const plane = planeRef.current;
+    if (!el || !plane) return;
+
+    shift.current = 0;
+    squeeze.current = 1;
+    applyPlane(damped.current.x, damped.current.y);
+
+    const frame = requestAnimationFrame(() => {
+      const wall = el.getBoundingClientRect();
+      const box = plane.getBoundingClientRect();
+      if (!wall.width || !box.width) return;
+
+      shift.current = Math.round((wall.left + wall.right) / 2 - (box.left + box.right) / 2);
+      // A hair of air at the sides, the same 0.98 the tile fit uses, so the
+      // outer columns are cropped by the frame rather than by chance.
+      squeeze.current = Math.min(1, (wall.width * 0.98) / box.width);
+      applyPlane(damped.current.x, damped.current.y);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [applyPlane, size.width, size.height, cols, tileW, tileH, tileGap]);
 
   /**
    * The loop, on the shared ticker.
