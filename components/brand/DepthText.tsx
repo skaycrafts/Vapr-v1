@@ -219,15 +219,68 @@ export default function DepthText({
     };
 
     apply(base.x, base.y);
-    gsap.ticker.add(tick);
+
+    /*
+     * It only moves while it is on screen.
+     *
+     * This word is the hero's, and the hero is `sticky top-0` — it stays in
+     * the document underneath everything that scrolls over it. The orbit
+     * stayed with it: thirty layers of a word at 17vw were being given a new
+     * transform on every frame of the page, including every frame of the
+     * pinned Chennai scene two sections down, where the word is behind an
+     * opaque section and cannot be seen at all. That is a repaint of the
+     * largest painted thing on the site, sixty times a second, for nothing —
+     * out of the same frame budget as the one scene that needs all of it.
+     *
+     * An IntersectionObserver cannot see this. A sticky element held at the
+     * top of the window is intersecting the viewport by every definition the
+     * observer has; what it is not, is visible. So the test is the element's
+     * place in the layout — `offsetTop` is unaffected by sticky, which only
+     * changes where the box is painted — against the scroll position. The
+     * check is two comparisons on numbers already in hand, and it runs
+     * before anything is written, so an off-screen word costs the price of
+     * an `if`.
+     */
+    let top = 0;
+    let height = 0;
+    const measure = () => {
+      let node: HTMLElement | null = root;
+      let y = 0;
+      while (node) {
+        y += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      top = y;
+      height = root.offsetHeight;
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    window.addEventListener('load', measure);
+
+    /** A screen of grace on each side, so it is already turning when it arrives. */
+    const onScreen = () => {
+      const y = window.scrollY;
+      const margin = window.innerHeight * 0.25;
+      return top < y + window.innerHeight + margin && top + height > y - margin;
+    };
+
+    const gatedTick: typeof tick = (t, deltaMs) => {
+      if (!onScreen()) return;
+      tick(t, deltaMs);
+    };
+
+    apply(base.x, base.y);
+    gsap.ticker.add(gatedTick);
 
     return () => {
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('load', measure);
       if (track) {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerleave', onLeave);
         window.removeEventListener('blur', onLeave);
       }
-      gsap.ticker.remove(tick);
+      gsap.ticker.remove(gatedTick);
     };
   }, [animate, autoOrbit, base, pointerMotion, pointerTracking, safeOrbitSpeed, safeSmoothing, safeTilt, spare]);
 

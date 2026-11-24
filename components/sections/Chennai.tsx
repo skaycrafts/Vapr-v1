@@ -90,6 +90,19 @@ const NOISE_PLACEMENT_CSS = `
   }
 
   /*
+   * The four words and the title are the only things in the scene that move,
+   * and they move for the whole of it — so they are promoted for the whole
+   * of it. Each gets a layer of its own, the fades and the scale run on the
+   * compositor against a texture, and no frame of the scrub re-rasterises
+   * display type. Scoped to the scene: the same elements in the plain
+   * layout are static text and ask for nothing.
+   */
+  #chennai[data-scene='on'] .chennai-noise,
+  #chennai[data-scene='on'] .chennai-title {
+    will-change: transform, opacity;
+  }
+
+  /*
    * Each word is placed from the centre line and then held inside the stage.
    *
    * A min() on a distance from an edge is a floor on how far out the word can
@@ -183,44 +196,33 @@ export default function Chennai() {
       defaults: { ease: EASE.none },
       scrollTrigger: {
         /*
-         * The stage, not the section.
+         * ── Why there is no `pin` here ─────────────────────────────────────
          *
-         * The section opens with 6vh of top padding (10vh from md), so its
-         * top edge reaches the top of the window a tenth of a screen before
-         * the stage does. Pinning on the section held the stage exactly that
-         * far down — a 720px laptop pinned a 720px stage at y=72, putting its
-         * last 72px permanently below the fold, which is where the fourth
-         * word sits. It was cut on every window short enough for the padding
-         * to matter, and whole on mine, which is why it survived a first fix.
+         * The scene used to be pinned by ScrollTrigger. It held the stage
+         * still by writing a transform on it from the scroll handler, which
+         * means the stage is only in the right place if JavaScript runs in
+         * the same frame the browser scrolled in. Under a fast wheel or a
+         * flick it does not: the page moves, the stage is told to catch up a
+         * frame later, and the whole composition slides and snaps back.
+         * Measured on the production build, the stage left the top of the
+         * window by as much as 107px, on twelve frames of one swipe. That
+         * was the glitch — not the fades, the frame they sit in.
          *
-         * Triggering on the stage lets the padding scroll away first and pins
-         * the scene flush with the top of the window, so the viewport and the
-         * composition are the same rectangle again.
+         * `position: sticky` (set on the stage in the markup, and only once
+         * the scene engages) is the same behaviour handed to the compositor:
+         * the stage is held at the top of the window by the browser itself,
+         * so it cannot lag by a frame, and nothing is taken out of flow, so
+         * there is no layout shift either — which is what the transform pin
+         * was chosen for in the first place. The section carries the travel
+         * as its own height (290svh: one screen of stage, 190 of scroll),
+         * which is exactly what the pin's spacer used to add.
+         *
+         * So this trigger now only reads the scroll. `top top` is the moment
+         * the stage sticks; `bottom bottom` is the moment it lets go.
          */
-        trigger: scene,
+        trigger: el,
         start: 'top top',
-        // 170vh of travel, down from 260. Most of that budget was being spent
-        // on scroll rather than on anything moving, and reaching the turn had
-        // become a chore.
-        //
-        // This is close to the floor. At 170 each word still gets about one
-        // gesture of scroll to arrive; much below it and the scrub turns
-        // twitchy, which reads as cheap rather than as fast.
-        end: '+=190%',
-        pin: scene,
-        // Pinned by transform, not by `position: fixed`.
-        //
-        // ScrollTrigger's default pin takes the stage out of flow and puts it
-        // back again, and the browser scores each of those as a layout shift:
-        // measured on the production build, the two transitions were worth
-        // about 1.4 of cumulative shift on their own — fourteen times the
-        // threshold where a page is called unstable, from one section. A
-        // transform moves the same pixels without touching layout, so the
-        // scene behaves identically and nothing below it is ever re-laid out.
-        pinType: 'transform',
-        // Pre-empts the pin's layout shift on fast scrolls, which otherwise
-        // shows as a one-frame jump at the moment of pinning.
-        anticipatePin: 1,
+        end: 'bottom bottom',
         scrub: SCRUB.weighted,
         invalidateOnRefresh: true,
       },
@@ -256,33 +258,28 @@ export default function Chennai() {
       const at = 0.7 + i * 0.45;
 
       /*
-       * The blur is dropped on a phone, and only there.
+       * Opacity, and a scale on devices with capacity for it. No blur.
        *
-       * A scrubbed `filter: blur()` is the most expensive thing on this
+       * A scrubbed `filter: blur()` was the most expensive thing on this
        * page: every frame of the scrub re-rasterises the word at a new
-       * radius, at 7vw, four words deep. Scale and opacity are composited
-       * and cost nothing. The arrival still reads as an arrival — it fades
-       * and settles rather than focusing — and the scene stops dropping
-       * frames in the middle of its own sentence.
-       */
-      /*
-       * On a phone the word fades and nothing else.
+       * radius, at 7vw, four words deep, and it was dropped on phones for
+       * exactly that reason. It is gone on the desktop too. The arrival
+       * reads the same — a word fading up and settling — and the frames
+       * that were going into re-rastering glyphs now go into drawing them.
        *
-       * Scaling display type re-rasterises the glyphs at every step — the
-       * same objection as the blur, at a lower price but on the same four
-       * words. Taking it off a touch device leaves opacity, which is pure
-       * compositing: the arrival is then as smooth as the screen can draw,
-       * and the scene has nothing left in it to re-raster.
+       * The scale stays where there is capacity, and the word is promoted
+       * for it in the markup, so the scale runs on the compositor against a
+       * texture rather than re-rastering type at every step.
        */
       tl.fromTo(
         word,
         {
           opacity: 0,
-          ...(pointerMotion ? { scale: 0.94, filter: 'blur(6px)' } : {}),
+          ...(pointerMotion ? { scale: 0.94 } : {}),
         },
         {
           opacity: 1,
-          ...(pointerMotion ? { scale: 1, filter: 'blur(0px)' } : {}),
+          ...(pointerMotion ? { scale: 1 } : {}),
           duration: ARRIVAL,
           ease: EASE.out,
         },
@@ -311,7 +308,6 @@ export default function Chennai() {
       noise,
       {
         opacity: 0,
-        ...(pointerMotion ? { filter: 'blur(10px)' } : {}),
         duration: 0.45,
         ease: EASE.inOut,
       },
@@ -360,12 +356,31 @@ export default function Chennai() {
       ref={root}
       id="chennai"
       aria-label="Chennai, and what VAPR is for"
-      className="on-ink group relative bg-paper pt-[6vh] md:pt-[10vh]"
+      /*
+        Under the scene the section is 290svh tall: one screen for the stage,
+        which sticks to the top of the window, and 190 more of scroll for the
+        timeline to run through — the same travel ScrollTrigger's pin spacer
+        used to add, stated in CSS where the browser can hold the stage still
+        itself. It does not apply to the plain layout: with no script, or with
+        reduced motion, this is a column of four words and a paragraph, and the
+        stage's own `py-24` is the whole of its spacing.
+
+        The section's top padding has gone with the pin. It was 6vh, 10vh from
+        md, and under the scene it held the stage that far below the top of the
+        window — which is the gap the pin was moved onto the stage to escape.
+        A sticky stage has no such escape: it sticks where it is, so there is
+        nothing above it.
+      */
+      className="on-ink group relative bg-paper data-[scene=on]:min-h-[290svh]"
+      /* `data-`, not `group-data-`: the attribute is on this element, and a
+         group variant looks for it on an ancestor — so the first spelling of
+         this matched nothing, the section kept the stage's own height, and the
+         scene had 40px of scroll to run a five-beat sequence in. */
     >
       <style>{NOISE_PLACEMENT_CSS}</style>
       <div
         ref={stage}
-        className="gutter mx-auto flex max-w-6xl flex-col items-center gap-12 py-24 text-center group-data-[scene=on]:grid group-data-[scene=on]:h-[100svh] group-data-[scene=on]:max-w-6xl group-data-[scene=on]:gap-0 group-data-[scene=on]:place-items-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:py-0"
+        className="gutter mx-auto flex max-w-6xl flex-col items-center gap-12 py-24 text-center group-data-[scene=on]:sticky group-data-[scene=on]:top-0 group-data-[scene=on]:grid group-data-[scene=on]:h-[100svh] group-data-[scene=on]:max-w-6xl group-data-[scene=on]:gap-0 group-data-[scene=on]:place-items-center group-data-[scene=on]:overflow-hidden group-data-[scene=on]:py-0"
       >
         {/*
           The ceiling was 12rem, which is a fixed 192px however wide the
